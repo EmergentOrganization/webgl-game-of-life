@@ -217,8 +217,10 @@ GOL.prototype.get = function() {
 GOL.prototype.start = function() {
     if (this.timer == null) {
         this.timer = setInterval(function(){
-            gol.step();
-            gol.draw();
+			for (var i = 0; i <32; i++) {
+				gol.step();
+			}
+        	gol.draw();	
         }, 16.66);
     }
     return this;
