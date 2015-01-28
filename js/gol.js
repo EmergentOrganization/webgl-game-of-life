@@ -24,7 +24,8 @@ function GOL(canvas, scale) {
         gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
         evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
         orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave.frag'),
-        MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag')
+        MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
+        MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders.frag')
     };
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
@@ -149,7 +150,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.MiniAtomConway.use()
+    this.programs.MicroFeeders.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
@@ -217,7 +218,7 @@ GOL.prototype.get = function() {
 GOL.prototype.start = function() {
     if (this.timer == null) {
         this.timer = setInterval(function(){
-			for (var i = 0; i <32; i++) {
+			for (var i = 0; i <1; i++) {
 				gol.step();
 			}
         	gol.draw();	
