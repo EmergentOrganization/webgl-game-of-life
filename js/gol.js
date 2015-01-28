@@ -263,6 +263,47 @@ GOL.prototype.eventCoord = function(event) {
     return [Math.floor(x / this.scale), Math.floor(y / this.scale)];
 };
 
+
+
+
+
+
+function addGUI() { 
+	alert("Init Gui")
+
+    var gui = new dat.GUI(),
+        cont = new myConfig();
+
+	/*dat.GUI.prototype.updateDisplays = function() {
+        for (var i in this.__controllers) {
+            this.__controllers[i].updateDisplay();
+        }
+    };*/
+	
+    gui.add(cont, 'testBool').name('TestMenu');
+    gui.add(cont, 'testInt').name('TestMenu');
+    gui.add(cont, 'testInt', 0, 20).step(1).name('TestMenu').onFinishChange(testFoo);
+	//gui.add(cont, 'testVar', 0, 20).step(1).name('Brush Size').onFinishChange(testFoo);
+
+	function testFoo() {
+        alert("TEST GUI Response");
+    }
+	
+	//guiSurface.updateDisplays();
+
+}
+
+function myConfig() {
+	this.testInt = 0;
+	this.testBool = false;
+	alert("TEST myConfig");
+}
+
+
+
+
+
+
 /**
  * Manages the user interface for a simulation.
  */
@@ -271,6 +312,9 @@ function Controller(gol) {
     var _this = this,
         $canvas = $(gol.igloo.canvas);
     this.drag = null;
+
+	addGUI()
+
     $canvas.on('mousedown', function(event) {
         _this.drag = event.which;
         var pos = gol.eventCoord(event);
