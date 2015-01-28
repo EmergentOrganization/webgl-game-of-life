@@ -269,8 +269,6 @@ GOL.prototype.eventCoord = function(event) {
 
 
 function addGUI() { 
-	alert("Init Gui")
-
     var gui = new dat.GUI(),
         cont = new myConfig();
 
@@ -296,7 +294,6 @@ function addGUI() {
 function myConfig() {
 	this.testInt = 0;
 	this.testBool = false;
-	alert("TEST myConfig");
 }
 
 
