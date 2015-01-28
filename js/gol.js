@@ -213,7 +213,7 @@ GOL.prototype.start = function() {
         this.timer = setInterval(function(){
             gol.step();
             gol.draw();
-        }, 60);
+        }, 16.66);
     }
     return this;
 };
