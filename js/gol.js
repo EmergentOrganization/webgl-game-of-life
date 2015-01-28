@@ -185,7 +185,13 @@ GOL.prototype.draw = function() {
 GOL.prototype.poke = function(x, y, state) {
     var gl = this.igloo.gl,
         v = state * 255;
-    this.textures.front.subset([v, v, v, 255], x, y, 1, 1);
+
+    for (var i = 0; i < 24; i++) {
+		for (var j = 0; j < 24; j++) {
+			this.textures.front.subset([v, v, v, 255], x+i-12, y+j-12, 1, 1);
+		}
+    }
+
     return this;
 };
 
