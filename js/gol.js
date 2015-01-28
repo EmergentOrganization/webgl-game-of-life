@@ -10,7 +10,7 @@ function GOL(canvas, scale) {
         alert('Could not initialize WebGL!');
         throw new Error('No WebGL');
     }
-    scale = this.scale = scale || 4;
+    scale = this.scale = scale || 1;
     var w = canvas.width, h = canvas.height;
     this.viewsize = new Float32Array([w, h]);
     this.statesize = new Float32Array([w / scale, h / scale]);
