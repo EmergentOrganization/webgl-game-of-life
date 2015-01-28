@@ -22,7 +22,9 @@ function GOL(canvas, scale) {
     this.programs = {
         copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
         gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
-        evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag')
+        evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
+        orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave.frag'),
+        MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag')
     };
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
@@ -147,7 +149,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.evo.use()
+    this.programs.MiniAtomConway.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
