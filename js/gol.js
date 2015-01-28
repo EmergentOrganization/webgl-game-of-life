@@ -102,7 +102,7 @@ GOL.prototype.set = function(state) {
  */
 GOL.prototype.setRandom = function(p) {
     var gl = this.igloo.gl, size = this.statesize[0] * this.statesize[1];
-    p = p == null ? 0.5 : p;
+    p = p == null ? 0.3 : p;
     var rand = new Uint8Array(size);
     for (var i = 0; i < size; i++) {
         rand[i] = Math.random() < p ? 1 : 0;
