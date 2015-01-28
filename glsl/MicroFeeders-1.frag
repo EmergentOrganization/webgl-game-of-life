@@ -110,6 +110,6 @@ void main() {
         get(vec2(10.0,1.0));
 
     if(sum >= 55) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
-    if(sum >= 32 && sum <= 59) {gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
-    if(sum >= 23 && sum <= 33) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+    if(sum >= 32 && sum <= 46) {gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
+    if(sum >= 23 && sum <= 30) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
 }

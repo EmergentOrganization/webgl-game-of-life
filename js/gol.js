@@ -25,7 +25,7 @@ function GOL(canvas, scale) {
         evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
         orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave.frag'),
         MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
-        MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders.frag')
+        MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-2.frag')
     };
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
@@ -105,7 +105,7 @@ GOL.prototype.set = function(state) {
  */
 GOL.prototype.setRandom = function(p) {
     var gl = this.igloo.gl, size = this.statesize[0] * this.statesize[1];
-    p = p == null ? 0.3 : p;
+    p = p == null ? 0.32 : p;
     var rand = new Uint8Array(size);
     for (var i = 0; i < size; i++) {
         rand[i] = Math.random() < p ? 1 : 0;
