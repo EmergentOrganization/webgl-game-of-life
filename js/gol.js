@@ -272,22 +272,13 @@ function addGUI() {
     var gui = new dat.GUI(),
         cont = new myConfig();
 
-	/*dat.GUI.prototype.updateDisplays = function() {
-        for (var i in this.__controllers) {
-            this.__controllers[i].updateDisplay();
-        }
-    };*/
-	
     gui.add(cont, 'testBool').name('TestMenu');
     gui.add(cont, 'testInt').name('TestMenu');
     gui.add(cont, 'testInt', 0, 20).step(1).name('TestMenu').onFinishChange(testFoo);
-	//gui.add(cont, 'testVar', 0, 20).step(1).name('Brush Size').onFinishChange(testFoo);
 
 	function testFoo() {
         alert("TEST GUI Response");
     }
-	
-	//guiSurface.updateDisplays();
 
 }
 
