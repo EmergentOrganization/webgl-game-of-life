@@ -21,7 +21,8 @@ function GOL(canvas, scale) {
     gl.disable(gl.DEPTH_TEST);
     this.programs = {
         copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
-        gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag')
+        gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
+        evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag')
     };
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
