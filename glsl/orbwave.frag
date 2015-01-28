@@ -9,14 +9,14 @@ int get(vec2 offset) {
     return int(texture2D(state, (gl_FragCoord.xy + offset) / scale).r);
 }
 
-
 void main() {
 
-    //360 sums. 
-    //limited to 256 sums?
+    float current = float(get(vec2(0.0, 0.0)));
+    gl_FragColor = vec4(current, current, current, 1.0);
+
     int sum =
         get(vec2(-14.0, -3.0)) +
-        get(vec2(-14.0, -2.0)) +
+        /*get(vec2(-14.0, -2.0)) +
         get(vec2(-14.0, -1.0)) +
         get(vec2(-14.0, 0.0)) +
         get(vec2(-14.0, 1.0)) +
@@ -28,7 +28,7 @@ void main() {
         get(vec2(-13.0, -3.0)) +
         get(vec2(-13.0, -2.0)) +
         get(vec2(-13.0, -1.0)) +
-       /* get(vec2(-13.0, 0.0)) +
+        get(vec2(-13.0, 0.0)) +
         get(vec2(-13.0, 1.0)) +
         get(vec2(-13.0, 2.0)) +
         get(vec2(-13.0, 3.0)) +
@@ -376,18 +376,7 @@ void main() {
         get(vec2(14.0, 2.0)) +*/
         get(vec2(14.0, 3.0));
 
-    //if(sum >= 180) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
-    //if(sum >= 180 && sum <= 200) {gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
-    //if(sum >= 130 && sum <= 140) {gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
-    //if(sum <= 120) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
-    //if(sum >= 60 && sum <= 70) {gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
-
-    /*if (sum == 4) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }/* else if (sum == 2) {
-        float current = float(get(vec2(0.0, 0.0)));
-        gl_FragColor = vec4(current, current, current, 1.0);
-    } *//*else {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-    }*/
+    if(sum >= 55) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+    if(sum >= 32 && sum <= 46) {gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
+    if(sum >= 23 && sum <= 30) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
 }
