@@ -16,7 +16,7 @@ void main() {
 
     int sum =
         get(vec2(-14.0, -3.0)) +
-        /*get(vec2(-14.0, -2.0)) +
+        get(vec2(-14.0, -2.0)) +
         get(vec2(-14.0, -1.0)) +
         get(vec2(-14.0, 0.0)) +
         get(vec2(-14.0, 1.0)) +
@@ -185,8 +185,10 @@ void main() {
         get(vec2(-1.0, 4.0)) +
         get(vec2(-1.0, 7.0)) +
         get(vec2(-1.0, 11.0)) +
-        get(vec2(-1.0, 12.0)) +
-        get(vec2(-1.0, 13.0)) +
+        get(vec2(-1.0, 12.0));
+        
+		int sumTwo = 
+		get(vec2(-1.0, 13.0)) + //crash
         get(vec2(-1.0, 14.0)) +
         get(vec2(0.0, -14.0)) +
         get(vec2(0.0, -13.0)) +
@@ -373,10 +375,15 @@ void main() {
         get(vec2(14.0, -1.0)) +
         get(vec2(14.0, 0.0)) +
         get(vec2(14.0, 1.0)) +
-        get(vec2(14.0, 2.0)) +*/
+        get(vec2(14.0, 2.0)) +
         get(vec2(14.0, 3.0));
 
-    if(sum >= 55) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
-    if(sum >= 32 && sum <= 46) {gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
-    if(sum >= 23 && sum <= 30) {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+		sum = sum + sumTwo;
+
+	if(sum >= 180) 					{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+	if(sum >= 180 && sum <= 200) 	{gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
+	if(sum >= 130 && sum <= 140) 	{gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
+	if(sum <= 120) 					{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+	if(sum >= 60 && sum <= 70) 		{gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
+
 }
