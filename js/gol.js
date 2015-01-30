@@ -27,7 +27,8 @@ function GOL(canvas, scale) {
         MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
         MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-2.frag'),
         ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
-        Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741.frag')
+        Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741.frag'),
+        Tether:  igloo.program('glsl/quad.vert', 'glsl/Tether.frag')
     };
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
@@ -152,7 +153,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.Microbes.use()
+    this.programs.Tether.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
