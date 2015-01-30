@@ -26,7 +26,8 @@ function GOL(canvas, scale) {
         orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave.frag'),
         MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
         MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-2.frag'),
-        ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag')
+        ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
+        Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741.frag')
     };
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
@@ -106,7 +107,7 @@ GOL.prototype.set = function(state) {
  */
 GOL.prototype.setRandom = function(p) {
     var gl = this.igloo.gl, size = this.statesize[0] * this.statesize[1];
-    p = p == null ? 0.35 : p;
+    p = p == null ? 0.37 : p;
     var rand = new Uint8Array(size);
     for (var i = 0; i < size; i++) {
         rand[i] = Math.random() < p ? 1 : 0;
@@ -151,7 +152,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.ManyRings.use()
+    this.programs.Microbes.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
