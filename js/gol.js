@@ -21,13 +21,13 @@ function GOL(canvas, scale) {
     gl.disable(gl.DEPTH_TEST);
     this.programs = {
         copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
-        gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
+        /*gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
         evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
         orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave.frag'),
         MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
         MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-2.frag'),
         ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
-        Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741.frag'),
+        Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741.frag'),*/
         Tether:  igloo.program('glsl/quad.vert', 'glsl/Tether.frag')
     };
     this.buffers = {
