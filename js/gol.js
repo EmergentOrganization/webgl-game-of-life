@@ -225,7 +225,7 @@ GOL.prototype.start = function() {
 				gol.step();
 			}
         	gol.draw();	
-        }, 16.66);
+        }, 33.33);
     }
     return this;
 };
