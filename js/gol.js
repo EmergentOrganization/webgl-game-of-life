@@ -101,6 +101,24 @@ GOL.prototype.set = function(state) {
     return this;
 };
 
+GOL.prototype.rescale = function(){
+    // sizing of the canvas to fit screen
+    var gameW = this.viewsize[0], gameH = this.viewsize[1];
+    var screenW = window.innerWidth, screenH = window.innerHeight;
+    var gameWidthToHeight = gameW/gameH, screenWidthToHeight = screenW/screenH;
+
+    if (screenWidthToHeight > gameWidthToHeight) {
+        // window width is too wide relative to desired game width
+        // scale based on height
+        scale = screenH/gameH;
+
+    } else { // window height is too high relative to desired game height
+        // scale based on width
+        scale = screenW/gameW;
+    }
+    this.igloo.canvas.style.setProperty("width", Math.floor(gameW * this.scale) + "px");
+    this.igloo.canvas.style.setProperty("height", Math.floor(gameH * this.scale) + "px");
+}
 /**
  * Fill the entire state with random values.
  * @param {number} [p] Chance of a cell being alive (0.0 to 1.0)
@@ -356,6 +374,7 @@ $(document).ready(function() {
     var $canvas = $('#life');
     gol = new GOL($canvas[0]).draw().start();
     controller = new Controller(gol);
+    window.addEventListener("resize", gol.rescale);
 });
 
 /* Don't scroll on spacebar. */
