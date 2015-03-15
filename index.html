@@ -13,44 +13,31 @@
 
   </head>
   <body>
-    <h1>WebGL Game of Life</h1>
+    <h1>WebGL Cellular Automata</h1>
     <!-- Canvas dimensions must be powers of two. -->
     <canvas id="life" width="512" height="512"></canvas>
     <div class="description">
-      <p>
-        This Game of Life simulation is running entirely on your
-        graphics card. The simulation state swaps back and forth
-        between two texture buffers in the GPU's memory.
-      </p>
       <h2>Controls</h2>
       <ul>
         <li>
-          <span class="input">Left-click</span>
-          <span class="result">draw live cells</span>
+          <span class="input">Left-click:  </span>
+          <span class="result">Hold to erase, release to shoot</span>
         </li>
         <li>
-          <span class="input">Middle/right-click</span>
-          <span class="result">draw dead cells</span>
+          <span class="input">W A S D:  </span>
+          <span class="result">Player Movement</span>
         </li>
         <li>
-          <span class="input">[SPACE]</span>
-          <span class="result">toggle pause/play</span>
+          <span class="input">SPACE:  </span>
+          <span class="result">Toggle pause/play</span>
         </li>
         <li>
-          <span class="input">[r]</span>
-          <span class="result">reset to random state</span>
+          <span class="input">R:  </span>
+          <span class="result">Reset to random state</span>
         </li>
         <li>
-          <span class="input">[DEL]</span>
-          <span class="result">clear the simulation state</span>
-        </li>
-        <li>
-          <span class="input">s</span>
-          <span class="result">snapshot the simulation state</span>
-        </li>
-        <li>
-          <span class="input">shift+s</span>
-          <span class="result">restore from snapshot</span>
+          <span class="input">DEL:  </span>
+          <span class="result">Clear the simulation state</span>
         </li>
       </ul>
     </div>
