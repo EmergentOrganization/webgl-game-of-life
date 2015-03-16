@@ -7,14 +7,17 @@ uniform sampler2D render;
 uniform vec2 scale;
 uniform float x;
 uniform float y;
-uniform float size;
+uniform float w;
+uniform float h;
 uniform float value;
+uniform float g;
+uniform float b;
 
 void main() {
 
 	gl_FragColor = texture2D(state, gl_FragCoord.xy / scale);
 
-	if( (int(gl_FragCoord.x) > int(x)) && (int(gl_FragCoord.x) < int(x+size)) && (int(gl_FragCoord.y) > int(y)) && (int(gl_FragCoord.y) < int(y+size)) ) { gl_FragColor = vec4(value, 1.0, 0.0, 1.0); }
+	if( (int(gl_FragCoord.x) > int(x)) && (int(gl_FragCoord.x) < int(x+w)) && (int(gl_FragCoord.y) > int(y)) && (int(gl_FragCoord.y) < int(y+h)) ) { gl_FragColor = vec4(value, g, b, 1.0); }
 
     /*
 	unsigned int i = get_global_id(0);

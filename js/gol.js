@@ -24,8 +24,8 @@ function GOL(canvas, scale) {
 	this.render_frame = 0;
 	this.recordnow = false;
 
-	this.player_x = w/2+12;
-	this.player_y = h/2+12;
+	this.player_x = w/2+(13/2);
+	this.player_y = h/2+(13/2);
 
 	this.p_move_x = 0;
 	this.p_move_y = 0;
@@ -34,9 +34,15 @@ function GOL(canvas, scale) {
 	this.p_move_R = 0;
 	this.p_move_U = 0;
 	this.p_move_D = 0;
-
-	this.bullets = new Array();
 	
+	this.p_speed = 2;
+
+	this.p_health_max = 3000;
+	this.p_health = this.p_health_max;
+	this.p_fuel = 1000;
+	this.p_power = 1000;
+
+	this.can_shoot = true;
 	this.bullet_x = this.statesize[0]/2;
 	this.bullet_y = this.statesize[1]/2;
 	this.bullet_exists = false;
@@ -48,10 +54,11 @@ function GOL(canvas, scale) {
 	this.r_click = false;
 	this.mouse_x = 0
 	this.mouse_y = 0
+	this.space_down = false;
 
+	this.p_hit = new Uint8Array(13 * 13 * 4);
+	this.p_shield_cooldown = 0;
 	
-
-
     gl.disable(gl.DEPTH_TEST);
     this.programs = {
         copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
@@ -85,8 +92,9 @@ function GOL(canvas, scale) {
     this.framebuffers = {
         step: igloo.framebuffer()
     };
-    this.setRandom();
 
+    this.setRandom();
+	this.place_cell_world(this.statesize[0]/2, this.statesize[1]/2, 129, 129, 0, 0, 0);
 }
 
 
@@ -282,7 +290,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.Microbes.use()
+    this.programs.Tether.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
@@ -293,7 +301,7 @@ GOL.prototype.step = function() {
 
 
 
-GOL.prototype.place_cell_rend = function(x, y, size, value) {
+GOL.prototype.place_cell_rend = function(x, y, w, h, value, g, b) {
     var gl = this.igloo.gl;
     this.framebuffers.step.attach(this.textures.rend);
     this.textures.rend.bind(0);
@@ -302,16 +310,19 @@ GOL.prototype.place_cell_rend = function(x, y, size, value) {
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
-        .uniform('x', x - size/2)
-        .uniform('y', y - size/2)
-        .uniform('size', size)
+        .uniform('x', x - w/2)
+        .uniform('y', y - h/2)
+        .uniform('w', w)
+        .uniform('h', h)
         .uniform('value', value)
+        .uniform('g', g)
+        .uniform('b', b)
         .draw(gl.TRIANGLE_STRIP, 4);
     //this.swap();
     return this;
 };
 
-GOL.prototype.place_cell_world = function(x, y, size, value) {
+GOL.prototype.place_cell_world = function(x, y, w, h, value, g, b) {
     var gl = this.igloo.gl;
     this.framebuffers.step.attach(this.textures.front);
     this.textures.front.bind(0);
@@ -320,10 +331,13 @@ GOL.prototype.place_cell_world = function(x, y, size, value) {
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
-        .uniform('x', x - (size/2))
-        .uniform('y', y - (size/2))
-        .uniform('size', size)
+        .uniform('x', x - w/2)
+        .uniform('y', y - h/2)
+        .uniform('w', w)
+        .uniform('h', h)
         .uniform('value', value)
+        .uniform('g', g)
+        .uniform('b', b)
         .draw(gl.TRIANGLE_STRIP, 4);
     
 	//this.swap_rend();
@@ -383,45 +397,71 @@ GOL.prototype.draw = function() {
  * @param {boolean} state True/false for live/dead
  * @returns {GOL} this
  */
-GOL.prototype.placeBoth = function(x, y, size, valRend, valWorld) {
-	gol.place_cell_rend(x,y,size,valRend);
-	gol.place_cell_world(x,y,size,valWorld);
+GOL.prototype.placeBoth = function(x, y, size, valRend, valWorld, g, b) {
+	gol.place_cell_rend(x,y,size,size,valRend,g,b);
+	gol.place_cell_world(x,y,size,size,valWorld,g,b);
     return this;
 };
 
 GOL.prototype.create_bullet = function() {
-	this.bullet_x = (this.statesize[0]/2) + ((gol.mouse_x - this.statesize[0]/2)/4);
-	this.bullet_y = (this.statesize[1]/2) + ((gol.mouse_y - this.statesize[1]/2)/4);
-	this.bullet_exists = true;
-	gol.bullet_size = 23;
-	gol.bullet_life = 0;
-	gol.bullet_val = 0;
+	var cost = 170;
+	if(gol.p_power >= cost){
+		this.bullet_x = (this.statesize[0]/2);
+		this.bullet_y = (this.statesize[1]/2);
+		this.bullet_exists = true;
+		gol.bullet_size = 13;
+		gol.bullet_life = 0;
+		gol.bullet_val = 0;
+		gol.p_power -= cost;
+	}
     return this;
 };
 
-GOL.prototype.animate_bullets = function(bullets) {
-	if(gol.bullet_exists) {
-		gol.bullet_x += (gol.mouse_x - this.statesize[0]/2)/80;
-		gol.bullet_y += (gol.mouse_y - this.statesize[1]/2)/80;
+
+GOL.prototype.create_melee = function() {
+	if(gol.bullet_life == 0) {
+		this.bullet_x = (this.statesize[0]/2) + ((gol.mouse_x - this.statesize[0]/2)/4);
+		this.bullet_y = (this.statesize[1]/2) + ((gol.mouse_y - this.statesize[1]/2)/4);
+		this.bullet_exists = true;
+		gol.bullet_size = 13+(gol.p_power/1000)*25;
+		gol.bullet_life = -1;
+		gol.bullet_val = 0;
+		gol.p_power -= 10;
+	}
+    return this;
+};
+
+GOL.prototype.animate_bullets = function() {
+	var lifespan = 20;
+	if(gol.bullet_exists && gol.bullet_life >= 0) {
+		gol.bullet_x += (gol.mouse_x - this.statesize[0]/2)/lifespan;
+		gol.bullet_y += (gol.mouse_y - this.statesize[1]/2)/lifespan;
 		gol.bullet_life += 1;
 
-		if(gol.bullet_size >= 10) {gol.bullet_size -= 1; } else { gol.bullet_val = 1;}
+		//if(gol.bullet_size >= 4) {gol.bullet_size -= 1; } else { gol.bullet_val = 1;}
+		//if(gol.bullet_life >= 2) {	gol.bullet_size = 11; }
 
-		if(gol.bullet_life >= 60) {	
+		gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 1, gol.bullet_val, 1, 0);
+
+		if(gol.bullet_life == lifespan) {	
 			gol.bullet_life = 0;
-			gol.bullet_size = 45;
+			gol.bullet_size = 51;
 			gol.bullet_val = 1;
 			gol.bullet_exists = false;
+			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 1, 1, 1, 1);
+			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size-8, 0, 0, 0, 1);
 		}
 
-		gol.RunBullet(this);
 	}
 
-	
+	if(gol.bullet_exists && gol.bullet_life < 0) {
+		gol.bullet_x += (gol.mouse_x - this.statesize[0]/2)/30;
+		gol.bullet_y += (gol.mouse_y - this.statesize[1]/2)/30;
+		gol.bullet_life = 0;
+		gol.bullet_exists = false;
 
-    /*for (var i = 0; i < bullets.length; i++) {
-		bullets[i].next_step();
-    }*/
+		gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 1, gol.bullet_val, 1, 0);
+	}
 	
     return this;
 };
@@ -451,14 +491,11 @@ GOL.prototype.start = function(canvas) {
 			
 			for (var i = 0; i < 1; i++) {
 				gol.shift();
-				gol.step();
-
-				if(gol.l_click) {/*gol.place_cell_world(gol.mouse_x, gol.mouse_y, 33, 0);*/ gol.create_bullet();} //interacting
-				if(gol.r_click) {gol.place_cell_world(gol.mouse_x, gol.mouse_y, 17, 1);} //interacting
-
-				gol.animate_bullets();
+				gol.step();gol.animate_bullets();
 				gol.swap_rend();
 				gol.RunPlayer(gol); //noninteracting
+
+
 				
 			}
         	
@@ -588,16 +625,19 @@ function Controller(gol) {
     $(document).on('keydown', function(event) {
 		switch (event.which) {
 		    case 87: /* W */
-				if (gol.p_move_y < 2){ gol.p_move_U = 2; }
+				if (gol.p_move_y < gol.p_speed){ gol.p_move_U = gol.p_speed; }
 		        break;
 		    case 65: /* A */
-		        if (gol.p_move_x > -2){ gol.p_move_L = -2; }
+		        if (gol.p_move_x > -gol.p_speed){ gol.p_move_L = -gol.p_speed; }
 		        break;
 		    case 83: /* S */
-		        if (gol.p_move_y > -2){ gol.p_move_D = -2; }
+		        if (gol.p_move_y > -gol.p_speed){ gol.p_move_D = -gol.p_speed; }
 		        break;
 		    case 68: /* D */
-		        if (gol.p_move_x < 2){ gol.p_move_R = 2; }
+		        if (gol.p_move_x < gol.p_speed){ gol.p_move_R = gol.p_speed; }
+		        break;    
+			case 32: /* D */
+				gol.space_down = true;
 		        break;
 		};
     });
@@ -610,14 +650,15 @@ function Controller(gol) {
         switch (event.which) {
         case 82: /* r */
             gol.setRandom();
-            gol.draw();
+			gol.player_reset();
             break;
         case 46: /* [delete] */
             gol.setEmpty();
             gol.draw();
             break;
         case 32: /* [space] */
-            gol.toggle();
+            //gol.toggle();
+			gol.space_down = false;
             break;
 		
 		
@@ -638,31 +679,158 @@ function Controller(gol) {
 }
 
 
+GOL.prototype.player_hitbox = function() {
+	var gl = this.igloo.gl, w = this.statesize[0], h = this.statesize[1];
+	this.framebuffers.step.attach(this.textures.front);
+	var rgba = new Uint8Array(13 * 13 * 4);
+	gl.readPixels(gol.statesize[0]/2-(13/2), gol.statesize[1]/2-(13/2), 13, 13, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
+	var state = new Uint8Array(13 * 13);
+	for (var i = 0; i < 13 * 13; i++) {
+		state[i] = rgba[i * 4] > 128 ? 1 : 0;
+	}
+	return state;
+};
+
+
+GOL.prototype.player_reset = function() {
+	gol.place_cell_world(gol.statesize[0]/2, gol.statesize[1]/2, 129, 129, 0, 0, 0);
+	gol.p_power = 1000;
+	gol.p_health = gol.p_health_max;
+	gol.p_fuel = 1000;
+	gol.p_move_R = 0;
+	gol.p_move_L = 0;
+	gol.p_move_U = 0;
+	gol.p_move_D = 0;
+	gol.l_click = false;
+	gol.r_click = false;
+	gol.space_down = false;
+	return this;
+};
+
+
 /**
  * Player controller
  */
 GOL.prototype.RunPlayer = function(gol) {
-	//alert("Player Test");
-    this.gol = gol;
-    var _this = this,
-        $canvas = $(gol.igloo.canvas);
 
-	gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 13, 1)
+	
+
+	//hitcheck / health
+	gol.p_hit = gol.player_hitbox();
+	var hit = 0;	
+	for(var i = 0; i < 13*13; i++) {
+		hit += gol.p_hit[i];
+	}
+	
+	//do damage
+	if(hit > 0) {gol.p_health -= hit + 6; gol.p_fuel -= hit;}
+	if(hit > ((13*13)/2)) {gol.p_health -= hit/2;}
+	
+	//Shield (deletes impacted objects)
+	/*if(hit > 60 && gol.p_power > 500 && gol.p_shield_cooldown == 0) {
+		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 45, 0, 0, 1, 1);
+		gol.p_power -= 150;
+		gol.p_fuel -= 100;
+		gol.p_shield_cooldown = 5;
+	} else */
+
+	if(hit > 0 && gol.p_shield_cooldown == 0) {
+		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 17, 0, 0, 1, 1);
+		gol.p_power -= 80;
+		gol.p_shield_cooldown = 10;
+	}
+
+	if(gol.p_shield_cooldown > 0) {
+		gol.p_shield_cooldown -= 1;
+	}
+
+	//if(hit != 0) {alert(hit + " / " + (13*13));}
+	
+
+	//draw player	
+	if(hit == 0) {gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 13, 13, 1, 1, 0);} else {
+		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 13, 13, 1, 0, 0)
+		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 9, 9, 1, 0, 0)
+	}
+
+
+
+
+
+
+	if((gol.p_move_L + gol.p_move_R != 0) || (gol.p_move_U + gol.p_move_D != 0)) { gol.p_fuel -= 5; }
+	
+	if(gol.p_fuel > 650) {
+		gol.p_speed = 3;
+		if(gol.p_move_R != 0) { gol.p_move_R = 3; }
+		if(gol.p_move_L != 0) { gol.p_move_L = -3; }
+		if(gol.p_move_U != 0) { gol.p_move_U = 3; }
+		if(gol.p_move_D != 0) { gol.p_move_D = -3; }
+	}
+	if(gol.p_fuel <= 650) {
+		gol.p_speed = 2;
+		if(gol.p_move_R != 0) { gol.p_move_R = 2; }
+		if(gol.p_move_L != 0) { gol.p_move_L = -2; }
+		if(gol.p_move_U != 0) { gol.p_move_U = 2; }
+		if(gol.p_move_D != 0) { gol.p_move_D = -2; }
+	}
+	if(/*gol.p_fuel >= 120 && */gol.p_fuel <= 300) {
+		gol.p_speed = 1;
+		if(gol.p_move_R != 0) { gol.p_move_R = 1; }
+		if(gol.p_move_L != 0) { gol.p_move_L = -1; }
+		if(gol.p_move_U != 0) { gol.p_move_U = 1; }
+		if(gol.p_move_D != 0) { gol.p_move_D = -1; }
+	}
+	/*if(gol.p_fuel <= 0) {
+		gol.p_speed = 0;
+		if(gol.p_move_R != 0) { gol.p_move_R = 0; }
+		if(gol.p_move_L != 0) { gol.p_move_L = 0; }
+		if(gol.p_move_U != 0) { gol.p_move_U = 0; }
+		if(gol.p_move_D != 0) { gol.p_move_D = 0; }
+	}*/
+
+	if(gol.p_power <= 0) {gol.can_shoot = false; gol.p_shield_cooldown = 30;}
+	if(gol.p_power >= 100) {gol.can_shoot = true;}
+
+
+	//regen
+	if(gol.p_fuel < 1000) {gol.p_fuel += 3;}
+	if(gol.p_health < gol.p_health_max) {gol.p_health += 2;}
+	if(gol.p_power < 1000) {gol.p_power += 4;}
+
+	//Overflow cases
+	if(gol.p_fuel > 1000) {gol.p_fuel = 1000;}
+	if(gol.p_health > gol.p_health_max) {gol.p_health = gol.p_health_max;}
+	if(gol.p_power > 1000) {gol.p_power = 1000;}
+
+	if(gol.p_fuel < 0) {gol.p_fuel = 0;}
+	if(gol.p_health < 0) {gol.p_health = 0;}
+	if(gol.p_power < 0) {gol.p_power = 0;}
+	
+
+	//status bars
+	gol.place_cell_rend((gol.statesize[0]/2), 8+8, (gol.statesize[0]/4)*(gol.p_fuel/1000), 11, 1, 1, 0)
+	gol.place_cell_rend((gol.statesize[0]/2), 20+8, (gol.statesize[0]/4)*(gol.p_health/gol.p_health_max), 11, 1, 0, 0)
+	gol.place_cell_rend((gol.statesize[0]/2), 32+8, (gol.statesize[0]/4)*(gol.p_power/1000), 11, 0, 1, 1)
+
+	if(!gol.bullet_exists){
+		if(gol.can_shoot) {if(gol.l_click && gol.bullet_life == 0) {gol.create_bullet();}}          //gol.place_cell_world(gol.mouse_x, gol.mouse_y, 33, 0);
+		if(gol.r_click && gol.bullet_life == 0) {gol.create_melee();}       						//gol.place_cell_world(gol.mouse_x, gol.mouse_y, 17, 1);
+	}
+
+	if(gol.space_down && gol.p_shield_cooldown == 0) {
+		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 100*(gol.p_power/1000)+13, 0, 0, 1, 1);
+		gol.p_power -= 30;
+	}
+				
+	if(gol.p_health <= 0) {
+		alert("You did not survive, this time.");
+		gol.setRandom();
+		gol.player_reset();
+	}
 
 	return this;
 }
-
-GOL.prototype.RunBullet = function(gol) {
-	//alert("Player Test");
-    this.gol = gol;
-    var _this = this,
-        $canvas = $(gol.igloo.canvas);
-
-	gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 1, gol.bullet_val);
-
-	return this;
-}
-
 
 
 
