@@ -279,13 +279,6 @@ GOL.prototype.swap_rend = function() {
  * @returns {GOL} this
  */
 GOL.prototype.step = function() {
-    if (GOL.now() != this.lasttick) {
-        $('.fps').text(this.fps + ' FPS');
-        this.lasttick = GOL.now();
-        this.fps = 0;
-    } else {
-        this.fps++;
-    }
     var gl = this.igloo.gl;
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
@@ -423,10 +416,13 @@ GOL.prototype.create_melee = function() {
 		this.bullet_x = (this.statesize[0]/2) + ((gol.mouse_x - this.statesize[0]/2)/4);
 		this.bullet_y = (this.statesize[1]/2) + ((gol.mouse_y - this.statesize[1]/2)/4);
 		this.bullet_exists = true;
-		gol.bullet_size = 13+(gol.p_power/1000)*25;
+		if(gol.p_power >= 333) {
+			gol.bullet_size = 13+12;
+		} else { gol.bullet_size = 13+(gol.p_power/1000)*32;}
+		
 		gol.bullet_life = -1;
 		gol.bullet_val = 0;
-		gol.p_power -= 10;
+		gol.p_power -= 5;
 	}
     return this;
 };
@@ -489,17 +485,29 @@ GOL.prototype.start = function(canvas) {
     if (this.timer == null) {
         this.timer = setInterval(function(){
 			
-			for (var i = 0; i < 1; i++) {
-				gol.shift();
-				gol.step();gol.animate_bullets();
-				gol.swap_rend();
-				gol.RunPlayer(gol); //noninteracting
-
-
-				
+			if (GOL.now() != this.lasttick) {
+				$('.fps').text(this.fps + ' FPS');
+				this.lasttick = GOL.now();
+				this.fps = 0;
+			} else {
+				this.fps++;
 			}
+			
+
+
+			gol.shift();
+
+			for (var i = 0; i < 3; i++) {
+				gol.step();
+			}
+
+			gol.animate_bullets();
+			gol.swap_rend();
+			gol.RunPlayer(gol); //noninteracting
         	
 			gol.draw();	
+
+
 
 			if (gol.recordnow === true) {
 				gol.gen += 1;
@@ -658,7 +666,7 @@ function Controller(gol) {
             break;
         case 32: /* [space] */
             //gol.toggle();
-			gol.space_down = false;
+			//gol.space_down = false;
             break;
 		
 		
@@ -713,7 +721,12 @@ GOL.prototype.player_reset = function() {
  */
 GOL.prototype.RunPlayer = function(gol) {
 
-	
+	if(gol.p_shield_cooldown > 0) {
+		gol.p_shield_cooldown -= 1;
+	} else { gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 19, 19, 0, 0.2, 0.4); }	
+
+
+		
 
 	//hitcheck / health
 	gol.p_hit = gol.player_hitbox();
@@ -735,14 +748,12 @@ GOL.prototype.RunPlayer = function(gol) {
 	} else */
 
 	if(hit > 0 && gol.p_shield_cooldown == 0) {
-		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 17, 0, 0, 1, 1);
 		gol.p_power -= 80;
 		gol.p_shield_cooldown = 10;
+		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 23, 23, 0, 1, 1)
+		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 15, 0, 0, 1, 1);
 	}
 
-	if(gol.p_shield_cooldown > 0) {
-		gol.p_shield_cooldown -= 1;
-	}
 
 	//if(hit != 0) {alert(hit + " / " + (13*13));}
 	
@@ -750,7 +761,7 @@ GOL.prototype.RunPlayer = function(gol) {
 	//draw player	
 	if(hit == 0) {gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 13, 13, 1, 1, 0);} else {
 		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 13, 13, 1, 0, 0)
-		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 9, 9, 1, 0, 0)
+		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 9, 9, 1, 1, 0)
 	}
 
 
@@ -789,13 +800,18 @@ GOL.prototype.RunPlayer = function(gol) {
 		if(gol.p_move_D != 0) { gol.p_move_D = 0; }
 	}*/
 
-	if(gol.p_power <= 0) {gol.can_shoot = false; gol.p_shield_cooldown = 30;}
+	if(gol.p_power <= 0) {
+		gol.can_shoot = false; 
+		gol.p_shield_cooldown = 30; 
+		gol.space_down = false;
+	}
+
 	if(gol.p_power >= 100) {gol.can_shoot = true;}
 
 
 	//regen
 	if(gol.p_fuel < 1000) {gol.p_fuel += 3;}
-	if(gol.p_health < gol.p_health_max) {gol.p_health += 2;}
+	if(gol.p_health < gol.p_health_max) {gol.p_health += 3;}
 	if(gol.p_power < 1000) {gol.p_power += 4;}
 
 	//Overflow cases
@@ -809,9 +825,9 @@ GOL.prototype.RunPlayer = function(gol) {
 	
 
 	//status bars
-	gol.place_cell_rend((gol.statesize[0]/2), 8+8, (gol.statesize[0]/4)*(gol.p_fuel/1000), 11, 1, 1, 0)
-	gol.place_cell_rend((gol.statesize[0]/2), 20+8, (gol.statesize[0]/4)*(gol.p_health/gol.p_health_max), 11, 1, 0, 0)
-	gol.place_cell_rend((gol.statesize[0]/2), 32+8, (gol.statesize[0]/4)*(gol.p_power/1000), 11, 0, 1, 1)
+	gol.place_cell_rend((gol.statesize[0]/2), 8+16, (gol.statesize[0]/4)*(gol.p_fuel/1000), 12, 1, 1, 0)
+	gol.place_cell_rend((gol.statesize[0]/2), 22+16, (gol.statesize[0]/4)*(gol.p_health/gol.p_health_max), 12, 1, 0, 0)
+	gol.place_cell_rend((gol.statesize[0]/2), 34+16, (gol.statesize[0]/4)*(gol.p_power/1000), 12, 0, 1, 1)
 
 	if(!gol.bullet_exists){
 		if(gol.can_shoot) {if(gol.l_click && gol.bullet_life == 0) {gol.create_bullet();}}          //gol.place_cell_world(gol.mouse_x, gol.mouse_y, 33, 0);
