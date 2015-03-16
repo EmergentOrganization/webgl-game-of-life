@@ -64,7 +64,7 @@ function GOL(canvas, scale) {
         copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
         gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
         evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
-        orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave.frag'),
+        orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
         MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
         MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-2.frag'),
         ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
@@ -283,7 +283,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.Tether.use()
+    this.programs.Microbes.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
@@ -413,12 +413,12 @@ GOL.prototype.create_bullet = function() {
 
 GOL.prototype.create_melee = function() {
 	if(gol.bullet_life == 0) {
-		this.bullet_x = (this.statesize[0]/2) + ((gol.mouse_x - this.statesize[0]/2)/4);
-		this.bullet_y = (this.statesize[1]/2) + ((gol.mouse_y - this.statesize[1]/2)/4);
+		this.bullet_x = (this.statesize[0]/2) + ((gol.mouse_x - this.statesize[0]/2)/5);
+		this.bullet_y = (this.statesize[1]/2) + ((gol.mouse_y - this.statesize[1]/2)/5);
 		this.bullet_exists = true;
 		if(gol.p_power >= 333) {
-			gol.bullet_size = 13+12;
-		} else { gol.bullet_size = 13+(gol.p_power/1000)*32;}
+			gol.bullet_size = 9+18;
+		} else { gol.bullet_size = 9+(gol.p_power/1000)*48;}
 		
 		gol.bullet_life = -1;
 		gol.bullet_val = 0;
@@ -497,7 +497,7 @@ GOL.prototype.start = function(canvas) {
 
 			gol.shift();
 
-			for (var i = 0; i < 3; i++) {
+			for (var i = 0; i < 1; i++) {
 				gol.step();
 			}
 
@@ -747,8 +747,8 @@ GOL.prototype.RunPlayer = function(gol) {
 		gol.p_shield_cooldown = 5;
 	} else */
 
-	if(hit > 0 && gol.p_shield_cooldown == 0) {
-		gol.p_power -= 80;
+	if(!gol.space_down && hit > 0 && gol.p_shield_cooldown == 0) {
+		gol.p_power -= 60;
 		gol.p_shield_cooldown = 10;
 		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 23, 23, 0, 1, 1)
 		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 15, 0, 0, 1, 1);
@@ -769,7 +769,7 @@ GOL.prototype.RunPlayer = function(gol) {
 
 
 
-	if((gol.p_move_L + gol.p_move_R != 0) || (gol.p_move_U + gol.p_move_D != 0)) { gol.p_fuel -= 5; }
+	if((gol.p_move_L + gol.p_move_R != 0) || (gol.p_move_U + gol.p_move_D != 0)) { gol.p_fuel -= 4; }
 	
 	if(gol.p_fuel > 650) {
 		gol.p_speed = 3;
@@ -825,9 +825,12 @@ GOL.prototype.RunPlayer = function(gol) {
 	
 
 	//status bars
+	gol.place_cell_rend((gol.statesize[0]/2), 8+16, (gol.statesize[0]/4), 12, 0.2, 0.2, 0)
+	gol.place_cell_rend((gol.statesize[0]/2), 22+16, (gol.statesize[0]/4), 12, 0.2, 0, 0)
+	gol.place_cell_rend((gol.statesize[0]/2), 36+16, (gol.statesize[0]/4), 12, 0, 0.2, 0.2)
 	gol.place_cell_rend((gol.statesize[0]/2), 8+16, (gol.statesize[0]/4)*(gol.p_fuel/1000), 12, 1, 1, 0)
 	gol.place_cell_rend((gol.statesize[0]/2), 22+16, (gol.statesize[0]/4)*(gol.p_health/gol.p_health_max), 12, 1, 0, 0)
-	gol.place_cell_rend((gol.statesize[0]/2), 34+16, (gol.statesize[0]/4)*(gol.p_power/1000), 12, 0, 1, 1)
+	gol.place_cell_rend((gol.statesize[0]/2), 36+16, (gol.statesize[0]/4)*(gol.p_power/1000), 12, 0, 1, 1)
 
 	if(!gol.bullet_exists){
 		if(gol.can_shoot) {if(gol.l_click && gol.bullet_life == 0) {gol.create_bullet();}}          //gol.place_cell_world(gol.mouse_x, gol.mouse_y, 33, 0);

@@ -642,7 +642,7 @@ void main() {
 	int sum_two = s3;
 	int sum_three = s4 + s5 + s6;
 
-	if(sum_one >= 31 && sum_one <= 155) 	{gl_FragColor = vec4(0.0, 0.3, 0.4, 1.0);}
+	if(sum_one >= 31 && sum_one <= 155) 	{gl_FragColor = vec4(0.0, 0.3, 1.0, 1.0);}
 	if(sum_one >= 40 && sum_one <= 42) 		{gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);}
 	if(sum_one >= 87 && sum_one <= 137) 	{gl_FragColor = vec4(1.0, 0.7, 0.0, 1.0);}
 
