@@ -79,6 +79,8 @@ function GOL(canvas, scale) {
 	this.p_shield_cooldown = 0;
 	this.p_s_burstsize = 130;
 	this.p_s_burstcooldown = 30;
+
+	this.active_rule = 2;
 	
     gl.disable(gl.DEPTH_TEST);
     this.programs = {
@@ -87,16 +89,31 @@ function GOL(canvas, scale) {
         evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
         orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
         MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
-        MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-2.frag'),
+        MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-1.frag'),
         ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
         Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
         Tether:  igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
-        Feed12:  igloo.program('glsl/quad.vert', 'glsl/Feeders12.frag'),
-        MiniAtom:  igloo.program('glsl/quad.vert', 'glsl/MiniAtom-1.frag'),
+        Feeders:  igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
+        MiniAtom:  igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
         AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
         ShiftCells:  igloo.program('glsl/quad.vert', 'glsl/ShiftCells.frag'),
         PlaceCells:  igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag')
     };
+
+	this.rule_array = new Array(9);
+	//this.rule_seeds = new Array(9);
+
+	this.rule_array[0] = this.programs.gol;
+	this.rule_array[1] = this.programs.evo;
+	this.rule_array[2] = this.programs.MiniAtomConway;
+	this.rule_array[3] = this.programs.Tether;
+	this.rule_array[4] = this.programs.MicroFeeders;
+	this.rule_array[5] = this.programs.MiniAtom;
+	this.rule_array[6] = this.programs.Microbes;
+	this.rule_array[7] = this.programs.orbw;
+	//this.rule_array[8] = this.programs.ManyRings;
+	this.rule_array[8] = this.programs.Feeders;
+
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
     };
@@ -302,7 +319,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.Tether.use()
+    this.rule_array[this.active_rule].use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
@@ -416,7 +433,7 @@ GOL.prototype.placeBoth = function(x, y, size, valRend, valWorld, g, b) {
 };
 
 GOL.prototype.create_bullet = function() {
-	var cost = 100;
+	var cost = 120;
 	if(gol.p_power >= cost){
 		this.bullet_x = (this.statesize[0]/this.scale/2);
 		this.bullet_y = (this.statesize[1]/this.scale/2);
@@ -438,7 +455,7 @@ GOL.prototype.enm_create_bullet = function() {
 	this.enm_bullet_y = gol.enm_b_start_y;
 	this.enm_bullet_exists = true;
 	gol.enm_bullet_size = (Math.random()*12)+3;
-	gol.enm_bullet_life_max = (Math.random()*100)+20;
+	gol.enm_bullet_life_max = (Math.random()*100)+45;
 	gol.enm_bullet_life = 0;
 	gol.enm_bullet_val = 1;
 	gol.enm_b_targ_x = (this.statesize[0]/2);
@@ -459,7 +476,7 @@ GOL.prototype.create_melee = function() {
 		
 		gol.bullet_life = -1;
 		gol.bullet_val = 0;
-		gol.p_power -= 10;
+		gol.p_power -= 8;
 	}
     return this;
 };
@@ -474,7 +491,7 @@ GOL.prototype.animate_bullets = function() {
 		gol.bullet_life += 1;
 		
 		if(gol.bullet_life >= lifespan) {	
-			gol.bullet_size = 47;
+			gol.bullet_size = 37;
 			gol.bullet_val = 1;
 			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 0, 0, 1, 0);
 			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size/3, 1, 1, 0, 0);
@@ -606,7 +623,7 @@ GOL.prototype.start = function(canvas) {
 			if (gol.recordnow === true) {
 				gol.gen += 1;
 				if((gol.gen > 600 && gol.gen % 100 === 0) || (gol.gen < 600 && gol.gen % 10 === 0) || (gol.gen < 30)){
-					gol.export_image = gol.exportImage(gol.igloo.gl, gol.textures.front.texture, gol.canvas.width, gol.canvas.height);
+					gol.export_image = gol.exportImage(gol.igloo.gl, gol.textures.rend.texture, gol.canvas.width, gol.canvas.height);
 					gol.export_images.push(gol.export_image);
 					gol.render_frame += 1;
 
@@ -666,19 +683,38 @@ function addGUI() {
     var gui = new dat.GUI(),
         cont = new myConfig();
 
-    gui.add(cont, 'testBool').name('TestMenu');
-    gui.add(cont, 'testInt').name('TestMenu');
-    gui.add(cont, 'testInt', 0, 20).step(1).name('TestMenu').onFinishChange(testFoo);
+    //gui.add(cont, 'testBool').name('TestMenu');
+    //gui.add(cont, 'testInt').name('TestMenu');
+    //gui.add(cont, 'testInt', 0, 20).step(1).name('TestMenu').onFinishChange(testFoo);
+	gui.add(cont, 'testString', {
+		'Conway': 0,
+		'Replicators': 1,
+		'Conway/Atom': 2,
+		'Tether': 3,
+		'Feeders': 4,
+		'Acid Eggs': 5,
+		'Molecules': 6,
+		'Orbwave': 7,
+		//'Many Rings': 8,
+		'Network': 8
+	}).name('Algorithm').onChange(set_rule);
 
-	function testFoo() {
-        alert("TEST GUI Response");
+	function testFoo(value) {
+        alert("TEST GUI Response: " + value);
     }
+
+	function set_rule(value){
+		gol.active_rule = value;
+		gol.setRandom();
+		gol.player_reset();
+	}
 	
 }
 
 function myConfig() {
 	this.testInt = 0;
 	this.testBool = false;
+	this.testString = "TestStringText";
 }
 
 
@@ -695,7 +731,7 @@ function Controller(gol) {
         $canvas = $(gol.igloo.canvas);
     this.drag = null;
 
-	//addGUI()
+	addGUI()
 
 	$canvas.on('mousedown', function(event) {
 		switch (event.which) {
@@ -881,9 +917,9 @@ GOL.prototype.RunPlayer = function() {
 
 
 
-	if((gol.p_move_L + gol.p_move_R != 0) || (gol.p_move_U + gol.p_move_D != 0)) { gol.p_fuel -= 6; }
+	if((gol.p_move_L + gol.p_move_R != 0) || (gol.p_move_U + gol.p_move_D != 0)) { gol.p_fuel -= 5; }
 	
-	if(gol.p_fuel >= 200) {
+	if(gol.p_fuel >= 150) {
 		gol.p_speed = 2;
 		if(gol.p_move_R != 0) { gol.p_move_R = 2; }
 		if(gol.p_move_L != 0) { gol.p_move_L = -2; }
@@ -930,12 +966,13 @@ GOL.prototype.RunPlayer = function() {
 	
 
 	//status bars
-	gol.place_cell_rend((gol.statesize[0]/2), 8+16, (gol.statesize[0]/4), 12, 0.2, 0.2, 0)
+	gol.place_cell_rend((gol.statesize[0]/2), 8+18, (gol.statesize[0]/4), 8, 0.2, 0.2, 0)
 	gol.place_cell_rend((gol.statesize[0]/2), 22+16, (gol.statesize[0]/4), 12, 0.2, 0, 0)
-	gol.place_cell_rend((gol.statesize[0]/2), 36+16, (gol.statesize[0]/4), 12, 0, 0.2, 0.2)
-	gol.place_cell_rend((gol.statesize[0]/2), 8+16, (gol.statesize[0]/4)*(gol.p_fuel/1000), 12, 1, 1, 0)
+	gol.place_cell_rend((gol.statesize[0]/2), 36+14, (gol.statesize[0]/4), 8, 0, 0.2, 0.2)
+
+	gol.place_cell_rend((gol.statesize[0]/2), 8+18, (gol.statesize[0]/4)*(gol.p_fuel/1000), 8, 1, 1, 0)
 	gol.place_cell_rend((gol.statesize[0]/2), 22+16, (gol.statesize[0]/4)*(gol.p_health/gol.p_health_max), 12, 1, 0, 0)
-	gol.place_cell_rend((gol.statesize[0]/2), 36+16, (gol.statesize[0]/4)*(gol.p_power/1000), 12, 0, 1, 1)
+	gol.place_cell_rend((gol.statesize[0]/2), 36+14, (gol.statesize[0]/4)*(gol.p_power/1000), 8, 0, 1, 1)
 
 	if(!gol.bullet_exists){
 		if(gol.can_shoot) {if(!gol.r_click && gol.l_click && gol.bullet_life == 0) {gol.create_bullet();}}          //gol.place_cell_world(gol.mouse_x, gol.mouse_y, 33, 0);
@@ -951,6 +988,7 @@ GOL.prototype.RunPlayer = function() {
 				
 	if(gol.p_health <= 0) {
 		//alert("You did not survive, this time.");
+		gol.active_rule = Math.floor(Math.random()*gol.rule_array.length)
 		gol.setRandom();
 		gol.player_reset();
 	}
