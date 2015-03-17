@@ -379,9 +379,9 @@ void main() {
 		sum = sum + sumTwo;
 
 	if(sum >= 220) 					{gl_FragColor = vec4(0.0, 0.9, 0.6, 1.0);}
-	if(sum >= 190 && sum <= 220) 	{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
+	if(sum >= 180 && sum <= 220) 	{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
 	if(sum >= 129 && sum <= 137) 	{gl_FragColor = vec4(1.0, 0.4, 0.0, 1.0);}
-	if(sum >= 35 && sum <= 120) 	{gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);}
-	if(sum >= 52 && sum <= 59) 		{gl_FragColor = vec4(1.0, 0.8, 0.8, 1.0);}
+	if(sum >= 38 && sum <= 118) 	{gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);}
+	if(sum >= 52 && sum <= 58) 		{gl_FragColor = vec4(1.0, 0.8, 0.8, 1.0);}
 
 }
