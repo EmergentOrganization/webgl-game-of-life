@@ -18,6 +18,7 @@ function GOL(canvas, scale) {
     this.timer = null;
     this.lasttick = GOL.now();
     this.fps = 0;
+	this.fps_target = 33.3;
 	this.export_image = null;
 	this.export_images = new Array();
 	this.gen = 0;
@@ -80,7 +81,7 @@ function GOL(canvas, scale) {
 	this.p_s_burstsize = 130;
 	this.p_s_burstcooldown = 30;
 
-	this.active_rule = 2;
+	this.active_rule = 0;
 	
     gl.disable(gl.DEPTH_TEST);
     this.programs = {
@@ -103,9 +104,9 @@ function GOL(canvas, scale) {
 	this.rule_array = new Array(9);
 	//this.rule_seeds = new Array(9);
 
-	this.rule_array[0] = this.programs.gol;
-	this.rule_array[1] = this.programs.evo;
-	this.rule_array[2] = this.programs.MiniAtomConway;
+	this.rule_array[0] = this.programs.MiniAtomConway;
+	this.rule_array[1] = this.programs.gol;
+	this.rule_array[2] = this.programs.evo;
 	this.rule_array[3] = this.programs.Tether;
 	this.rule_array[4] = this.programs.MicroFeeders;
 	this.rule_array[5] = this.programs.MiniAtom;
@@ -633,7 +634,7 @@ GOL.prototype.start = function(canvas) {
 					}
 				}
 			}
-        }, 33.3);
+        }, this.fps_target);
     }
     return this;
 };
@@ -683,13 +684,13 @@ function addGUI() {
     var gui = new dat.GUI(),
         cont = new myConfig();
 
-    //gui.add(cont, 'testBool').name('TestMenu');
+    gui.add(cont, 'testBool').name('Enable 60fps').onFinishChange(fpsChange);
     //gui.add(cont, 'testInt').name('TestMenu');
     //gui.add(cont, 'testInt', 0, 20).step(1).name('TestMenu').onFinishChange(testFoo);
-	gui.add(cont, 'testString', {
-		'Conway': 0,
-		'Replicators': 1,
-		'Conway/Atom': 2,
+	gui.add(cont, 'testInt', {
+		'Conway/Atom': 0,
+		'Conway\'s GoL': 1,
+		'Replicators': 2,
 		'Tether': 3,
 		'Feeders': 4,
 		'Acid Eggs': 5,
@@ -703,6 +704,13 @@ function addGUI() {
         alert("TEST GUI Response: " + value);
     }
 
+	function fpsChange(value) {
+		gol.stop();
+        if(value) {gol.fps_target = 16.7; }
+        if(!value) {gol.fps_target = 33.3;}
+		gol.start();
+    }
+
 	function set_rule(value){
 		gol.active_rule = value;
 		gol.setRandom();
@@ -714,7 +722,6 @@ function addGUI() {
 function myConfig() {
 	this.testInt = 0;
 	this.testBool = false;
-	this.testString = "TestStringText";
 }
 
 
@@ -988,7 +995,7 @@ GOL.prototype.RunPlayer = function() {
 				
 	if(gol.p_health <= 0) {
 		//alert("You did not survive, this time.");
-		gol.active_rule = Math.floor(Math.random()*gol.rule_array.length)
+		//gol.active_rule = Math.floor(Math.random()*gol.rule_array.length)
 		gol.setRandom();
 		gol.player_reset();
 	}
