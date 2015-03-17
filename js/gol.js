@@ -10,7 +10,7 @@ function GOL(canvas, scale) {
         alert('Could not initialize WebGL!');
         throw new Error('No WebGL');
     }
-    scale = this.scale = scale || 1;
+    scale = this.scale = 1;
     var w = canvas.width, h = canvas.height;
 	this.canvas = canvas;
     this.viewsize = new Float32Array([w, h]);
@@ -24,8 +24,8 @@ function GOL(canvas, scale) {
 	this.render_frame = 0;
 	this.recordnow = false;
 
-	this.player_x = w/2+(13/2);
-	this.player_y = h/2+(13/2);
+	this.player_x = w/scale/2+(13/2);
+	this.player_y = h/scale/2+(13/2);
 
 	this.p_move_x = 0;
 	this.p_move_y = 0;
@@ -37,7 +37,7 @@ function GOL(canvas, scale) {
 	
 	this.p_speed = 2;
 
-	this.p_health_max = 3000;
+	this.p_health_max = 1000;
 	this.p_health = this.p_health_max;
 	this.p_fuel = 1000;
 	this.p_power = 1000;
@@ -49,6 +49,8 @@ function GOL(canvas, scale) {
 	this.bullet_life = 0;
 	this.bullet_size = 9;
 	this.bullet_val = 0;
+	this.b_targ_x = 0;
+	this.b_targ_y = 0;
 
 	this.l_click = false;
 	this.r_click = false;
@@ -57,6 +59,8 @@ function GOL(canvas, scale) {
 	this.space_down = false;
 
 	this.p_hit = new Uint8Array(13 * 13 * 4);
+	this.hitmod = 1;
+	this.hitrate = 2;
 	this.p_shield_cooldown = 0;
 	
     gl.disable(gl.DEPTH_TEST);
@@ -85,8 +89,6 @@ function GOL(canvas, scale) {
         back: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
             .blank(this.statesize[0], this.statesize[1]),
         rend: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
-            .blank(this.statesize[0], this.statesize[1]),
-        rendback: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
             .blank(this.statesize[0], this.statesize[1])
     };
     this.framebuffers = {
@@ -94,7 +96,7 @@ function GOL(canvas, scale) {
     };
 
     this.setRandom();
-	this.place_cell_world(this.statesize[0]/2, this.statesize[1]/2, 129, 129, 0, 0, 0);
+	this.place_cell_world(this.statesize[0]/scale/2, this.statesize[1]/scale/2, 129, 129, 0, 0, 0);
 }
 
 
@@ -267,7 +269,7 @@ GOL.prototype.swap_rend = function() {
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniformi('render', 1)
-        .uniform('scale', this.viewsize)
+        .uniform('scale', this.statesize)
         .draw(gl.TRIANGLE_STRIP, 4);
 
     return this;
@@ -283,7 +285,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.Microbes.use()
+    this.programs.MiniAtomConway.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
@@ -372,12 +374,12 @@ GOL.prototype.draw = function() {
     this.igloo.defaultFramebuffer.bind();
     this.textures.front.bind(0);
     this.textures.rend.bind(1);
-    gl.viewport(0, 0, this.viewsize[0], this.viewsize[1]);
+    gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
     this.programs.copy.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniformi('render', 1)
-        .uniform('scale', this.viewsize)
+        .uniform('scale', this.statesize)
         .draw(gl.TRIANGLE_STRIP, 4);
     return this;
 };
@@ -391,21 +393,23 @@ GOL.prototype.draw = function() {
  * @returns {GOL} this
  */
 GOL.prototype.placeBoth = function(x, y, size, valRend, valWorld, g, b) {
-	gol.place_cell_rend(x,y,size,size,valRend,g,b);
+	gol.place_cell_rend(x*gol.scale,y*gol.scale,size*gol.scale,size*gol.scale,valRend,g,b);
 	gol.place_cell_world(x,y,size,size,valWorld,g,b);
     return this;
 };
 
 GOL.prototype.create_bullet = function() {
-	var cost = 170;
+	var cost = 100;
 	if(gol.p_power >= cost){
-		this.bullet_x = (this.statesize[0]/2);
-		this.bullet_y = (this.statesize[1]/2);
+		this.bullet_x = (this.statesize[0]/this.scale/2);
+		this.bullet_y = (this.statesize[1]/this.scale/2);
 		this.bullet_exists = true;
-		gol.bullet_size = 13;
+		gol.bullet_size = 9;
 		gol.bullet_life = 0;
 		gol.bullet_val = 0;
 		gol.p_power -= cost;
+		gol.b_targ_x = (gol.mouse_x - this.statesize[0]/2);
+		gol.b_targ_y = (gol.mouse_y - this.statesize[1]/2);
 	}
     return this;
 };
@@ -413,8 +417,8 @@ GOL.prototype.create_bullet = function() {
 
 GOL.prototype.create_melee = function() {
 	if(gol.bullet_life == 0) {
-		this.bullet_x = (this.statesize[0]/2) + ((gol.mouse_x - this.statesize[0]/2)/5);
-		this.bullet_y = (this.statesize[1]/2) + ((gol.mouse_y - this.statesize[1]/2)/5);
+		this.bullet_x = (this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/5);
+		this.bullet_y = (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/5);
 		this.bullet_exists = true;
 		if(gol.p_power >= 333) {
 			gol.bullet_size = 9+18;
@@ -422,30 +426,33 @@ GOL.prototype.create_melee = function() {
 		
 		gol.bullet_life = -1;
 		gol.bullet_val = 0;
-		gol.p_power -= 5;
+		gol.p_power -= 10;
 	}
     return this;
 };
 
 GOL.prototype.animate_bullets = function() {
-	var lifespan = 20;
+	var lifespan = 15;
 	if(gol.bullet_exists && gol.bullet_life >= 0) {
-		gol.bullet_x += (gol.mouse_x - this.statesize[0]/2)/lifespan;
-		gol.bullet_y += (gol.mouse_y - this.statesize[1]/2)/lifespan;
+
+		gol.bullet_x += (gol.b_targ_x/lifespan)-gol.p_move_x;		 //(gol.mouse_x - this.statesize[0]/2)/lifespan;
+		gol.bullet_y += (gol.b_targ_y/lifespan)-gol.p_move_y; 		//(gol.mouse_y - this.statesize[1]/2)/lifespan;
+
 		gol.bullet_life += 1;
 
 		//if(gol.bullet_size >= 4) {gol.bullet_size -= 1; } else { gol.bullet_val = 1;}
 		//if(gol.bullet_life >= 2) {	gol.bullet_size = 11; }
 
 		gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 1, gol.bullet_val, 1, 0);
-
+		gol.placeBoth(gol.bullet_x-(gol.b_targ_x/lifespan/2), gol.bullet_y-(gol.b_targ_y/lifespan/2), gol.bullet_size, 1, gol.bullet_val, 1, 0);
+	
 		if(gol.bullet_life == lifespan) {	
 			gol.bullet_life = 0;
-			gol.bullet_size = 51;
+			gol.bullet_size = 41;
 			gol.bullet_val = 1;
 			gol.bullet_exists = false;
-			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 1, 1, 1, 1);
-			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size-8, 0, 0, 0, 1);
+			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 0, 0, 1, 0);
+			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size/3, 1, 1, 0, 0);
 		}
 
 	}
@@ -522,7 +529,7 @@ GOL.prototype.start = function(canvas) {
 					}
 				}
 			}
-        }, 16.7);
+        }, 33.3);
     }
     return this;
 };
@@ -601,7 +608,7 @@ function Controller(gol) {
         $canvas = $(gol.igloo.canvas);
     this.drag = null;
 
-	addGUI()
+	//addGUI()
 
 	$canvas.on('mousedown', function(event) {
 		switch (event.which) {
@@ -691,7 +698,8 @@ GOL.prototype.player_hitbox = function() {
 	var gl = this.igloo.gl, w = this.statesize[0], h = this.statesize[1];
 	this.framebuffers.step.attach(this.textures.front);
 	var rgba = new Uint8Array(13 * 13 * 4);
-	gl.readPixels(gol.statesize[0]/2-(13/2), gol.statesize[1]/2-(13/2), 13, 13, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
+	gl.readPixels(gol.statesize[0]/gol.scale/2-(13/2), gol.statesize[1]/gol.scale/2-(13/2), 13, 13, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
+	
 	var state = new Uint8Array(13 * 13);
 	for (var i = 0; i < 13 * 13; i++) {
 		state[i] = rgba[i * 4] > 128 ? 1 : 0;
@@ -701,7 +709,7 @@ GOL.prototype.player_hitbox = function() {
 
 
 GOL.prototype.player_reset = function() {
-	gol.place_cell_world(gol.statesize[0]/2, gol.statesize[1]/2, 129, 129, 0, 0, 0);
+	gol.place_cell_world(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, 129, 129, 0, 0, 0);
 	gol.p_power = 1000;
 	gol.p_health = gol.p_health_max;
 	gol.p_fuel = 1000;
@@ -719,40 +727,36 @@ GOL.prototype.player_reset = function() {
 /**
  * Player controller
  */
-GOL.prototype.RunPlayer = function(gol) {
+GOL.prototype.RunPlayer = function() {
 
 	if(gol.p_shield_cooldown > 0) {
 		gol.p_shield_cooldown -= 1;
 	} else { gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 19, 19, 0, 0.2, 0.4); }	
 
-
+	var hit = 0;
 		
-
-	//hitcheck / health
-	gol.p_hit = gol.player_hitbox();
-	var hit = 0;	
-	for(var i = 0; i < 13*13; i++) {
-		hit += gol.p_hit[i];
-	}
+	if(gol.hitmod == 0) {
+		//hitcheck / health
+		gol.p_hit = gol.player_hitbox();
+			
+		for(var i = 0; i < 13*13; i++) {
+			hit += gol.p_hit[i];
+		}
 	
-	//do damage
-	if(hit > 0) {gol.p_health -= hit + 6; gol.p_fuel -= hit;}
-	if(hit > ((13*13)/2)) {gol.p_health -= hit/2;}
+		//do damage
+		if(hit > 0) {gol.p_health -= (hit*gol.hitrate + 30); gol.p_fuel -= (hit+10);}
+		if(hit > ((13*13)/2) ) {gol.p_health -= hit/2;}
 	
-	//Shield (deletes impacted objects)
-	/*if(hit > 60 && gol.p_power > 500 && gol.p_shield_cooldown == 0) {
-		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 45, 0, 0, 1, 1);
-		gol.p_power -= 150;
-		gol.p_fuel -= 100;
-		gol.p_shield_cooldown = 5;
-	} else */
-
-	if(!gol.space_down && hit > 0 && gol.p_shield_cooldown == 0) {
-		gol.p_power -= 60;
-		gol.p_shield_cooldown = 10;
-		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 23, 23, 0, 1, 1)
-		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 15, 0, 0, 1, 1);
+		//Shield (deletes impacted objects)
+		if(!gol.space_down && hit > 0 && gol.p_shield_cooldown == 0) {
+			gol.p_power -= 60;
+			gol.p_shield_cooldown = 10;
+			gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 23, 23, 0, 1, 1)
+			gol.placeBoth(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, 15, 0, 0, 1, 1);
+		}
 	}
+
+	gol.hitmod = (gol.hitmod + 1) % gol.hitrate;
 
 
 	//if(hit != 0) {alert(hit + " / " + (13*13));}
@@ -769,16 +773,9 @@ GOL.prototype.RunPlayer = function(gol) {
 
 
 
-	if((gol.p_move_L + gol.p_move_R != 0) || (gol.p_move_U + gol.p_move_D != 0)) { gol.p_fuel -= 4; }
+	if((gol.p_move_L + gol.p_move_R != 0) || (gol.p_move_U + gol.p_move_D != 0)) { gol.p_fuel -= 6; }
 	
-	if(gol.p_fuel > 650) {
-		gol.p_speed = 3;
-		if(gol.p_move_R != 0) { gol.p_move_R = 3; }
-		if(gol.p_move_L != 0) { gol.p_move_L = -3; }
-		if(gol.p_move_U != 0) { gol.p_move_U = 3; }
-		if(gol.p_move_D != 0) { gol.p_move_D = -3; }
-	}
-	if(gol.p_fuel <= 650) {
+	if(gol.p_fuel >= 200) {
 		gol.p_speed = 2;
 		if(gol.p_move_R != 0) { gol.p_move_R = 2; }
 		if(gol.p_move_L != 0) { gol.p_move_L = -2; }
@@ -802,7 +799,7 @@ GOL.prototype.RunPlayer = function(gol) {
 
 	if(gol.p_power <= 0) {
 		gol.can_shoot = false; 
-		gol.p_shield_cooldown = 30; 
+		if(gol.space_down) {gol.p_shield_cooldown = 30;} 
 		gol.space_down = false;
 	}
 
@@ -810,7 +807,7 @@ GOL.prototype.RunPlayer = function(gol) {
 
 
 	//regen
-	if(gol.p_fuel < 1000) {gol.p_fuel += 3;}
+	if(gol.p_fuel < 1000) {gol.p_fuel += 4;}
 	if(gol.p_health < gol.p_health_max) {gol.p_health += 3;}
 	if(gol.p_power < 1000) {gol.p_power += 4;}
 
@@ -833,17 +830,17 @@ GOL.prototype.RunPlayer = function(gol) {
 	gol.place_cell_rend((gol.statesize[0]/2), 36+16, (gol.statesize[0]/4)*(gol.p_power/1000), 12, 0, 1, 1)
 
 	if(!gol.bullet_exists){
-		if(gol.can_shoot) {if(gol.l_click && gol.bullet_life == 0) {gol.create_bullet();}}          //gol.place_cell_world(gol.mouse_x, gol.mouse_y, 33, 0);
-		if(gol.r_click && gol.bullet_life == 0) {gol.create_melee();}       						//gol.place_cell_world(gol.mouse_x, gol.mouse_y, 17, 1);
+		if(gol.can_shoot) {if(!gol.r_click && gol.l_click && gol.bullet_life == 0) {gol.create_bullet();}}          //gol.place_cell_world(gol.mouse_x, gol.mouse_y, 33, 0);
+		if(!gol.l_click && gol.r_click && gol.bullet_life == 0) {gol.create_melee();}       						//gol.place_cell_world(gol.mouse_x, gol.mouse_y, 17, 1);
 	}
 
 	if(gol.space_down && gol.p_shield_cooldown == 0) {
-		gol.placeBoth(gol.statesize[0]/2, gol.statesize[1]/2, 100*(gol.p_power/1000)+13, 0, 0, 1, 1);
+		gol.placeBoth(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, 100*(gol.p_power/1000)+13, 0, 0, 1, 1);
 		gol.p_power -= 30;
 	}
 				
 	if(gol.p_health <= 0) {
-		alert("You did not survive, this time.");
+		//alert("You did not survive, this time.");
 		gol.setRandom();
 		gol.player_reset();
 	}

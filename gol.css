@@ -1,5 +1,5 @@
 body {
-    margin: 10px auto;
+    margin: 16px auto;
     width: 512px;
     background: black;
     font-family: sans-serif;
@@ -11,7 +11,7 @@ body {
 
 h1, h2 {
     color: White;
-    text-align: center;
+    text-align: Left;
     margin: 0;
 }
 
@@ -20,7 +20,7 @@ h2 {
 }
 
 canvas {
-    border: 1px solid #333;
+    border: 3px solid #333;
 }
 
 div.description {
