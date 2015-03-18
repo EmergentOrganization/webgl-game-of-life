@@ -87,7 +87,7 @@ function GOL(canvas, scale) {
     this.programs = {
         copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
         gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
-        /*evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
+        evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
         orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
         MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
         MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-1.frag'),
@@ -97,7 +97,6 @@ function GOL(canvas, scale) {
         Feeders:  igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
         MiniAtom:  igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
         AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
-        */
         ShiftCells:  igloo.program('glsl/quad.vert', 'glsl/ShiftCells.frag'),
         PlaceCells:  igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag')
     };
