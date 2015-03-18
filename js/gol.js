@@ -616,12 +616,12 @@ GOL.prototype.start = function(canvas) {
 				gol.step();
 			}
 
-        	gol.Deflect();
-			gol.animate_bullets();
-			gol.enm_animate_bullets();
+        	//gol.Deflect();
+			//gol.animate_bullets();
+			//gol.enm_animate_bullets();
 			gol.swap_rend();
-			gol.RunPlayer();
-			gol.RunEnemy();
+			//gol.RunPlayer();
+			//gol.RunEnemy();
 			gol.draw();	
 
 
