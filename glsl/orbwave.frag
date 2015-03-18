@@ -1,4 +1,6 @@
+#ifdef GL_ES
 precision mediump float;
+#endif
 
 uniform sampler2D state;
 uniform vec2 scale;
@@ -378,10 +380,10 @@ void main() {
 
 		sum = sum + sumTwo;
 
-	if(sum >= 180) 					{gl_FragColor = vec4(0.0, 0.9, 0.6, 1.0);}
-	if(sum >= 180 && sum <= 200) 	{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
-	if(sum >= 130 && sum <= 140) 	{gl_FragColor = vec4(1.0, 0.4, 0.0, 1.0);}
-	if(sum >= 35 && sum <= 120) 	{gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);}
-	if(sum >= 60 && sum <= 70) 		{gl_FragColor = vec4(1.0, 0.8, 0.8, 1.0);}
+	if(sum >= 180) 					{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+	if(sum >= 180 && sum <= 200) 	{gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
+	if(sum >= 130 && sum <= 140) 	{gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
+	if(sum <= 120) 					{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+	if(sum >= 60 && sum <= 70) 		{gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}
 
 }
