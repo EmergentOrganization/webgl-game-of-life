@@ -87,16 +87,16 @@ function GOL(canvas, scale) {
     this.programs = {
         copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
         gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
-        evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
-        orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
-        MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
-        MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-1.frag'),
-        ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
-        Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
-        Tether:  igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
-        Feeders:  igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
-        MiniAtom:  igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
-        AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
+        //evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
+        //orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
+        //MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
+        //MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-1.frag'),
+        //ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
+        //Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
+        //Tether:  igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
+        //Feeders:  igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
+        //MiniAtom:  igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
+        //AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
         ShiftCells:  igloo.program('glsl/quad.vert', 'glsl/ShiftCells.frag'),
         PlaceCells:  igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag')
     };
@@ -104,7 +104,12 @@ function GOL(canvas, scale) {
 	this.rule_array = new Array(9);
 	//this.rule_seeds = new Array(9);
 
-	this.rule_array[0] = this.programs.MiniAtomConway;
+
+	this.rule_array[0] = this.programs.gol;
+
+
+
+	/*this.rule_array[0] = this.programs.MiniAtomConway;
 	this.rule_array[1] = this.programs.gol;
 	this.rule_array[2] = this.programs.evo;
 	this.rule_array[3] = this.programs.Tether;
@@ -113,7 +118,7 @@ function GOL(canvas, scale) {
 	this.rule_array[6] = this.programs.Microbes;
 	this.rule_array[7] = this.programs.orbw;
 	//this.rule_array[8] = this.programs.ManyRings;
-	this.rule_array[8] = this.programs.Feeders;
+	this.rule_array[8] = this.programs.Feeders;*/
 
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
@@ -605,18 +610,18 @@ GOL.prototype.start = function(canvas) {
 			
 
 
-			gol.shift();
+			//gol.shift();
 
 			for (var i = 0; i < 1; i++) {
 				gol.step();
 			}
 
-        	gol.Deflect();
-			gol.animate_bullets();
-			gol.enm_animate_bullets();
+        	//gol.Deflect();
+			//gol.animate_bullets();
+			//gol.enm_animate_bullets();
 			gol.swap_rend();
-			gol.RunPlayer();
-			gol.RunEnemy();
+			//gol.RunPlayer();
+			//gol.RunEnemy();
 			gol.draw();	
 
 
