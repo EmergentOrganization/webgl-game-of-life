@@ -82,6 +82,11 @@ function GOL(canvas, scale) {
 	this.p_s_burstcooldown = 30;
 
 	this.active_rule = 0;
+
+	this.wp_x=0;
+	this.wp_y=0;
+	this.wp_jumptime = 0;
+	this.wp_jumptime_max = 0;
 	
     gl.disable(gl.DEPTH_TEST);
     this.programs = {
@@ -497,7 +502,7 @@ GOL.prototype.animate_bullets = function() {
 		gol.bullet_life += 1;
 		
 		if(gol.bullet_life >= lifespan) {	
-			gol.bullet_size = 37;
+			gol.bullet_size = 43;
 			gol.bullet_val = 1;
 			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 0, 0, 1, 0);
 			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size/3, 1, 1, 0, 0);
@@ -523,7 +528,26 @@ GOL.prototype.animate_bullets = function() {
     return this;
 };
 
+		/*var bx=0;
+		var by=0;
+		var b_rand_max = 32;
+		var b_cone = ((gol.bullet_life/lifespan)*b_rand_max)*/
+	
+		/*for(var i = 0; i < 6; i++) {
+			bx = gol.bullet_x + Math.floor((Math.random()*b_cone)-(b_cone/2));
+			by = gol.bullet_y + Math.floor((Math.random()*b_cone)-(b_cone/2));
 
+			if(gol.bullet_life >= lifespan) {	
+				gol.bullet_size = 43;
+				gol.bullet_val = 1;
+				gol.placeBoth(bx, by, gol.bullet_size, 0, 0, 1, 0);
+				gol.placeBoth(bx, by, gol.bullet_size/3, 1, 1, 0, 0);
+			} else {
+				gol.placeBoth(bx, by, gol.bullet_size, 1, gol.bullet_val, 1, 0);
+				gol.placeBoth(bx-(gol.b_targ_x/lifespan/2), by-(gol.b_targ_y/lifespan/2), gol.bullet_size, 1, gol.bullet_val, 1, 0);
+			}
+
+		}*/
 
 GOL.prototype.enm_animate_bullets = function() {
 	var lifespan = gol.enm_bullet_life_max;
@@ -859,7 +883,7 @@ GOL.prototype.player_reset = function() {
 	this.enm_can_shoot = true;
 	this.enm_bullet_exists = false;
 	this.enemy_cooldown = 250;
-
+	gol.wp_jumptime = 0;
 	return this;
 };
 
@@ -879,11 +903,41 @@ GOL.prototype.RunEnemy = function() {
 }
 
 
+GOL.prototype.health_waypoint = function() {
+	if(gol.wp_jumptime <= 0) {
+		gol.wp_jump();	
+		gol.wp_jumptime = Math.floor(Math.random()*200)+300;
+		gol.wp_jumptime_max = gol.wp_jumptime;
+	}	else {
+
+		gol.wp_x -= gol.p_move_x;
+		gol.wp_y -= gol.p_move_y;
+		gol.wp_jumptime -= 1;
+
+		var col = gol.wp_jumptime/gol.wp_jumptime_max;
+
+		gol.place_cell_rend(gol.wp_x, gol.wp_y, 19, 19, 0.6, 0, 0.4)
+		gol.place_cell_rend(gol.wp_x, gol.wp_y, 13, 13, col, 1-col, 1-col)
+		gol.place_cell_world(gol.wp_x, gol.wp_y, 69, 69, 1, 0, 0);
+		gol.place_cell_world(gol.wp_x, gol.wp_y, 65, 65, 0, 0, 0);
+	}
+	
+}
+
+
+GOL.prototype.wp_jump = function() {
+	gol.wp_x = Math.random()*gol.statesize[0];
+	gol.wp_y = Math.random()*gol.statesize[1];
+}
+
 
 /**
  * Player controller
  */
 GOL.prototype.RunPlayer = function() {
+
+	gol.health_waypoint();
+
 
 	if(gol.p_shield_cooldown > 0) {
 		gol.p_shield_cooldown -= 1;
@@ -900,7 +954,7 @@ GOL.prototype.RunPlayer = function() {
 		}
 	
 		//do damage
-		if(hit > 0) {gol.p_health -= (hit*gol.hitrate + 30); gol.p_fuel -= (hit+10);}
+		if(hit > 0) {gol.p_health -= (hit*gol.hitrate + 25); gol.p_fuel -= (hit+10);}
 		if(hit > ((gol.player_size*gol.player_size)/2) ) {gol.p_health -= hit/2;}
 	
 		//Shield (deletes impacted objects)
