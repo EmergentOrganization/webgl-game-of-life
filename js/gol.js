@@ -610,18 +610,18 @@ GOL.prototype.start = function(canvas) {
 			
 
 
-			//gol.shift();
+			gol.shift();
 
 			for (var i = 0; i < 1; i++) {
 				gol.step();
 			}
 
-        	//gol.Deflect();
-			//gol.animate_bullets();
-			//gol.enm_animate_bullets();
+        	gol.Deflect();
+			gol.animate_bullets();
+			gol.enm_animate_bullets();
 			gol.swap_rend();
-			//gol.RunPlayer();
-			//gol.RunEnemy();
+			gol.RunPlayer();
+			gol.RunEnemy();
 			gol.draw();	
 
 
