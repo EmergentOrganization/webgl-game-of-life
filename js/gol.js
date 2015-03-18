@@ -610,7 +610,7 @@ GOL.prototype.start = function(canvas) {
 			
 
 
-			//gol.shift();
+			gol.shift();
 
 			for (var i = 0; i < 1; i++) {
 				gol.step();
