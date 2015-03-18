@@ -1,6 +1,6 @@
 body {
-    margin: 10px auto;
-    width: 1024px;
+    margin: 16px auto;
+    width: 512px;
     background: black;
     font-family: sans-serif;
     user-select: none;
@@ -10,8 +10,8 @@ body {
 }
 
 h1, h2 {
-    color: salmon;
-    text-align: center;
+    color: White;
+    text-align: Left;
     margin: 0;
 }
 
@@ -20,11 +20,11 @@ h2 {
 }
 
 canvas {
-    border: 1px solid #333;
+    border: 3px solid #333;
 }
 
 div.description {
-    color: salmon;
+    color: White;
     width: 600px;
     margin: 0px auto;
     text-indent: 1em;
@@ -38,18 +38,14 @@ div.description {
 .fps {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 512ddd;
     color: #444;
-    font-size: 12px;
-}
-
-ul li span {
-    display: inline-block;
+    font-size: 18px;
 }
 
 ul {
     list-style-type: none;
-    color: pink;
+    color: White;
 }
 
 ul li .input {
