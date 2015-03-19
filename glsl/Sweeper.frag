@@ -83,7 +83,8 @@ void main() {
 	int sum_one = s1;
 
 	if(sum_one >= 39) 		{gl_FragColor = vec4(0.0, 0.1, 0.1, 1.0);}
-	if(sum_one >= 21 && sum_one <= 32) 		{gl_FragColor = vec4(1.0, 0.3, 0.0, 1.0);}
+	if(sum_one >= 21 && sum_one <= 32) 		{gl_FragColor = vec4(1.0, 0.8, 0.0, 1.0);}
+	if(sum_one >= 26 && sum_one <= 30) 		{gl_FragColor = vec4(1.0, 0.2, 0.0, 1.0);}
 	if(sum_one <= 20) 		{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
 
 
