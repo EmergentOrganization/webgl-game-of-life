@@ -49,7 +49,7 @@ function GOL(canvas, scale) {
 	this.bullet_y = this.statesize[1]/2;
 	this.bullet_exists = false;
 	this.bullet_life = 0;
-	this.bullet_size = 9;
+	this.bullet_size = 12;
 	this.bullet_val = 0;
 	this.b_targ_x = 0;
 	this.b_targ_y = 0;
@@ -66,7 +66,7 @@ function GOL(canvas, scale) {
 	this.enm_bullet_val = 1;
 	this.enm_b_targ_x = this.statesize[0]/2;
 	this.enm_b_targ_y = this.statesize[1]/2;
-	this.enemy_cooldown = 250;
+	this.enemy_cooldown = 180 + Math.floor(Math.random()*350);
 
 	this.l_click = false;
 	this.r_click = false;
@@ -465,7 +465,7 @@ GOL.prototype.create_bullet = function() {
 		this.bullet_x = (this.statesize[0]/this.scale/2);
 		this.bullet_y = (this.statesize[1]/this.scale/2);
 		this.bullet_exists = true;
-		gol.bullet_size = 9;
+		gol.bullet_size = 12;
 		gol.bullet_life = 0;
 		gol.bullet_val = 0;
 		gol.p_power -= cost;
@@ -478,15 +478,21 @@ GOL.prototype.create_bullet = function() {
 GOL.prototype.enm_create_bullet = function() {
 	gol.enm_b_start_x = Math.random()*this.statesize[0];
 	gol.enm_b_start_y = Math.random()*this.statesize[1];
-	this.enm_bullet_x = gol.enm_b_start_x;
-	this.enm_bullet_y = gol.enm_b_start_y;
-	this.enm_bullet_exists = true;
-	gol.enm_bullet_size = (Math.random()*12)+3;
-	gol.enm_bullet_life_max = (Math.random()*100)+45;
-	gol.enm_bullet_life = 0;
-	gol.enm_bullet_val = 1;
-	gol.enm_b_targ_x = (this.statesize[0]/2);
-	gol.enm_b_targ_y = (this.statesize[1]/2);
+
+	if(!gol.cpu_hit_test(this.statesize[0]/2, gol.enm_b_start_x, this.statesize[1]/2, gol.enm_b_start_y, 128, 1)) {
+
+		this.enm_bullet_x = gol.enm_b_start_x;
+		this.enm_bullet_y = gol.enm_b_start_y;
+		this.enm_bullet_exists = true;
+		gol.enm_bullet_size = (Math.random()*17)+4;
+		gol.enm_bullet_life_max = (Math.random()*100)+45;
+		gol.enm_bullet_life = 0;
+		gol.enm_bullet_val = 1;
+		gol.enm_b_targ_x = (this.statesize[0]/2);
+		gol.enm_b_targ_y = (this.statesize[1]/2);
+	} else {
+		gol.enm_create_bullet();
+	}
 	
     return this;
 };
@@ -518,7 +524,7 @@ GOL.prototype.animate_bullets = function() {
 		gol.bullet_life += 1;
 		
 		if(gol.bullet_life >= lifespan) {	
-			gol.bullet_size = 43;
+			gol.bullet_size = 47;
 			gol.bullet_val = 1;
 			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size, 0, 0, 1, 0);
 			gol.placeBoth(gol.bullet_x, gol.bullet_y, gol.bullet_size/4, 1, 1, 0, 0);
@@ -598,7 +604,7 @@ GOL.prototype.Deflect = function() {
 		if(gol.cpu_hit_test(this.statesize[0]/2, gol.enm_bullet_x, this.statesize[1]/2, gol.enm_bullet_y, gol.p_s_burstsize*(gol.p_power/1000), gol.enm_bullet_size)) {
 			gol.enm_can_shoot = true;
 			gol.enm_bullet_exists = false;
-			gol.enemy_cooldown = 60; //gol.enm_bullet_life_max + 90 + (Math.random()*40)
+			gol.enemy_cooldown = Math.floor(Math.random()*150) + 20; //gol.enm_bullet_life_max + 90 + (Math.random()*40)
 			gol.game_score += 200;
 		}
 	}	
@@ -607,16 +613,17 @@ GOL.prototype.Deflect = function() {
 		if(gol.cpu_hit_test(gol.enm_bullet_x, gol.bullet_x, gol.enm_bullet_y, gol.bullet_y, gol.enm_bullet_size, gol.bullet_size)) {
 			gol.enm_can_shoot = true;
 			gol.enm_bullet_exists = false;
-			gol.enemy_cooldown = 60; //gol.enm_bullet_life_max + 90 + (Math.random()*40);
+			gol.enemy_cooldown = Math.floor(Math.random()*150) + 20; //gol.enm_bullet_life_max + 90 + (Math.random()*40);
 			gol.game_score += 100;
 		}
 	}
 
-	
-	if(gol.cpu_hit_test(gol.enm_bullet_x, gol.wp_x, gol.enm_bullet_y, gol.wp_y, gol.enm_bullet_size, 69)) {
-		gol.enm_can_shoot = true;
-		gol.enm_bullet_exists = false;
-		gol.enemy_cooldown = 20;
+	if(gol.enm_bullet_exists) {
+		if(gol.cpu_hit_test(gol.enm_bullet_x, gol.wp_x, gol.enm_bullet_y, gol.wp_y, gol.enm_bullet_size, 69)) {
+			gol.enm_can_shoot = true;
+			gol.enm_bullet_exists = false;
+			gol.enemy_cooldown = Math.floor(Math.random()*30)+10;
+		}
 	}
 
     return this;
@@ -658,6 +665,7 @@ GOL.prototype.start = function(canvas) {
 			gol.shift();
 
 			for (var i = 0; i < 1; i++) {
+				//if((gol.p_move_L + gol.p_move_R != 0) || (gol.p_move_U + gol.p_move_D != 0)) {gol.step();}
 				gol.step();
 			}
 			
@@ -909,7 +917,7 @@ GOL.prototype.player_reset = function() {
 	gol.p_s_burstcooldown = 0;
 	this.enm_can_shoot = true;
 	this.enm_bullet_exists = false;
-	this.enemy_cooldown = 250;
+	this.enemy_cooldown = 180 + Math.floor(Math.random()*350);
 	gol.wp_jumptime = 0;
 	gol.game_score = 0;
 	return this;
@@ -924,7 +932,7 @@ GOL.prototype.RunEnemy = function() {
 	}
 
 	if(gol.enemy_cooldown <= 0) {
-		gol.enemy_cooldown = 180;
+		gol.enemy_cooldown = 200 + Math.floor(Math.random()*300);
 		gol.enm_create_bullet();
 	}
 }
@@ -933,18 +941,26 @@ GOL.prototype.RunEnemy = function() {
 GOL.prototype.health_waypoint = function() {
 	if(gol.wp_jumptime <= 0) {
 		gol.wp_jump();	
-		gol.wp_jumptime = Math.floor(Math.random()*500)+300;
+		gol.wp_jumptime = Math.floor(Math.random()*500)+600;
 		gol.wp_jumptime_max = gol.wp_jumptime;
 	}	else {
 
+
 		gol.wp_x -= gol.p_move_x;
 		gol.wp_y -= gol.p_move_y;
+		
+		if(gol.wp_x > this.statesize[0]) { gol.wp_x = gol.wp_x % this.statesize[0]; }	
+		if(gol.wp_y > this.statesize[1]) { gol.wp_y = gol.wp_y % this.statesize[1]; }	
+
+		if(gol.wp_x < 0) { gol.wp_x = (this.statesize[0] - Math.abs(gol.wp_x)) % this.statesize[0]; }	
+		if(gol.wp_y < 0) { gol.wp_y = (this.statesize[1] - Math.abs(gol.wp_y)) % this.statesize[1]; }	
+		
 		gol.wp_jumptime -= 1;
 
 		var col = gol.wp_jumptime/gol.wp_jumptime_max;
 
 		gol.placeBoth(gol.wp_x, gol.wp_y, 69, 1, 1, 0, 0);
-		gol.placeBoth(gol.wp_x, gol.wp_y, 65, 0, 0, 0, 0);
+		gol.placeBoth(gol.wp_x, gol.wp_y, 65, 0, 0.0, 0.15, 0.15);
 
 		gol.place_cell_rend(gol.wp_x, gol.wp_y, 25, 25, 0.6, 0, 0.4)
 		gol.place_cell_rend(gol.wp_x, gol.wp_y, 21, 21, 1-col, col, col)
@@ -953,10 +969,10 @@ GOL.prototype.health_waypoint = function() {
 
 	if(gol.cpu_hit_test(gol.statesize[0]/2, gol.wp_x, gol.statesize[1]/2, gol.wp_y, 1, 69)) {
 		gol.p_health += 20;
-		gol.p_power += 2;
+		gol.p_power += 4;
 		gol.p_fuel += 2;
 		gol.game_score += 1;
-		gol.wp_jumptime -= 1;
+		gol.wp_jumptime -= 2;
 	}
 
 	
@@ -966,6 +982,10 @@ GOL.prototype.health_waypoint = function() {
 GOL.prototype.wp_jump = function() {
 	gol.wp_x = Math.random()*gol.statesize[0];
 	gol.wp_y = Math.random()*gol.statesize[1];
+
+	if(gol.cpu_hit_test(this.statesize[0]/2, gol.wp_x, this.statesize[1]/2, gol.wp_y, 128, 1)) {
+		gol.wp_jump();
+	}
 }
 
 GOL.prototype.cpu_hit_test = function(x1, x2, y1, y2, s1, s2) {
@@ -999,7 +1019,7 @@ GOL.prototype.RunPlayer = function() {
 		}
 	
 		//do damage
-		if(hit > 0) {gol.p_health -= (hit*gol.hitrate + 25); gol.p_fuel -= (hit+10);}
+		if(hit > 0) {gol.p_health -= (hit*gol.hitrate + 20); gol.p_fuel -= (hit+10);}
 		if(hit > ((gol.player_size*gol.player_size)/2) ) {gol.p_health -= hit/2;}
 	
 		//Shield (deletes impacted objects)
