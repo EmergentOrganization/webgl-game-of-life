@@ -1136,7 +1136,7 @@ GOL.prototype.run_waypoints = function() {
 			gol.waypoints[i][3]-= 1;
 
 			if(gol.waypoints[i][3] <= 0) {
-				gol.waypoint_cooldown = 120;
+				gol.waypoint_cooldown = 360;
 				gol.ar_kill(gol.waypoints, i);
 			}
 
