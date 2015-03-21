@@ -755,18 +755,18 @@ GOL.prototype.save_score = function() {
 GOL.prototype.load_score = function() {
 	
 	var current_list = JSON.parse ( localStorage.getItem('WebGoL-Highscores'));
-	//console.log("Final: " + current_list);
 
-	//alert("Final Score: " + current_list[current_list.length-1]);	
+	if(current_list != null) {
 
-	var s = "";
-	for(var i = 0; i < current_list.length; i++) {
-		s = s + "[" + current_list[i] + "]<br>";
-	}
+		var s = "";
+		for(var i = 0; i < current_list.length; i++) {
+			s = s + "[" + current_list[i] + "]<br>";
+		}
 
-	var newWindow = window.open();
-	newWindow.document.write(s);
-	newWindow.document.close();
+		var newWindow = window.open();
+		newWindow.document.write(s);
+		newWindow.document.close();
+	} else {alert("No highscores found");}
 
     return this;
 };
