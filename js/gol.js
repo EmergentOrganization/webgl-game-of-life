@@ -693,7 +693,12 @@ function Controller(gol) {
 		        gol.load_score();
 		        break;    
 			case 32: /* space */
-				if(gol.p_s_burstcooldown <= 0 && !gol.space_down) {gol.space_down = true;}
+				if(gol.p_s_burstcooldown <= 0 && !gol.space_down) {
+					gol.space_down = true;
+			 		var sound = new Audio("sounds/ShieldBurst.wav");
+					sound.volume = 0.2;
+					sound.play();
+				}
 		        break;
 		};
     });
@@ -968,7 +973,7 @@ GOL.prototype.run_hittests = function() {
 	for(var i = 0; i < gol.bullets.length; i++) {
 		if(gol.bullets.length > 0 && gol.bullets[i] != null) {
 			if(gol.bullets[i][9] == 1 && gol.space_down) {
-				if(gol.cpu_hit_test(this.statesize[0]/2, gol.bullets[i][0], this.statesize[1]/2, gol.bullets[i][1], gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, gol.bullets[i][2])) {
+				if(gol.cpu_hit_test(this.statesize[0]/2, gol.bullets[i][0], this.statesize[1]/2, gol.bullets[i][1], (gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, gol.bullets[i][2])) {
 					gol.ar_kill(gol.bullets, i);
 					hit_bul_sound = true;
 				}
@@ -980,7 +985,7 @@ GOL.prototype.run_hittests = function() {
 	//enemy collision with shield burst
 	for(var i = 0; i < gol.enemies.length; i++) {
 		if(gol.enemies.length > 0 && gol.enemies[i] != null && gol.space_down) {
-			if(gol.cpu_hit_test(this.statesize[0]/2, gol.enemies[i][0], this.statesize[1]/2, gol.enemies[i][1], gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, gol.enemies[i][2])) {
+			if(gol.cpu_hit_test(this.statesize[0]/2, gol.enemies[i][0], this.statesize[1]/2, gol.enemies[i][1], (gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, gol.enemies[i][2])) {
 				gol.enemies[i][3] -= 10;
 			}
 		}
@@ -999,7 +1004,7 @@ GOL.prototype.run_hittests = function() {
 
 	if(hit_enemy_sound) {
 		var sound = new Audio("sounds/EnemyHit.wav");
-		sound.volume = 0.05;
+		sound.volume = 0.03;
 		sound.play();
 	}
 	if(hit_wp_sound) {
@@ -1480,22 +1485,31 @@ GOL.prototype.run_player = function() {
 			}
 		}         
 		
-		if((!gol.l_click || gol.melee_on) && gol.r_click) {gol.create_melee(); gol.p_power -= 6}       		
+		if((!gol.l_click || gol.melee_on) && gol.r_click) {
+			gol.create_melee(); 
+			gol.p_power -= 6;
+			var sound = new Audio("sounds/Melee.wav");
+			sound.volume = 0.05;
+			sound.play();
+		}      		
 		
 		if(!gol.l_click && gol.r_click && !gol.melee_on) {gol.p_power -= 50; gol.melee_on = true;}       		
 		
 		if(gol.l_click && gol.r_click && gol.p_power >= 30 && gol.melee_on && gol.place_barrier_cooldown <= 0) {
 			gol.create_barrier((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), gol.barrier_size, gol.barrier_life_max); 
 			gol.place_barrier_cooldown = 5;
-			gol.p_power -= 35;
+			gol.p_power -= 35;					
+			var sound = new Audio("sounds/CreateWall.wav");
+			sound.volume = 0.18;
+			sound.play();
 		}
 	}
 
 	
 	//Shield burst attack
 	if(gol.space_down) {
-		gol.placeBoth(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, 0, 0, 1, 1);
-		gol.place_cell_rend(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, (gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size)*0.85, (gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size)*0.85, 0.9, 0.9, 1)
+		gol.placeBoth(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, (gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, 0, 0, 1, 1);
+		gol.place_cell_rend(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size)*0.85, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size)*0.85, 0.9, 0.9, 1)
 		gol.p_power -= 30;
 	}
 
