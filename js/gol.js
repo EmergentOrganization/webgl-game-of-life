@@ -87,7 +87,7 @@ function GOL(canvas, scale) {
 	this.enemy_cooldown = 600;
 
 	//waypoint creation
-	this.waypoint_cooldown = 0;
+	this.waypoint_cooldown = 900;
 
 	//Placeable Barrier object
 	this.barrier_size = 18;
@@ -841,6 +841,7 @@ GOL.prototype.run_hittests = function() {
 	}
 
 	//Bullet collision with Waypoints
+	var hit_wp_sound = false;
 	for(var i = 0; i < gol.waypoints.length; i++) {
 		for(var j = 0; j < gol.bullets.length; j++) {
 			if(gol.waypoints.length > 0 && gol.waypoints[i] != null) {
@@ -849,6 +850,7 @@ GOL.prototype.run_hittests = function() {
 						if(gol.cpu_hit_test(gol.bullets[j][0], gol.waypoints[i][0], gol.bullets[j][1], gol.waypoints[i][1], gol.bullets[j][2], gol.waypoints[i][2])) {
 							gol.waypoints[i][3] -= (gol.bullets[j][2]*10)+20;
 							gol.ar_kill(gol.bullets, j);
+							hit_wp_sound = true;
 						}
 					}
 				}
@@ -856,7 +858,20 @@ GOL.prototype.run_hittests = function() {
 		}
 	}
 
+	//enemy collision with Waypoints
+	for(var i = 0; i < gol.waypoints.length; i++) {
+		for(var j = 0; j < gol.enemies.length; j++) {
+			if(gol.waypoints.length > 0 && gol.waypoints[i] != null) {
+				if(gol.enemies.length > 0 && gol.enemies[j] != null) {
+					if(gol.cpu_hit_test(gol.enemies[j][0], gol.waypoints[i][0], gol.enemies[j][1], gol.waypoints[i][1], gol.enemies[j][2], gol.waypoints[i][2])) {
+						gol.ar_kill(gol.enemies, j);
+					}
+				}
+			}
+		}
+	}
 	//Bullet collision with bullet
+	var hit_bul_sound = false;
 	for(var i = 0; i < gol.bullets.length; i++) {
 		for(var j = 0; j < gol.bullets.length; j++) {
 			if(gol.bullets.length > 0 && gol.bullets[i] != null) {
@@ -866,12 +881,14 @@ GOL.prototype.run_hittests = function() {
 							if(gol.cpu_hit_test(gol.bullets[j][0], gol.bullets[i][0], gol.bullets[j][1], gol.bullets[i][1], gol.bullets[j][2], gol.bullets[i][2]+gol.bullets[i][10])) {
 								gol.bullets[j] = null;
 								gol.game_score += 20;
+								hit_bul_sound = true;
 							}
 						} else {
 							if(gol.cpu_hit_test(gol.bullets[j][0], gol.bullets[i][0], gol.bullets[j][1], gol.bullets[i][1], gol.bullets[j][2], gol.bullets[i][2])) {
 								gol.bullets[i] = null;
 								gol.bullets[j] = null;
 								gol.game_score += 10;
+								hit_bul_sound = true;
 							}
 						}
 					}
@@ -882,6 +899,7 @@ GOL.prototype.run_hittests = function() {
 
 
 	//Bullet collision with enemy
+	var hit_enemy_sound = false;
 	for(var i = 0; i < gol.bullets.length; i++) {
 		for(var j = 0; j < gol.enemies.length; j++) {
 			if(gol.bullets.length > 0 && gol.bullets[i] != null) {
@@ -890,11 +908,13 @@ GOL.prototype.run_hittests = function() {
 						if(gol.bullets[i][3] <= 1 && gol.bullets[i][9] == 0) {
 							if(gol.cpu_hit_test(gol.enemies[j][0], gol.bullets[i][0], gol.enemies[j][1], gol.bullets[i][1], gol.enemies[j][2], gol.bullets[i][2]+gol.bullets[i][10])) {
 								gol.enemies[j][3] -= 15;
+								hit_enemy_sound = true;
 							}
 						} else {
 							if(gol.cpu_hit_test(gol.enemies[j][0], gol.bullets[i][0], gol.enemies[j][1], gol.bullets[i][1], gol.enemies[j][2], gol.bullets[i][2])) {
 								gol.ar_kill(gol.bullets, i);
 								gol.enemies[j][3] -= 15;
+								hit_enemy_sound = true;
 							}
 						}
 					}
@@ -910,8 +930,9 @@ GOL.prototype.run_hittests = function() {
 				if(gol.barriers.length > 0 && gol.barriers[j] != null) {
 					if(gol.bullets[i][9] == 1) {
 						if(gol.cpu_hit_test(gol.barriers[j][0], gol.bullets[i][0], gol.barriers[j][1], gol.bullets[i][1], gol.barriers[j][2], gol.bullets[i][2])) {
-							gol.barriers[j][3] -= (gol.bullets[i][2]*50)+20;
+							gol.barriers[j][3] -= (gol.bullets[i][2]*75)+20;
 							gol.ar_kill(gol.bullets, i);
+							hit_bul_sound = true;
 						}
 					}
 				}
@@ -919,24 +940,25 @@ GOL.prototype.run_hittests = function() {
 		}
 	}
 
+	/*//Bullet collision with melee
+	for(var i = 0; i < gol.bullets.length; i++) {
+		if(gol.bullets.length > 0 && gol.bullets[i] != null) {
+			if(gol.bullets[i][9] == 1 && gol.melee_on) {
+				if(gol.cpu_hit_test((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/4), gol.bullets[i][0], (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/4), gol.bullets[i][1], (22*(gol.p_power/1000))+12, gol.bullets[i][2])) {
+					gol.ar_kill(gol.bullets, i);
+					hit_bul_sound = true;
+				}
+			}
+		}
+	}*/
+
 	//Bullet collision with melee
 	for(var i = 0; i < gol.bullets.length; i++) {
 		if(gol.bullets.length > 0 && gol.bullets[i] != null) {
 			if(gol.bullets[i][9] == 1 && gol.melee_on) {
 				if(gol.cpu_hit_test((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/4), gol.bullets[i][0], (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/4), gol.bullets[i][1], (22*(gol.p_power/1000))+12, gol.bullets[i][2])) {
 					gol.ar_kill(gol.bullets, i);
-					
-				}
-			}
-		}
-	}
-
-	//Bullet collision with shield burst
-	for(var i = 0; i < gol.bullets.length; i++) {
-		if(gol.bullets.length > 0 && gol.bullets[i] != null) {
-			if(gol.bullets[i][9] == 1 && gol.melee_on) {
-				if(gol.cpu_hit_test((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/4), gol.bullets[i][0], (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/4), gol.bullets[i][1], (22*(gol.p_power/1000))+12, gol.bullets[i][2])) {
-					gol.ar_kill(gol.bullets, i);
+					hit_bul_sound = true;
 				}
 			}
 		}
@@ -948,6 +970,7 @@ GOL.prototype.run_hittests = function() {
 			if(gol.bullets[i][9] == 1 && gol.space_down) {
 				if(gol.cpu_hit_test(this.statesize[0]/2, gol.bullets[i][0], this.statesize[1]/2, gol.bullets[i][1], gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, gol.bullets[i][2])) {
 					gol.ar_kill(gol.bullets, i);
+					hit_bul_sound = true;
 				}
 			}
 		}
@@ -973,6 +996,23 @@ GOL.prototype.run_hittests = function() {
 			}
 		}
 	}
+
+	if(hit_enemy_sound) {
+		var sound = new Audio("sounds/EnemyHit.wav");
+		sound.volume = 0.05;
+		sound.play();
+	}
+	if(hit_wp_sound) {
+		var sound = new Audio("sounds/WaypointHit.wav");
+		sound.volume = 0.1;
+		sound.play();
+	}
+	if(hit_bul_sound) {
+		var sound = new Audio("sounds/BulletBlock.wav");
+		sound.volume = 0.1;
+		sound.play();
+	}
+
 
 	return this;
 };
@@ -1019,6 +1059,9 @@ GOL.prototype.run_bullets = function() {
 				gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 1, gol.bullets[i][9], 1, 0);
 				gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], (gol.bullets[i][2]+gol.bullets[i][10])/4, 1, 1, 0, 0);
 				gol.ar_kill(gol.bullets, i);
+				var sound = new Audio("sounds/ShootDet.wav");
+				sound.volume = 0.1;
+				sound.play();
 			}
 		}
 	}
@@ -1059,8 +1102,8 @@ GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size) {
 };
 
 GOL.prototype.run_enemies = function() {
-	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1) {
-		gol.enemy_cooldown = 300;
+	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1 + Math.floor(gol.game_score/3000)) {
+		gol.enemy_cooldown = 100+Math.random()*300;
 
 		var rof = Math.random()*280+40;
 		var bul_rand = rof/320*20;
@@ -1076,6 +1119,9 @@ GOL.prototype.run_enemies = function() {
 			if(gol.enemies[i][5] <= 0) {
 				gol.enemies[i][5] = gol.enemies[i][6];
 				gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7], 150, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 0, 150, 32);						
+				var sound = new Audio("sounds/EnemyShoot.wav");
+				sound.volume = 0.1;
+				sound.play();
 			}
 
 			gol.enemies[i][5]-= 1;
@@ -1087,9 +1133,12 @@ GOL.prototype.run_enemies = function() {
 			if(gol.enemies[i][3] <= 0) {
 				gol.game_score += 30;
 				gol.ar_kill(gol.enemies, i);
-				if(gol.enemy_cooldown <= 60){
-					gol.enemy_cooldown = 60+Math.random()*60;
-				} else {gol.enemy_cooldown += 60;}
+				if(gol.enemy_cooldown <= 30){
+					gol.enemy_cooldown = 30+Math.random()*30;
+				} else {gol.enemy_cooldown += 30;}
+				var sound = new Audio("sounds/EnemyDie.wav");
+				sound.volume = 0.4;
+				sound.play();
 			}
 
 		}
@@ -1109,6 +1158,10 @@ GOL.prototype.create_waypoint = function(x, y, size, cooldown) {
 		new_obj[4] = cooldown;	// Cooldown Max (frames)
 
 		gol.waypoints.push(new_obj);
+		
+		var sound = new Audio("sounds/Waypoint.wav");
+		sound.volume = 0.1;
+		sound.play();
 
 	} else {gol.waypoint_cooldown = 1;}
 	
@@ -1120,6 +1173,7 @@ GOL.prototype.run_waypoints = function() {
 	if(gol.waypoint_cooldown == 0) {
 		gol.create_waypoint(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], 65, 2400);
 		if(gol.waypoint_cooldown == 0) {gol.waypoint_cooldown = -1;}
+		
 	}
 
 	for(var i = 0; i < gol.waypoints.length; i++) {
@@ -1141,6 +1195,9 @@ GOL.prototype.run_waypoints = function() {
 			if(gol.waypoints[i][3] <= 0) {
 				gol.waypoint_cooldown = 360;
 				gol.ar_kill(gol.waypoints, i);
+				var sound = new Audio("sounds/Waypoint.wav");
+				sound.volume = 0.1;
+				sound.play();
 			}
 
 		}
@@ -1224,6 +1281,11 @@ GOL.prototype.hitplayer = function() {
 		//do damage
 		if(hit > 0) {gol.p_health -= (hit*gol.hitrate + 30); gol.p_fuel -= (hit+10);}
 		if(hit > ((gol.player_size*gol.player_size)/2) ) {gol.p_health -= hit/2;}
+		if(hit > 0) {
+			var sound = new Audio("sounds/PlayerHit.wav");
+			sound.volume = 0.1;
+			sound.play();
+		}
 
 	}
 
@@ -1315,7 +1377,7 @@ GOL.prototype.player_reset = function() {
 	//Cooldowns
 	gol.shoot_cooldown = 0;
 	gol.enemy_cooldown = 600;
-	gol.waypoint_cooldown = 0;
+	gol.waypoint_cooldown = 900;
 	gol.place_barrier_cooldown = 0;
 
 	return this;
@@ -1411,6 +1473,9 @@ GOL.prototype.run_player = function() {
 					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 25, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 32, 101, 12);						
 					gol.shoot_cooldown = gol.p_rof;
 					gol.p_power -= 100;
+					var sound = new Audio("sounds/Shoot.wav");
+					sound.volume = 0.05;
+					sound.play();
 				}
 			}
 		}         
