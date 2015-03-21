@@ -53,6 +53,7 @@ function GOL(canvas, scale) {
 	this.active_rule = 0; //Which level?
 	this.game_score = 0; //Scorekeeping
 	this.healthflash = false;
+	this.master_volume = 2.5;
 
 	//Player Stats
 	this.p_health_max = 5000;
@@ -70,8 +71,8 @@ function GOL(canvas, scale) {
 	this.p_shield_cooldown = 0;
 	this.p_shield_size_max = 8;
 	this.p_shield_size = this.player_size+2;
-	this.p_s_burstsize = 100;
-	this.p_s_burstcooldown = 30;
+	this.p_s_burstsize = 80;
+	this.p_s_burstcooldown = 0;
 
 	//Game objects containers
 	this.bullets = new Array();
@@ -93,6 +94,126 @@ function GOL(canvas, scale) {
 	this.barrier_size = 18;
 	this.place_barrier_cooldown = 0;
 	this.barrier_life_max = 900;
+	
+	this.audio_ar = new Array(14);
+	for(var i = 0; i < this.audio_ar.length; i++) {
+		this.audio_ar[i] = new Array(10);
+	}
+
+	for(i = 0; i < 7; i++) {
+		var j = 0;
+
+		this.audio_ar[j][i] = new Audio("sounds/ShieldBurst.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.15;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/EnemyHit.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.03;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/WaypointHit.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.1;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/BulletBlock.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.1;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/ShootDet.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.1;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/EnemyShoot.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.1;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/EnemyDie.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.3;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/Waypoint.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.1;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/PlayerHit.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.1;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 4;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/Shoot.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.05;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/Melee.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.05;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 6;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/CreateWall.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.18;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 4;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/PlayerHitBig.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.1;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 4;
+		
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/Wilhelm_Scream.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.2;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
+		
+
+	}
 	
 
     gl.disable(gl.DEPTH_TEST); //disables alpha channels? not sure.
@@ -151,6 +272,7 @@ function GOL(canvas, scale) {
 	//Assign unique seed strengths to rules' indexes
 	this.rule_seeds[0] = 0.22;
 	this.rule_seeds[1] = 0.08;
+	this.rule_seeds[2] = 0.03;
 	this.rule_seeds[4] = 0.28;
 	this.rule_seeds[5] = 0.39;
 	this.rule_seeds[6] = 0.34;
@@ -588,7 +710,7 @@ function addGUI() {
     gui.add(cont, 'testBool').name('Pause').onFinishChange(tog);
     //gui.add(cont, 'testInt').name('TestMenu');
     //gui.add(cont, 'testInt', 0, 20).step(1).name('TestMenu').onFinishChange(testFoo);
-	gui.add(cont, 'testInt', {
+	gui.add(cont, 'rule', {
 		'Conway/Atom': 0,
 		'Conway\'s GoL': 1,
 		'Replicators': 2,
@@ -601,7 +723,8 @@ function addGUI() {
 		'Network': 8,
 		'Waves': 9,
 		'Dunes': 10,
-		'Sweeper': 11
+		'Sweeper': 11,
+		'Random': -1
 	}).name('Algorithm').onChange(set_rule);
 
 	function testFoo(value) {
@@ -623,6 +746,7 @@ function addGUI() {
 
 	function set_rule(value){
 		gol.active_rule = value;
+		if(value == -1) {gol.active_rule = Math.floor(Math.random()*gol.rule_array.length); cont.rule = gol.active_rule;}
 		gol.setRandom();
 		gol.player_reset();
 		document.getElementById("life").focus();
@@ -633,6 +757,7 @@ function addGUI() {
 function myConfig() {
 	this.testInt = 0;
 	this.testBool = false;
+	this.rule = 0;
 }
 
 
@@ -693,11 +818,9 @@ function Controller(gol) {
 		        gol.load_score();
 		        break;    
 			case 32: /* space */
-				if(gol.p_s_burstcooldown <= 0 && !gol.space_down) {
+				if(gol.p_s_burstcooldown <= 0 && !gol.space_down && (gol.p_power/gol.p_power_max) >= 0.6) {
 					gol.space_down = true;
-			 		var sound = new Audio("sounds/ShieldBurst.wav");
-					sound.volume = 0.2;
-					sound.play();
+			 		gol.play_sound(0);
 				}
 		        break;
 		};
@@ -779,6 +902,14 @@ GOL.prototype.load_score = function() {
     return this;
 };
 
+GOL.prototype.play_sound = function(s_num) {
+	if(gol.audio_ar[s_num][8] <= 0) {
+		gol.audio_ar[s_num][8] = gol.audio_ar[s_num][9];
+		gol.audio_ar[s_num][gol.audio_ar[s_num][7]].play();
+		gol.audio_ar[s_num][7] = (gol.audio_ar[s_num][7] + 1) % 7;
+	}
+}
+
 /* ************************
 // End General functions //
 ************************ */
@@ -836,7 +967,7 @@ GOL.prototype.run_hittests = function() {
 	for(var i = 0; i < gol.waypoints.length; i++) {
 		if(gol.waypoints.length > 0 && gol.waypoints[i] != null) {
 			if(gol.cpu_hit_test(this.statesize[0]/2, gol.waypoints[i][0], this.statesize[1]/2, gol.waypoints[i][1], gol.player_size, gol.waypoints[i][2])) {
-				gol.p_health += 20;
+				gol.p_health += 8;
 				gol.p_power += 4;
 				gol.p_fuel += 2;
 				gol.game_score += 1;
@@ -1003,19 +1134,13 @@ GOL.prototype.run_hittests = function() {
 	}
 
 	if(hit_enemy_sound) {
-		var sound = new Audio("sounds/EnemyHit.wav");
-		sound.volume = 0.03;
-		sound.play();
+		gol.play_sound(1);
 	}
 	if(hit_wp_sound) {
-		var sound = new Audio("sounds/WaypointHit.wav");
-		sound.volume = 0.1;
-		sound.play();
+		gol.play_sound(2);
 	}
 	if(hit_bul_sound) {
-		var sound = new Audio("sounds/BulletBlock.wav");
-		sound.volume = 0.1;
-		sound.play();
+		gol.play_sound(3);
 	}
 
 
@@ -1058,15 +1183,14 @@ GOL.prototype.run_bullets = function() {
 
 			gol.bullets[i][3] -= 1;
 
-			if(gol.bullets[i][3] > 0) {
+			if(gol.bullets[i][3] > 0 || gol.bullets[i][10] <= 0) {
 				gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], 1, gol.bullets[i][9], 0.5, 0);
 			} else {
-				gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 1, gol.bullets[i][9], 1, 0);
-				gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], (gol.bullets[i][2]+gol.bullets[i][10])/4, 1, 1, 0, 0);
-				gol.ar_kill(gol.bullets, i);
-				var sound = new Audio("sounds/ShootDet.wav");
-				sound.volume = 0.1;
-				sound.play();
+				if(gol.bullets[i][10] > 0) {gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 1, gol.bullets[i][9], 1, 0);
+					gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], (gol.bullets[i][2]+gol.bullets[i][10])/4, 1, 1, 0, 0);
+					gol.ar_kill(gol.bullets, i);
+					gol.play_sound(4);
+				}
 			}
 		}
 	}
@@ -1107,13 +1231,13 @@ GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size) {
 };
 
 GOL.prototype.run_enemies = function() {
-	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1 + Math.floor(gol.game_score/3000)) {
+	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1 + Math.floor(gol.game_score/1500)) {
 		gol.enemy_cooldown = 100+Math.random()*300;
 
-		var rof = Math.random()*280+40;
-		var bul_rand = rof/320*20;
+		var rof = Math.random()*300+60;
+		var bul_rand = rof/360*20;
 
-		gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], Math.random()*20+20, Math.random()*90+30, rof, Math.random()*bul_rand+4);
+		gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/10)+16, Math.random()*90+30, rof, Math.random()*bul_rand+4);
 	}
 	for(var i = 0; i < gol.enemies.length; i++) {
 		if(gol.enemies.length > 0 && gol.enemies[i] != null) {
@@ -1124,9 +1248,7 @@ GOL.prototype.run_enemies = function() {
 			if(gol.enemies[i][5] <= 0) {
 				gol.enemies[i][5] = gol.enemies[i][6];
 				gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7], 150, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 0, 150, 32);						
-				var sound = new Audio("sounds/EnemyShoot.wav");
-				sound.volume = 0.1;
-				sound.play();
+				gol.play_sound(5);
 			}
 
 			gol.enemies[i][5]-= 1;
@@ -1141,9 +1263,7 @@ GOL.prototype.run_enemies = function() {
 				if(gol.enemy_cooldown <= 30){
 					gol.enemy_cooldown = 30+Math.random()*30;
 				} else {gol.enemy_cooldown += 30;}
-				var sound = new Audio("sounds/EnemyDie.wav");
-				sound.volume = 0.4;
-				sound.play();
+				gol.play_sound(6);
 			}
 
 		}
@@ -1164,9 +1284,7 @@ GOL.prototype.create_waypoint = function(x, y, size, cooldown) {
 
 		gol.waypoints.push(new_obj);
 		
-		var sound = new Audio("sounds/Waypoint.wav");
-		sound.volume = 0.1;
-		sound.play();
+		gol.play_sound(7);
 
 	} else {gol.waypoint_cooldown = 1;}
 	
@@ -1200,9 +1318,7 @@ GOL.prototype.run_waypoints = function() {
 			if(gol.waypoints[i][3] <= 0) {
 				gol.waypoint_cooldown = 360;
 				gol.ar_kill(gol.waypoints, i);
-				var sound = new Audio("sounds/Waypoint.wav");
-				sound.volume = 0.1;
-				sound.play();
+				gol.play_sound(7);
 			}
 
 		}
@@ -1284,13 +1400,9 @@ GOL.prototype.hitplayer = function() {
 		}
 	
 		//do damage
-		if(hit > 0) {gol.p_health -= (hit*gol.hitrate + 30); gol.p_fuel -= (hit+10);}
-		if(hit > ((gol.player_size*gol.player_size)/2) ) {gol.p_health -= hit/2;}
-		if(hit > 0) {
-			var sound = new Audio("sounds/PlayerHit.wav");
-			sound.volume = 0.1;
-			sound.play();
-		}
+		if(hit > 0) {gol.p_health -= (hit*gol.hitrate + 30); gol.p_fuel -= (hit+10); gol.play_sound(8);}
+		if(hit > ((gol.player_size*gol.player_size)/3) ) {gol.p_health -= hit/2; gol.play_sound(12);}
+			
 
 	}
 
@@ -1368,10 +1480,7 @@ GOL.prototype.player_reset = function() {
 
 	//Player shield
 	gol.p_shield_cooldown = 0;
-	gol.p_shield_size_max = 8;
-	gol.p_shield_size = gol.player_size+2;
-	gol.p_s_burstsize = 100;
-	gol.p_s_burstcooldown = 30;
+	gol.p_s_burstcooldown = 0;
 
 	//Game objects containers
 	gol.bullets = new Array();
@@ -1397,6 +1506,11 @@ GOL.prototype.run_player = function() {
 	gol.shoot_cooldown -= 1;
 	gol.enemy_cooldown -= 1;
 	gol.waypoint_cooldown -= 1;
+	
+
+	for(var i = 0; i < gol.audio_ar.length; i++) {
+		gol.audio_ar[i][8] -= 1;
+	}	
 
 	if(gol.p_shield_cooldown > 0) {
 		gol.p_shield_cooldown -= 1;
@@ -1423,7 +1537,7 @@ GOL.prototype.run_player = function() {
 
 	//Drained all power
 	if(gol.p_power <= 0) {
-		if(gol.space_down) {gol.p_s_burstcooldown = 60;} 
+		if(gol.space_down) {gol.p_s_burstcooldown = 30;} 
 		gol.space_down = false;
 	}
 
@@ -1444,7 +1558,7 @@ GOL.prototype.run_player = function() {
 	if(gol.p_power < 0) {gol.p_power = 0;}
 	
 
-	if(hit != 0) {
+	if(hit >= (gol.player_size*gol.player_size)/3) {
 		gol.healthflash = true;
 	} else if(gol.hitmod == 1) {
 		gol.healthflash = false;
@@ -1456,7 +1570,7 @@ GOL.prototype.run_player = function() {
 	gol.place_cell_rend((gol.statesize[0]/2), 8+18, (gol.statesize[0]/4), 8, 0.26, 0.2, 0)
 
 	if(gol.healthflash) {
-		gol.place_cell_rend((gol.statesize[0]/2), 22+16, (gol.statesize[0]/4), 12, 1, 1, 1)
+		gol.place_cell_rend((gol.statesize[0]/2), 22+16, (gol.statesize[0]/4), 12, 1, 0.8, 0.8)
 	} else {
 		gol.place_cell_rend((gol.statesize[0]/2), 22+16, (gol.statesize[0]/4), 12, 0.2, 0, 0)
 	}
@@ -1478,9 +1592,7 @@ GOL.prototype.run_player = function() {
 					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 25, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 32, 101, 12);						
 					gol.shoot_cooldown = gol.p_rof;
 					gol.p_power -= 100;
-					var sound = new Audio("sounds/Shoot.wav");
-					sound.volume = 0.05;
-					sound.play();
+					gol.play_sound(9);
 				}
 			}
 		}         
@@ -1488,9 +1600,7 @@ GOL.prototype.run_player = function() {
 		if((!gol.l_click || gol.melee_on) && gol.r_click) {
 			gol.create_melee(); 
 			gol.p_power -= 6;
-			var sound = new Audio("sounds/Melee.wav");
-			sound.volume = 0.05;
-			sound.play();
+			gol.play_sound(10);
 		}      		
 		
 		if(!gol.l_click && gol.r_click && !gol.melee_on) {gol.p_power -= 50; gol.melee_on = true;}       		
@@ -1499,9 +1609,7 @@ GOL.prototype.run_player = function() {
 			gol.create_barrier((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), gol.barrier_size, gol.barrier_life_max); 
 			gol.place_barrier_cooldown = 5;
 			gol.p_power -= 35;					
-			var sound = new Audio("sounds/CreateWall.wav");
-			sound.volume = 0.18;
-			sound.play();
+			gol.play_sound(11);
 		}
 	}
 
@@ -1518,6 +1626,7 @@ GOL.prototype.run_player = function() {
 
 	//Game Over!	
 	if(gol.p_health <= 0) {
+		gol.play_sound(13);
 		//alert("You did not survive, this time.");
 		//gol.active_rule = Math.floor(Math.random()*gol.rule_array.length)
 		gol.setRandom();

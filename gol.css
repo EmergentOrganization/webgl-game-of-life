@@ -16,7 +16,7 @@ h1, h2 {
 }
 
 h2 {
-    font-size: 20px;
+    font-size: 10px;
 }
 
 canvas {
@@ -28,6 +28,7 @@ div.description {
     width: 600px;
     margin: 0px auto;
     text-indent: 1em;
+    font-size: 10px;
 }
 
 .description p {
@@ -49,13 +50,11 @@ ul {
 }
 
 ul li .input {
-    text-align: right;
     width: 250px;
     font-weight: bold;
 }
 
 ul li .result {
-    text-align: left;
     width: 250px;
     font-style: italic;
 }
