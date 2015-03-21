@@ -610,6 +610,7 @@ function addGUI() {
 
 	function tog(){
 		gol.toggle();
+		document.getElementById("life").focus();
 	}
 
 	function fpsChange(value) {
@@ -617,12 +618,14 @@ function addGUI() {
         if(value) {gol.fps_target = 16.7; }
         if(!value) {gol.fps_target = 33.3;}
 		gol.toggle();
+		document.getElementById("life").focus();
     }
 
 	function set_rule(value){
 		gol.active_rule = value;
 		gol.setRandom();
 		gol.player_reset();
+		document.getElementById("life").focus();
 	}
 	
 }
@@ -686,7 +689,7 @@ function Controller(gol) {
 		    case 68: /* D */
 		        if (gol.p_move_x < gol.p_speed){ gol.p_move_R = gol.p_speed; }
 		        break;   
-		    case 72: /* H */
+		    case 80: /* P */
 		        gol.load_score();
 		        break;    
 			case 32: /* space */
