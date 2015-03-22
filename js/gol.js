@@ -71,7 +71,7 @@ function GOL(canvas, scale) {
 	this.p_shield_cooldown = 0;
 	this.p_shield_size_max = 8;
 	this.p_shield_size = this.player_size+2;
-	this.p_s_burstsize = 80;
+	this.p_s_burstsize = 90;
 	this.p_s_burstcooldown = 0;
 
 	//Game objects containers
@@ -85,17 +85,17 @@ function GOL(canvas, scale) {
 	this.p_rof = 10;
 
 	//enemy creation
-	this.enemy_cooldown = 600;
+	this.enemy_cooldown = Math.floor(Math.random()*200+400);
 
 	//waypoint creation
-	this.waypoint_cooldown = 900;
+	this.waypoint_cooldown = Math.floor(Math.random()*500+400);
 
 	//Placeable Barrier object
 	this.barrier_size = 18;
 	this.place_barrier_cooldown = 0;
-	this.barrier_life_max = 900;
+	this.barrier_life_max = 1200;
 	
-	this.audio_ar = new Array(14);
+	this.audio_ar = new Array(15);
 	for(var i = 0; i < this.audio_ar.length; i++) {
 		this.audio_ar[i] = new Array(10);
 	}
@@ -211,6 +211,14 @@ function GOL(canvas, scale) {
 		this.audio_ar[j][7] = 0;
 		this.audio_ar[j][8] = 0;
 		this.audio_ar[j][9] = 5;
+
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/CreateEnemy.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.15;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 5;
 		
 
 	}
@@ -241,14 +249,16 @@ function GOL(canvas, scale) {
         Waves:  igloo.program('glsl/quad.vert', 'glsl/Waves.frag'),
         Dunes:  igloo.program('glsl/quad.vert', 'glsl/Dunes.frag'),
         Sweeper:  igloo.program('glsl/quad.vert', 'glsl/Sweeper.frag'),
+        Tsunami:  igloo.program('glsl/quad.vert', 'glsl/Tsunami.frag'),
+        Minefield:  igloo.program('glsl/quad.vert', 'glsl/Minefield.frag'),
         //AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
         ShiftCells:  igloo.program('glsl/quad.vert', 'glsl/ShiftCells.frag'),
         PlaceCells:  igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag')
     };
 
 	//Rule & seed selection containers
-	this.rule_array = new Array(12);
-	this.rule_seeds = new Array(12);
+	this.rule_array = new Array(14);
+	this.rule_seeds = new Array(14);
 
 	//set the seed strength defaults
 	for (var i = 0; i < this.rule_seeds.length; i++){
@@ -268,6 +278,8 @@ function GOL(canvas, scale) {
 	this.rule_array[9] = this.programs.Waves;
 	this.rule_array[10] = this.programs.Dunes;
 	this.rule_array[11] = this.programs.Sweeper;
+	this.rule_array[12] = this.programs.Tsunami;
+	this.rule_array[13] = this.programs.Minefield;
 
 	//Assign unique seed strengths to rules' indexes
 	this.rule_seeds[0] = 0.22;
@@ -281,6 +293,7 @@ function GOL(canvas, scale) {
 	this.rule_seeds[9] = 0.31;
 	this.rule_seeds[10] = 0.31;
 	this.rule_seeds[11] = 0.33;
+	this.rule_seeds[12] = 0.29;
 
 
 	//Create the quad that displays the texture
@@ -724,6 +737,8 @@ function addGUI() {
 		'Waves': 9,
 		'Dunes': 10,
 		'Sweeper': 11,
+		'Tsunami': 12,
+		'Minefield': 13,
 		'Random': -1
 	}).name('Algorithm').onChange(set_rule);
 
@@ -818,7 +833,7 @@ function Controller(gol) {
 		        gol.load_score();
 		        break;    
 			case 32: /* space */
-				if(gol.p_s_burstcooldown <= 0 && !gol.space_down && (gol.p_power/gol.p_power_max) >= 0.6) {
+				if(gol.p_s_burstcooldown <= 0 && !gol.space_down && (gol.p_power/gol.p_power_max) >= 0.5) {
 					gol.space_down = true;
 			 		gol.play_sound(0);
 				}
@@ -1117,7 +1132,7 @@ GOL.prototype.run_hittests = function() {
 	for(var i = 0; i < gol.enemies.length; i++) {
 		if(gol.enemies.length > 0 && gol.enemies[i] != null && gol.space_down) {
 			if(gol.cpu_hit_test(this.statesize[0]/2, gol.enemies[i][0], this.statesize[1]/2, gol.enemies[i][1], (gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, gol.enemies[i][2])) {
-				gol.enemies[i][3] -= 10;
+				gol.enemies[i][3] -= 50;
 			}
 		}
 	}
@@ -1147,6 +1162,27 @@ GOL.prototype.run_hittests = function() {
 	return this;
 };
 
+GOL.prototype.check_barrier_placement = function() {
+	var hit = false;
+
+	//placement collision with barrier
+	for(var i = 0; i < gol.barriers.length; i++) {
+		if(gol.barriers.length > 0 && gol.barriers[i] != null) {
+			if(gol.barriers[i][3] >= gol.barrier_life_max*0.5) {
+				if(gol.cpu_hit_test((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), gol.barriers[i][0], (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), gol.barriers[i][1], gol.barrier_size/2, gol.barrier_size/2)) {
+					hit = true;
+				}
+			} else {
+				if(gol.cpu_hit_test((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), gol.barriers[i][0], (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), gol.barriers[i][1], gol.barrier_size/2, gol.barrier_size/2)) {
+					gol.barriers[i][3] = 0;
+					hit = true;
+				}
+			}
+		}
+	}
+
+	return hit;
+}
 
 GOL.prototype.create_bullet = function(x, y, size, life, targ_x, targ_y, val, exp, open, rand) {
 	var new_obj = new Array(13);
@@ -1183,7 +1219,7 @@ GOL.prototype.run_bullets = function() {
 
 			gol.bullets[i][3] -= 1;
 
-			if(gol.bullets[i][3] > 0 || gol.bullets[i][10] <= 0) {
+			if(gol.bullets[i][3] > 0 || (gol.bullets[i][3] > 0 && gol.bullets[i][10] <= 0)) {
 				gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], 1, gol.bullets[i][9], 0.5, 0);
 			} else {
 				if(gol.bullets[i][10] > 0) {gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 1, gol.bullets[i][9], 1, 0);
@@ -1219,11 +1255,13 @@ GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size) {
 		new_obj[2] = size;		// Square size
 		new_obj[3] = life;		// Life (frames)
 		new_obj[4] = life;		// Lifespan (frames)
-		new_obj[5] = cooldown;	// Shoot cooldown (frames)
+		new_obj[5] = cooldown/6;	// Shoot cooldown (frames)
 		new_obj[6] = cooldown;	// Cooldown Max (frames)
 		new_obj[7] = bul_size;	// Cooldown Max (frames)
 
 		gol.enemies.push(new_obj);
+
+		gol.play_sound(14);
 
 	} else {gol.enemy_cooldown = 1;}
 
@@ -1234,16 +1272,13 @@ GOL.prototype.run_enemies = function() {
 	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1 + Math.floor(gol.game_score/1500)) {
 		gol.enemy_cooldown = 100+Math.random()*300;
 
-		var rof = Math.random()*300+60;
-		var bul_rand = rof/360*20;
+		var rof = Math.random()*710+90;
+		var bul_rand = (rof/800)*25;
 
-		gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/10)+16, Math.random()*90+30, rof, Math.random()*bul_rand+4);
+		gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/10)+16, Math.random()*90+5+(gol.game_score/250), rof, Math.random()*bul_rand+4);
 	}
 	for(var i = 0; i < gol.enemies.length; i++) {
 		if(gol.enemies.length > 0 && gol.enemies[i] != null) {
-
-			gol.placeBoth(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], 1, 1, 0.0, 0.0);
-			gol.placeBoth(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-6, 1, 1, (gol.enemies[i][3]/gol.enemies[i][4]), 0.0);
 
 			if(gol.enemies[i][5] <= 0) {
 				gol.enemies[i][5] = gol.enemies[i][6];
@@ -1257,12 +1292,15 @@ GOL.prototype.run_enemies = function() {
 			gol.enemies[i][0] = adjusted_pos[0];
 			gol.enemies[i][1] = adjusted_pos[1];
 
+			gol.placeBoth(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], 1, 1, 0.0, 0.0);
+			gol.placeBoth(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-6, 1, 1, (gol.enemies[i][3]/gol.enemies[i][4]), 0.0);
+
 			if(gol.enemies[i][3] <= 0) {
 				gol.game_score += 30;
 				gol.ar_kill(gol.enemies, i);
 				if(gol.enemy_cooldown <= 30){
-					gol.enemy_cooldown = 30+Math.random()*30;
-				} else {gol.enemy_cooldown += 30;}
+					gol.enemy_cooldown = 15+Math.random()*15;
+				} else {gol.enemy_cooldown += 15;}
 				gol.play_sound(6);
 			}
 
@@ -1294,7 +1332,7 @@ GOL.prototype.create_waypoint = function(x, y, size, cooldown) {
 GOL.prototype.run_waypoints = function() {
 
 	if(gol.waypoint_cooldown == 0) {
-		gol.create_waypoint(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], 65, 2400);
+		gol.create_waypoint(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], 65, 3200);
 		if(gol.waypoint_cooldown == 0) {gol.waypoint_cooldown = -1;}
 		
 	}
@@ -1316,7 +1354,7 @@ GOL.prototype.run_waypoints = function() {
 			gol.waypoints[i][3]-= 1;
 
 			if(gol.waypoints[i][3] <= 0) {
-				gol.waypoint_cooldown = 360;
+				gol.waypoint_cooldown = Math.floor((Math.random()*900*3)+360);
 				gol.ar_kill(gol.waypoints, i);
 				gol.play_sound(7);
 			}
@@ -1330,6 +1368,7 @@ GOL.prototype.run_waypoints = function() {
 
 //Create new barrier object
 GOL.prototype.create_barrier = function(x, y, size, life) {
+	
 	var new_obj = new Array(4);
 
 	new_obj[0] = x;
@@ -1606,10 +1645,12 @@ GOL.prototype.run_player = function() {
 		if(!gol.l_click && gol.r_click && !gol.melee_on) {gol.p_power -= 50; gol.melee_on = true;}       		
 		
 		if(gol.l_click && gol.r_click && gol.p_power >= 30 && gol.melee_on && gol.place_barrier_cooldown <= 0) {
-			gol.create_barrier((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), gol.barrier_size, gol.barrier_life_max); 
-			gol.place_barrier_cooldown = 5;
-			gol.p_power -= 35;					
-			gol.play_sound(11);
+			if(!gol.check_barrier_placement()) {
+				gol.create_barrier((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), gol.barrier_size, gol.barrier_life_max); 
+				gol.place_barrier_cooldown = 5;
+				gol.p_power -= 50;					
+				gol.play_sound(11);
+			}
 		}
 	}
 
