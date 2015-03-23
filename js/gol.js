@@ -21,6 +21,7 @@ function GOL(canvas, scale) {
     this.lasttick = GOL.now();
     this.fps = 0;
 	this.fps_target = 33.3; //Determines framerate. 66.6 = 15fps, 33.3 = 30fps, 16.7 = 60fps
+	document.getElementById("life").style.cursor = "none";
 
 	//Record function
 	this.export_image = null;
@@ -96,7 +97,7 @@ function GOL(canvas, scale) {
 	this.place_barrier_cooldown = 0;
 	this.barrier_life_max = 1200;
 	
-	this.audio_ar = new Array(15);
+	this.audio_ar = new Array(16);
 	for(var i = 0; i < this.audio_ar.length; i++) {
 		this.audio_ar[i] = new Array(10);
 	}
@@ -160,7 +161,7 @@ function GOL(canvas, scale) {
 		j += 1;
 
 		this.audio_ar[j][i] = new Audio("sounds/Waypoint.wav");
-		this.audio_ar[j][i].volume = this.master_volume*0.1;
+		this.audio_ar[j][i].volume = this.master_volume*0.25;
 		this.audio_ar[j][7] = 0;
 		this.audio_ar[j][8] = 0;
 		this.audio_ar[j][9] = 5;
@@ -220,6 +221,14 @@ function GOL(canvas, scale) {
 		this.audio_ar[j][7] = 0;
 		this.audio_ar[j][8] = 0;
 		this.audio_ar[j][9] = 5;
+
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/WaypointRegen.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.025;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 12;
 		
 
 	}
@@ -252,14 +261,15 @@ function GOL(canvas, scale) {
         Sweeper:  igloo.program('glsl/quad.vert', 'glsl/Sweeper.frag'),
         Tsunami:  igloo.program('glsl/quad.vert', 'glsl/Tsunami.frag'),
         Minefield:  igloo.program('glsl/quad.vert', 'glsl/Minefield.frag'),
+        Nemesis:  igloo.program('glsl/quad.vert', 'glsl/Nemesis.frag'),
         //AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
         ShiftCells:  igloo.program('glsl/quad.vert', 'glsl/ShiftCells.frag'),
         PlaceCells:  igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag')
     };
 
 	//Rule & seed selection containers
-	this.rule_array = new Array(14);
-	this.rule_seeds = new Array(14);
+	this.rule_array = new Array(15);
+	this.rule_seeds = new Array(15);
 
 	//set the seed strength defaults
 	for (var i = 0; i < this.rule_seeds.length; i++){
@@ -281,6 +291,7 @@ function GOL(canvas, scale) {
 	this.rule_array[11] = this.programs.Sweeper;
 	this.rule_array[12] = this.programs.Tsunami;
 	this.rule_array[13] = this.programs.Minefield;
+	this.rule_array[14] = this.programs.Nemesis;
 
 	//Assign unique seed strengths to rules' indexes
 	this.rule_seeds[0] = 0.22;
@@ -295,6 +306,7 @@ function GOL(canvas, scale) {
 	this.rule_seeds[10] = 0.31;
 	this.rule_seeds[11] = 0.33;
 	this.rule_seeds[12] = 0.29;
+	this.rule_seeds[14] = 0.44;
 
 
 	//Create the quad that displays the texture
@@ -517,8 +529,8 @@ GOL.prototype.draw = function() {
 
 //Create a square at the location and size in both rend and front textures
 GOL.prototype.placeBoth = function(x, y, size, valRend, valWorld, g, b) {
-	gol.place_cell_rend(x*gol.scale,y*gol.scale,size*gol.scale,size*gol.scale,valRend,g,b);
 	gol.place_cell_world(x,y,size,size,valWorld,g,b);
+	gol.place_cell_rend(x*gol.scale,y*gol.scale,size*gol.scale,size*gol.scale,valRend,g,b);
     return this;
 };
 
@@ -566,11 +578,11 @@ GOL.prototype.start = function(canvas) {
 			//Compute the next frame(s) of the CA
 			for (var i = 0; i < 1; i++) { gol.step();}
 			
-			gol.run_explosions();		//Detonations
         	gol.run_hittests();			//CPU Hit tests
 			gol.run_bullets();			//Step Bullet calcs
 
 			gol.swap_rend();			//Merge the CA and Player texture layers
+			gol.run_explosions();		//Detonations
 			
 			gol.run_waypoints();		//Step Waypoint calcs
 			gol.run_enemies();			//Step Enemy calcs
@@ -740,6 +752,7 @@ function addGUI() {
 		'Sweeper': 11,
 		'Tsunami': 12,
 		'Minefield': 13,
+		'Blood Parasite': 14,
 		'Random': -1
 	}).name('Algorithm').onChange(set_rule);
 
@@ -989,6 +1002,7 @@ GOL.prototype.run_hittests = function() {
 				gol.p_fuel += 2;
 				gol.game_score += 1;
 				gol.waypoints[i][3] -= 3;
+				gol.play_sound(15);
 			}
 		}
 	}
@@ -1247,7 +1261,8 @@ GOL.prototype.run_bullets = function() {
 					gol.bullets[i][3] -= 1;
 
 					if(gol.bullets[i][10] > 0 && gol.bullets[i][3] <= 0) {
-						gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 5);
+						gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 5, 0, 0, 0.6, 0, 0, false);
+						gol.play_sound(4);
 					}
 
 				}
@@ -1265,8 +1280,8 @@ GOL.prototype.create_melee = function() {
 	
 	gol.placeBoth((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/4), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/4), (22*(gol.p_power/1000))+12, 0, 0, 1, 0.4);
 	gol.placeBoth((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/4), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/4), (5*(gol.p_power/1000))+3, 1, 1, 0, 0);
-	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), 7, 7, 0.8, 0.8, 0.8);
-	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), 5, 5, 0.3, 0.3, 0.3);
+	//gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), 7, 7, 0.8, 0.8, 0.8);
+	//gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), 5, 5, 0.3, 0.3, 0.3);
     
 	return this;
 };
@@ -1393,7 +1408,7 @@ GOL.prototype.run_waypoints = function() {
 }
 
 
-GOL.prototype.create_explosion = function(x, y, size, cooldown) {
+GOL.prototype.create_explosion = function(x, y, size, cooldown, outval, inval, r, g, b, shift) {
 	var new_obj = new Array(5);
 
 	new_obj[0] = x;			// Actual X pos
@@ -1401,10 +1416,14 @@ GOL.prototype.create_explosion = function(x, y, size, cooldown) {
 	new_obj[2] = size;		// Square size
 	new_obj[3] = cooldown;	// Warp cooldown (frames)
 	new_obj[4] = cooldown;	// Cooldown Max (frames)
+	new_obj[5] = outval;	// Outer Explosion Value
+	new_obj[6] = inval;		// Inner Explosion Value
+	new_obj[7] = r;			// Rend Colour R
+	new_obj[8] = g;			// Rend Colour G
+	new_obj[9] = b;			// Rend Colour B
+	new_obj[10] = shift;	// Bool adjust for player pos
 
 	gol.explosions.push(new_obj);
-		
-	gol.play_sound(4);
 	
 	return this;
 }
@@ -1416,12 +1435,14 @@ GOL.prototype.run_explosions = function() {
 
 			var col = gol.explosions[i][3]/gol.explosions[i][4];
 
-			var adjusted_pos = gol.cpu_positioning(gol.explosions[i][0], gol.explosions[i][1]);
-			gol.explosions[i][0] = adjusted_pos[0];
-			gol.explosions[i][1] = adjusted_pos[1];
+			if(!gol.explosions[i][10]) {
+				var adjusted_pos = gol.cpu_positioning(gol.explosions[i][0], gol.explosions[i][1]);
+				gol.explosions[i][0] = adjusted_pos[0];
+				gol.explosions[i][1] = adjusted_pos[1];
+			}
 			
-			gol.placeBoth(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 0, 0.4+(col/2), 0.2, 0);
-			gol.placeBoth(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 1, 1, 1, col);
+			gol.placeBoth(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 		gol.explosions[i][7], 	gol.explosions[i][5], 	gol.explosions[i][8], 	gol.explosions[i][9]);
+			gol.placeBoth(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 			1, 						gol.explosions[i][6], 	1, 						col);
 
 			gol.explosions[i][3]-= 1;
 
@@ -1485,13 +1506,15 @@ GOL.prototype.run_shields = function() {
 	//Shield (deletes impacted objects)
 	if(gol.p_shield_cooldown == 0) {
 		gol.p_power -= 80;
-		gol.p_shield_cooldown = 10;
+		gol.p_shield_cooldown = 15;
 
 		//figure out how large the burst should be
 		var shield_size_calc = Math.ceil((gol.p_power/gol.p_power_max)*gol.p_shield_size_max) + gol.p_shield_size;
 
-		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, shield_size_calc, 0, 1, 1)
-		gol.placeBoth(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, shield_size_calc, 0, 0, 1, 1);
+		//gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, shield_size_calc, 0, 1, 1)
+		//gol.placeBoth(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, shield_size_calc, 0, 0, 1, 1);
+
+		gol.create_explosion(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, 2, 0, 0, 0, 1, 1, true);
 	}
 
 	return this;
@@ -1611,8 +1634,17 @@ GOL.prototype.player_reset = function() {
 GOL.prototype.run_player = function() {
 
 	//Placement marker
-	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), 7, 7, 0.8, 0.8, 0.8);
-	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), 5, 5, 0.3, 0.3, 0.3);
+	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), 9, 9, 0.8, 0.8, 0.8);
+	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5), 7, 7, 0.3, 0.3, 0.3);
+
+	//Shoot marker
+	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)), 11, 11, 0, 0, 0);
+	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)), 9, 9, 1, 1, 1);
+	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)), 5, 5, 0.8, 0, 0);
+
+	//Melee marker
+	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/4), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/4), 7, 7, 0.4, 0.8, 0.4);
+	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/4), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/4), 5, 5, 1, 1, 1);
 
 
 	//cooldowns
