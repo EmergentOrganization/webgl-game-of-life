@@ -50,7 +50,10 @@ function GOL(canvas, scale) {
 	this.space_down = false;
 
 	//General game values
-	this.active_rule = 0; //Which level?
+	this.active_rule = new Array(2); //Which level?
+	this.active_rule[0] = 13;
+	this.active_rule[1] = 0;
+
 	this.game_score = 0; //Scorekeeping
 	this.game_frame = 0; //timekeeping
 	this.healthflash = false;
@@ -345,9 +348,8 @@ function GOL(canvas, scale) {
     };
 
 	//Randomise the worldspace
-    this.setRandom(this.textures.front);
-    this.setRandom(this.textures.background_1, 0.34);
-    //this.setRandom(this.textures.foreground_1);
+    this.setRandom(this.textures.front, 1);
+    this.setEmpty(this.textures.background_1);
 
 	//clear the CA in an area around the player
 	this.place_cell_world(this.statesize[0]/scale/2, this.statesize[1]/scale/2, this.statesize[0]/3, this.statesize[1]/3, 0, 0, 0);
@@ -382,9 +384,9 @@ GOL.prototype.set = function(state, tex) {
  * @param {number} [p] Chance of a cell being alive (0.0 to 1.0)
  * @returns {GOL} this
  */
-GOL.prototype.setRandom = function(tex, p) {
+GOL.prototype.setRandom = function(tex, layer, p) {
     var gl = this.igloo.gl, size = this.statesize[0] * this.statesize[1];
-    p = p == null ? this.rule_seeds[this.active_rule] : p;
+    p = p == null ? this.rule_seeds[this.active_rule[layer]] : p;
     var rand = new Uint8Array(size);
     for (var i = 0; i < size; i++) {
         rand[i] = Math.random() < p ? 1 : 0;
@@ -573,6 +575,30 @@ GOL.prototype.place_cell_world = function(x, y, w, h, r, g, b) {
 
 
 
+//draw a rectangle only on the CA texture (front)
+GOL.prototype.place_cell_back = function(x, y, w, h, r, g, b) {
+	if(r == 1) {r = 0;} else {r = 1;}
+    var gl = this.igloo.gl;
+    this.framebuffers.step.attach(this.textures.background_1);
+    this.textures.background_1.bind(0);
+    //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
+    this.programs.PlaceCells.use()
+        .attrib('quad', this.buffers.quad, 2)
+        .uniformi('state', 0)
+        .uniform('scale', this.statesize)
+        .uniform('x', x - w/2)
+        .uniform('y', y - h/2)
+        .uniform('w', w)
+        .uniform('h', h)
+        .uniform('value', r)
+        .uniform('g', g)
+        .uniform('b', b)
+        .draw(gl.TRIANGLE_STRIP, 4);
+    return this;
+};
+
+
+
 //Offset the 'front' texture by the the player's movements
 GOL.prototype.shift = function(tex_front, tex_back, layer, mult) {
     var gl = this.igloo.gl;
@@ -620,12 +646,21 @@ GOL.prototype.draw = function() {
 
 
 //Create a square at the location and size in both rend and front textures
-GOL.prototype.placeBoth = function(x, y, size, valRend, valWorld, g, b) {
+GOL.prototype.placeAll = function(x, y, size, valRend, valWorld, g, b) {
 	gol.place_cell_world(x,y,size,size,valWorld,g,b);
-	gol.place_cell_rend(x*gol.scale,y*gol.scale,size*gol.scale,size*gol.scale,valRend,g,b);
+	gol.place_cell_back(x,y,size,size,valWorld,g,b);
+	gol.place_cell_rend(x,y,size,size,valRend,g,b);
     return this;
 };
 
+
+//Create a square at the location and size in both rend and front textures
+GOL.prototype.place_Rend_World = function(x, y, size, valRend, valWorld, g, b) {
+	gol.place_cell_world(x,y,size,size,valWorld,g,b);
+	//gol.place_cell_back(x,y,size,size,valWorld,g,b);
+	gol.place_cell_rend(x,y,size,size,valRend,g,b);
+    return this;
+};
 
 /* ************************
 //   End GPU functions   //
@@ -670,14 +705,14 @@ GOL.prototype.start = function(canvas) {
 			
 			//Compute the next frame(s) of the CA
 			for (var i = 0; i < 1; i++) { 
-				gol.step(gol.textures.front, gol.textures.back, gol.rule_array[gol.active_rule], 1);
+				gol.step(gol.textures.front, gol.textures.back, gol.rule_array[gol.active_rule[1]], 1);
 				gol.game_frame += 1
 			}
 
 			if(gol.game_frame % 4 == 0) {
-				gol.step(gol.textures.background_1, gol.textures.background_2, gol.rule_array[9], 0);
+				gol.step(gol.textures.background_1, gol.textures.background_2, gol.rule_array[gol.active_rule[0]], 0);
 			} else {
-				gol.fakestep(gol.textures.background_1, gol.textures.background_2, gol.rule_array[9], 0);
+				gol.fakestep(gol.textures.background_1, gol.textures.background_2, gol.rule_array[gol.active_rule[0]], 0);
 			}
 
 			gol.destruct_interf();
@@ -862,7 +897,27 @@ function addGUI() {
 		'Minefield': 13,
 		'Blood Parasite': 14,
 		'Random': -1
-	}).name('Algorithm').onChange(set_rule);
+	}).name('Hostile Algorithm').onChange(set_rule);
+
+	gui.add(cont, 'buddy_rule', {
+		'Conway/Atom': 0,
+		'Conway\'s GoL': 1,
+		'Replicators': 2,
+		'Tether': 3,
+		'Feeders': 4,
+		'Acid Eggs': 5,
+		'Molecules': 6,
+		'Orbwave': 7,
+		//'Many Rings': 8,
+		'Network': 8,
+		'Waves': 9,
+		'Dunes': 10,
+		'Sweeper': 11,
+		'Tsunami': 12,
+		'Minefield': 13,
+		'Blood Parasite': 14,
+		'Random': -1
+	}).name('Player Algorithm').onChange(set_buddy_rule);
 
 	function testFoo(value) {
         alert("TEST GUI Response: " + value);
@@ -882,12 +937,23 @@ function addGUI() {
     }
 
 	function set_rule(value){
-		gol.active_rule = value;
-		if(value == -1) {gol.active_rule = Math.floor(Math.random()*gol.rule_array.length); cont.rule = gol.active_rule;}
-		gol.setRandom(gol.textures.front);
+		gol.active_rule[1] = value;
+		if(value == -1) {gol.active_rule[1] = Math.floor(Math.random()*gol.rule_array.length); cont.rule = gol.active_rule[1];}
+		gol.setRandom(gol.textures.front, 1);
+		gol.setEmpty(gol.textures.background_1);
 		gol.player_reset();
 		document.getElementById("life").focus();
-		gui.close();
+		//gui.close();
+	}
+
+	function set_buddy_rule(value){
+		gol.active_rule[0] = value;
+		if(value == -1) {gol.active_rule[0] = Math.floor(Math.random()*gol.rule_array.length); cont.buddy_rule = gol.active_rule[0];}
+		gol.setRandom(gol.textures.front, 1);
+		gol.setEmpty(gol.textures.background_1);
+		gol.player_reset();
+		document.getElementById("life").focus();
+		//gui.close();
 	}
 	
 }
@@ -896,6 +962,7 @@ function myConfig() {
 	this.testInt = 0;
 	this.testBool = false;
 	this.rule = 0;
+	this.buddy_rule = 0;
 }
 
 
@@ -971,7 +1038,8 @@ function Controller(gol) {
     $(document).on('keyup', function(event) {
         switch (event.which) {
         case 82: /* r */
-            gol.setRandom(gol.textures.front);
+            gol.setRandom(gol.textures.front, 1);
+			gol.setEmpty(gol.textures.background_1);
 			gol.player_reset();
             break;
         case 46: /* [delete] */
@@ -1010,7 +1078,7 @@ GOL.prototype.save_score = function() {
 		score_ar = JSON.parse ( localStorage.getItem('WebGoL-Highscores'));
 	}
 
-	var newscore = [this.statesize[0], this.statesize[1], gol.active_rule, gol.game_score];
+	var newscore = [this.statesize[0], this.statesize[1], gol.active_rule[1], gol.game_score];
 	score_ar.push(newscore);
 
 	// Put the object into storage
@@ -1419,11 +1487,11 @@ GOL.prototype.run_bullets = function() {
 				gol.bullets[i][1] += (gol.bullets[i][6]/gol.bullets[i][4])*(gol.bullets[i][11]/100)-gol.p_move_y; 	
 
 				if(gol.bullets[i][3] > 0) {
-					gol.placeBoth(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], 1, gol.bullets[i][9], 0.5, 0);
+					gol.placeAll(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], 1, gol.bullets[i][9], 0.5, 0);
 					gol.bullets[i][3] -= 1;
 
 					if(gol.bullets[i][10] > 0 && gol.bullets[i][3] <= 0) {
-						gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 5, 0, 0, 0.6, 0, 0, false);
+						gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 5, 0, 0, 0.6, 0, 0, false, 0);
 						gol.play_sound(4);
 					}
 
@@ -1444,7 +1512,7 @@ GOL.prototype.create_melee = function() {
 	var dist = gol.get_dist(this.statesize[0]/2, x, this.statesize[1]/2, y);
 
 	if(dist > 18 && dist < 64) {
-		gol.placeBoth(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
+		gol.placeAll(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
 		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
 		gol.p_power -= 6;
 		gol.play_sound(10);
@@ -1455,7 +1523,7 @@ GOL.prototype.create_melee = function() {
 		x = capped_pos[0];
 		y = capped_pos[1];
 
-		gol.placeBoth(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
+		gol.placeAll(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
 		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
 		gol.p_power -= 6;
 		gol.play_sound(10);
@@ -1496,8 +1564,8 @@ GOL.prototype.run_enemies = function() {
 	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 2 + Math.floor(gol.game_score/2500)) {
 		gol.enemy_cooldown = 100+Math.random()*300;
 
-		var rof = Math.random()*710+90;
-		var bul_rand = (rof/800)*25;
+		var rof = Math.random()*390+20;
+		var bul_rand = (rof/400)*25;
 
 		gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/10)+16, Math.random()*90+5+(gol.game_score/250), rof, Math.random()*bul_rand+4);
 	}
@@ -1531,8 +1599,8 @@ GOL.prototype.run_enemies = function() {
 			gol.enemies[i][0] = adjusted_pos[0];
 			gol.enemies[i][1] = adjusted_pos[1];
 
-			gol.placeBoth(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], 1, 1, 0.0, 0.0);
-			gol.placeBoth(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-6, 1, 1, (gol.enemies[i][3]/gol.enemies[i][4]), 0.0);
+			gol.placeAll(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], 1, 1, 0.0, 0.0);
+			gol.placeAll(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-6, 1, 1, (gol.enemies[i][3]/gol.enemies[i][4]), 0.0);
 
 			if(gol.enemies[i][3] <= 0) {
 				gol.game_score += 30;
@@ -1585,9 +1653,9 @@ GOL.prototype.run_waypoints = function() {
 			gol.waypoints[i][0] = adjusted_pos[0];
 			gol.waypoints[i][1] = adjusted_pos[1];
 			
-			gol.placeBoth(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]+4, 1, 1, 0, 0);
-			gol.placeBoth(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2], 0, 0, 0.8, 0);
-			gol.placeBoth(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]-8, 0, 0, 0.2, 0);
+			gol.placeAll(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]+4, 1, 1, 0, 0);
+			gol.placeAll(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2], 0, 0, 0.8, 0);
+			gol.placeAll(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]-8, 0, 0, 0.2, 0);
 			gol.place_cell_rend(gol.waypoints[i][0], gol.waypoints[i][1], 21, 21, 1-col, col, col);
 
 			gol.waypoints[i][3]-= 1;
@@ -1605,8 +1673,8 @@ GOL.prototype.run_waypoints = function() {
 }
 
 
-GOL.prototype.create_explosion = function(x, y, size, cooldown, outval, inval, r, g, b, shift) {
-	var new_obj = new Array(5);
+GOL.prototype.create_explosion = function(x, y, size, cooldown, outval, inval, r, g, b, shift, layers) {
+	var new_obj = new Array(12);
 
 	new_obj[0] = x;			// Actual X pos
 	new_obj[1] = y;			// Actual Y pos
@@ -1619,6 +1687,7 @@ GOL.prototype.create_explosion = function(x, y, size, cooldown, outval, inval, r
 	new_obj[8] = g;			// Rend Colour G
 	new_obj[9] = b;			// Rend Colour B
 	new_obj[10] = shift;	// Bool adjust for player pos
+	new_obj[11] = layers;	// Bool adjust for player pos
 
 	gol.explosions.push(new_obj);
 	
@@ -1638,8 +1707,16 @@ GOL.prototype.run_explosions = function() {
 				gol.explosions[i][1] = adjusted_pos[1];
 			}
 			
-			gol.placeBoth(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 		gol.explosions[i][7], 	gol.explosions[i][5], 	gol.explosions[i][8], 	gol.explosions[i][9]);
-			gol.placeBoth(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 			1, 						gol.explosions[i][6], 	1, 						col);
+			if(gol.explosions[i][11] == 0) {
+				gol.placeAll(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 		gol.explosions[i][7], 	gol.explosions[i][5], 	gol.explosions[i][8], 	gol.explosions[i][9]);
+				gol.placeAll(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 			1, 						gol.explosions[i][6], 	1, 						col);
+			}
+
+			if(gol.explosions[i][11] == 1) {
+				gol.place_Rend_World(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 		gol.explosions[i][7], 	gol.explosions[i][5], 	gol.explosions[i][8], 	gol.explosions[i][9]);
+				gol.place_Rend_World(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 			1, 						gol.explosions[i][6], 	1, 						col);
+			}
+
 
 			gol.explosions[i][3]-= 1;
 
@@ -1684,7 +1761,7 @@ GOL.prototype.run_barriers = function() {
 				gol.barriers[i][0] = adjusted_pos[0];
 				gol.barriers[i][1] = adjusted_pos[1];
 
-				gol.placeBoth(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size, 0, 0, gol.barriers[i][3]/gol.barrier_life_max, 1-(gol.barriers[i][3]/gol.barrier_life_max));
+				gol.placeAll(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size, 0, 0, gol.barriers[i][3]/gol.barrier_life_max, 1-(gol.barriers[i][3]/gol.barrier_life_max));
 			}
 		}
 	}
@@ -1709,9 +1786,9 @@ GOL.prototype.run_shields = function() {
 		var shield_size_calc = Math.ceil((gol.p_power/gol.p_power_max)*gol.p_shield_size_max) + gol.p_shield_size;
 
 		//gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, shield_size_calc, 0, 1, 1)
-		//gol.placeBoth(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, shield_size_calc, 0, 0, 1, 1);
+		//gol.placeAll(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, shield_size_calc, 0, 0, 1, 1);
 
-		gol.create_explosion(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, 3, 0, 0, 0, 1, 1, true);
+		gol.create_explosion(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, 3, 0, 0, 0, 1, 1, true, 1);
 	}
 
 	return this;
@@ -1913,7 +1990,7 @@ GOL.prototype.run_player = function() {
 
 	//regens
 	if(gol.p_fuel < 1000) {gol.p_fuel += 4;}
-	if(gol.p_health < gol.p_health_max) {gol.p_health += 2;}
+	if(gol.p_health < gol.p_health_max) {gol.p_health += 1;}
 	if(gol.p_power < 1000) {gol.p_power += 4;}
 
 	//Regen overflow cases
@@ -1994,7 +2071,7 @@ GOL.prototype.run_player = function() {
 	
 	//Shield burst attack
 	if(gol.space_down) {
-		gol.placeBoth(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, (gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, 0, 0, 1, 1);
+		gol.place_Rend_World(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, (gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size, 0, 0, 1, 1);
 		gol.place_cell_rend(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size)*0.85, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/1000)+gol.player_size)*0.85, 0.9, 0.9, 1)
 		gol.p_power -= 30;
 	}
@@ -2007,7 +2084,8 @@ GOL.prototype.run_player = function() {
 		gol.play_sound(13);
 		//alert("You did not survive, this time.");
 		//gol.active_rule = Math.floor(Math.random()*gol.rule_array.length)
-		gol.setRandom(gol.textures.front);
+		gol.setRandom(gol.textures.front, 1);
+		gol.setEmpty(gol.textures.background_1);
 		gol.player_reset();
 	}
 
