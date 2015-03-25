@@ -52,6 +52,7 @@ function GOL(canvas, scale) {
 	//General game values
 	this.active_rule = 0; //Which level?
 	this.game_score = 0; //Scorekeeping
+	this.game_frame = 0; //timekeeping
 	this.healthflash = false;
 	this.master_volume = 2.5;
 
@@ -267,8 +268,10 @@ function GOL(canvas, scale) {
         Minefield:  igloo.program('glsl/quad.vert', 'glsl/Minefield.frag'),
         Nemesis:  igloo.program('glsl/quad.vert', 'glsl/Nemesis.frag'),
         //AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
-        ShiftCells:  igloo.program('glsl/quad.vert', 'glsl/ShiftCells.frag'),
-        PlaceCells:  igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag')
+        ShiftCells:  igloo.program('glsl/quad.vert', 'glsl/ShiftCells_2.frag'),
+        PlaceCells:  igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag'),
+        RendMerge3:  igloo.program('glsl/quad.vert', 'glsl/RendMerge3.frag'),
+        DestInterf:  igloo.program('glsl/quad.vert', 'glsl/DestInterf.frag')
     };
 
 	//Rule & seed selection containers
@@ -324,6 +327,14 @@ function GOL(canvas, scale) {
             .blank(this.statesize[0], this.statesize[1]),
         back: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
             .blank(this.statesize[0], this.statesize[1]),
+        foreground_1: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
+            .blank(this.statesize[0], this.statesize[1]),
+        foreground_2: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
+            .blank(this.statesize[0], this.statesize[1]),
+        background_1: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
+            .blank(this.statesize[0], this.statesize[1]),
+        background_2: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
+            .blank(this.statesize[0], this.statesize[1]),
         rend: igloo.texture(null, gl.RGBA, gl.REPEAT, gl.NEAREST)
             .blank(this.statesize[0], this.statesize[1])
     };
@@ -334,7 +345,9 @@ function GOL(canvas, scale) {
     };
 
 	//Randomise the worldspace
-    this.setRandom();
+    this.setRandom(this.textures.front);
+    this.setRandom(this.textures.background_1, 0.34);
+    //this.setRandom(this.textures.foreground_1);
 
 	//clear the CA in an area around the player
 	this.place_cell_world(this.statesize[0]/scale/2, this.statesize[1]/scale/2, this.statesize[0]/3, this.statesize[1]/3, 0, 0, 0);
@@ -352,7 +365,7 @@ function GOL(canvas, scale) {
  * @param {Object} state Boolean array-like
  * @returns {GOL} this
  */
-GOL.prototype.set = function(state) {
+GOL.prototype.set = function(state, tex) {
     var gl = this.igloo.gl;
     var rgba = new Uint8Array(this.statesize[0] * this.statesize[1] * 4);
     for (var i = 0; i < state.length; i++) {
@@ -360,7 +373,7 @@ GOL.prototype.set = function(state) {
         rgba[ii + 0] = rgba[ii + 1] = rgba[ii + 2] = state[i] ? 255 : 0;
         rgba[ii + 3] = 255;
     }
-    this.textures.front.subset(rgba, 0, 0, this.statesize[0], this.statesize[1]);
+    tex.subset(rgba, 0, 0, this.statesize[0], this.statesize[1]);
     return this;
 };
 
@@ -369,14 +382,14 @@ GOL.prototype.set = function(state) {
  * @param {number} [p] Chance of a cell being alive (0.0 to 1.0)
  * @returns {GOL} this
  */
-GOL.prototype.setRandom = function(p) {
+GOL.prototype.setRandom = function(tex, p) {
     var gl = this.igloo.gl, size = this.statesize[0] * this.statesize[1];
     p = p == null ? this.rule_seeds[this.active_rule] : p;
     var rand = new Uint8Array(size);
     for (var i = 0; i < size; i++) {
         rand[i] = Math.random() < p ? 1 : 0;
     }
-    this.set(rand);
+    this.set(rand, tex);
     return this;
 };
 
@@ -384,8 +397,8 @@ GOL.prototype.setRandom = function(p) {
  * Clear the simulation state to empty.
  * @returns {GOL} this
  */
-GOL.prototype.setEmpty = function() {
-    this.set(new Uint8Array(this.statesize[0] * this.statesize[1]));
+GOL.prototype.setEmpty = function(tex) {
+    this.set(new Uint8Array(this.statesize[0] * this.statesize[1]), tex);
     return this;
 };
 
@@ -393,7 +406,19 @@ GOL.prototype.setEmpty = function() {
  * Swap the texture buffers.
  * @returns {GOL} this
  */
-GOL.prototype.swap = function() {
+GOL.prototype.swap_main = function() {
+    var tmp = this.textures.front;
+    this.textures.front = this.textures.back;
+    this.textures.back = tmp;
+    return this;
+};
+GOL.prototype.swap_back = function() {
+    var tmp = this.textures.background_1;
+    this.textures.background_1 = this.textures.background_2;
+    this.textures.background_2 = tmp;
+    return this;
+};
+GOL.prototype.swap_fore = function() {
     var tmp = this.textures.front;
     this.textures.front = this.textures.back;
     this.textures.back = tmp;
@@ -423,21 +448,82 @@ GOL.prototype.swap_rend = function() {
 };
 
 
+//Combines three ca world layers into one final render state
+GOL.prototype.swap_MergeRend3 = function() {
+
+	//Set rend as destination?
+	var gl = this.igloo.gl;
+	this.framebuffers.step.attach(this.textures.rend);
+
+	//Bind textures
+    this.textures.background_1.bind(3);
+    this.textures.foreground_1.bind(2);
+    this.textures.front.bind(1);
+    this.textures.rend.bind(0);
+
+	//overlay rend onto ca, result goes in rend tex
+	this.programs.RendMerge3.use()
+        .attrib('quad', this.buffers.quad, 2)
+        .uniformi('render', 0)
+        .uniformi('state', 1)
+        .uniformi('front', 2)
+        .uniformi('back', 3)
+        .uniform('scale', this.statesize)
+        .draw(gl.TRIANGLE_STRIP, 4);
+
+    return this;
+};
+
+//destructive interference
+GOL.prototype.destruct_interf = function() {
+
+	//Set rend as destination?
+	var gl = this.igloo.gl;
+	this.framebuffers.step.attach(this.textures.front);
+
+	//Bind textures
+    this.textures.background_1.bind(2);
+    this.textures.foreground_1.bind(1);
+    this.textures.front.bind(0);
+
+	//overlay rend onto ca, result goes in rend tex
+	this.programs.DestInterf.use()
+        .attrib('quad', this.buffers.quad, 2)
+        .uniformi('state', 0)
+        .uniformi('front', 1)
+        .uniformi('back', 2)
+        .uniform('scale', this.statesize)
+        .draw(gl.TRIANGLE_STRIP, 4);
+
+    return this;
+};
 /**
  * Step the selected rule without rendering anything.
  * @returns {GOL} this
  */
-GOL.prototype.step = function() {
+GOL.prototype.step = function(tex_front, tex_back, rule_prog, layer) {
     var gl = this.igloo.gl;
-    this.framebuffers.step.attach(this.textures.back);
-    this.textures.front.bind(0);
+    this.framebuffers.step.attach(tex_back);
+    tex_front.bind(0);
     //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.rule_array[this.active_rule].use()
+    rule_prog.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
         .draw(gl.TRIANGLE_STRIP, 4);
-    this.swap();
+	if(layer == 1) {this.swap_main();}
+	if(layer == 0) {this.swap_back();}
+	if(layer == 2) {this.swap_front();}
+    return this;
+};
+
+
+GOL.prototype.fakestep = function(tex_front, tex_back, rule_prog, layer) {
+    this.framebuffers.step.attach(tex_back);
+    tex_front.bind(0);
+	//if(layer == 1) {this.swap_main();}
+	//if(layer == 0) {this.swap_back();}
+	//if(layer == 2) {this.swap_front();}
     return this;
 };
 
@@ -488,14 +574,14 @@ GOL.prototype.place_cell_world = function(x, y, w, h, r, g, b) {
 
 
 //Offset the 'front' texture by the the player's movements
-GOL.prototype.shift = function() {
+GOL.prototype.shift = function(tex_front, tex_back, layer, mult) {
     var gl = this.igloo.gl;
-    this.framebuffers.step.attach(this.textures.back);
-    this.textures.front.bind(0);
+    this.framebuffers.step.attach(tex_back);
+    tex_front.bind(0);
     //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
 
-	this.p_move_x =  this.p_move_L + this.p_move_R;
-	this.p_move_y = this.p_move_U + this.p_move_D;
+	this.p_move_x = (this.p_move_L + this.p_move_R) * mult;
+	this.p_move_y = (this.p_move_U + this.p_move_D) * mult;
 
     this.programs.ShiftCells.use()
         .attrib('quad', this.buffers.quad, 2)
@@ -505,7 +591,9 @@ GOL.prototype.shift = function() {
         .uniform('my', this.p_move_y)
         .draw(gl.TRIANGLE_STRIP, 4);
 
-    this.swap();
+	if(layer == 1) {this.swap_main();}
+	if(layer == 0) {this.swap_back();}
+	if(layer == 2) {this.swap_front();}
 
     return this;
 };
@@ -577,17 +665,31 @@ GOL.prototype.start = function(canvas) {
 			// shift, step, hit, bullet, enemy, swap_rend, waypoint, barrier, player, draw
 
 			//Offset the CA texture (front) by player's movements
-			gol.shift();	
+			gol.shift(gol.textures.front, gol.textures.back, 1, 1);	
+			gol.shift(gol.textures.background_1, gol.textures.background_2, 0, 1);	
 			
 			//Compute the next frame(s) of the CA
-			for (var i = 0; i < 1; i++) { gol.step();}
+			for (var i = 0; i < 1; i++) { 
+				gol.step(gol.textures.front, gol.textures.back, gol.rule_array[gol.active_rule], 1);
+				gol.game_frame += 1
+			}
+
+			if(gol.game_frame % 4 == 0) {
+				gol.step(gol.textures.background_1, gol.textures.background_2, gol.rule_array[9], 0);
+			} else {
+				gol.fakestep(gol.textures.background_1, gol.textures.background_2, gol.rule_array[9], 0);
+			}
+
+			gol.destruct_interf();
 			
         	gol.run_hittests();			//CPU Hit tests
 			gol.run_bullets();			//Step Bullet calcs
 
-			gol.swap_rend();			//Merge the CA and Player texture layers
+			//gol.swap_rend();			//Merge the CA and Player texture layers
+			gol.swap_MergeRend3();
+
 			gol.run_explosions();		//Detonations
-			
+
 			gol.run_waypoints();		//Step Waypoint calcs
 			gol.run_enemies();			//Step Enemy calcs
 			gol.run_barriers();			//Step Barrier calcs
@@ -640,7 +742,7 @@ GOL.prototype.exportImage = function(gl, texture, width, height) {
     // Copy the pixels to a 2D canvas
     var context = canvas.getContext('2d');
     var imageData = context.createImageData(width, height);
-    imageData.data.set(data);
+    imageData.data.set(data, this.textures.front);
 
     context.putImageData(imageData, 0, 0);
 	context.scale(1, -1);
@@ -782,7 +884,7 @@ function addGUI() {
 	function set_rule(value){
 		gol.active_rule = value;
 		if(value == -1) {gol.active_rule = Math.floor(Math.random()*gol.rule_array.length); cont.rule = gol.active_rule;}
-		gol.setRandom();
+		gol.setRandom(gol.textures.front);
 		gol.player_reset();
 		document.getElementById("life").focus();
 		gui.close();
@@ -869,11 +971,11 @@ function Controller(gol) {
     $(document).on('keyup', function(event) {
         switch (event.which) {
         case 82: /* r */
-            gol.setRandom();
+            gol.setRandom(gol.textures.front);
 			gol.player_reset();
             break;
         case 46: /* [delete] */
-            gol.setEmpty();
+            gol.setEmpty(gol.textures.front);
             gol.draw();
             break;
         case 32: /* [space] */
@@ -1367,7 +1469,7 @@ GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size) {
 
 	if(!gol.cpu_hit_test(this.statesize[0]/2, x, this.statesize[1]/2, y, gol.player_size, 96)) {
 
-		var new_obj = new Array(8);
+		var new_obj = new Array(11);
 
 		new_obj[0] = x;			// Actual X pos
 		new_obj[1] = y;			// Actual Y pos
@@ -1377,6 +1479,9 @@ GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size) {
 		new_obj[5] = cooldown/6;	// Shoot cooldown (frames)
 		new_obj[6] = cooldown;	// Cooldown Max (frames)
 		new_obj[7] = bul_size;	// Cooldown Max (frames)
+		new_obj[8] = false;	// Moving?
+		new_obj[9] = 0;	// move_x
+		new_obj[10] = 0;	// move_y
 
 		gol.enemies.push(new_obj);
 
@@ -1388,7 +1493,7 @@ GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size) {
 };
 
 GOL.prototype.run_enemies = function() {
-	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1 + Math.floor(gol.game_score/1500)) {
+	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 2 + Math.floor(gol.game_score/2500)) {
 		gol.enemy_cooldown = 100+Math.random()*300;
 
 		var rof = Math.random()*710+90;
@@ -1403,6 +1508,21 @@ GOL.prototype.run_enemies = function() {
 				gol.enemies[i][5] = gol.enemies[i][6];
 				gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7], 150, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 0, 150, 32);						
 				gol.play_sound(5);
+			}
+
+			if(gol.enemies[i][5] >= 30 && gol.enemies[i][5] <= gol.enemies[i][6]*0.8) {
+				if(!gol.enemies[i][8]) {
+					gol.enemies[i][8] = true;
+					gol.enemies[i][9] = Math.floor(Math.random()*3-1);
+					gol.enemies[i][10] = Math.floor(Math.random()*3-1);
+				}
+			} else {
+				gol.enemies[i][8] = false;
+			}
+
+			if(gol.enemies[i][8]) {
+				gol.enemies[i][0] += gol.enemies[i][9];
+				gol.enemies[i][1] += gol.enemies[i][10];
 			}
 
 			gol.enemies[i][5]-= 1;
@@ -1649,7 +1769,7 @@ GOL.prototype.drainfuel = function() {
 //Read the pixels from the CA texture, return Uint8Array
 GOL.prototype.player_hitbox = function() {
 	var gl = this.igloo.gl, w = this.statesize[0], h = this.statesize[1];
-	this.framebuffers.step.attach(this.textures.front);
+	this.framebuffers.step.attach(gol.textures.front);
 	var rgba = new Uint8Array(gol.player_size * gol.player_size * 4);
 	gl.readPixels(gol.statesize[0]/gol.scale/2-(gol.player_size/2), gol.statesize[1]/gol.scale/2-(gol.player_size/2), gol.player_size, gol.player_size, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
 	
@@ -1686,6 +1806,7 @@ GOL.prototype.player_reset = function() {
 	//General game values
 	gol.game_score = 0; //Scorekeeping
 	gol.healthflash = false;
+	gol.game_frame = 0;
 
 	//Player shield
 	gol.p_shield_cooldown = 0;
@@ -1886,7 +2007,7 @@ GOL.prototype.run_player = function() {
 		gol.play_sound(13);
 		//alert("You did not survive, this time.");
 		//gol.active_rule = Math.floor(Math.random()*gol.rule_array.length)
-		gol.setRandom();
+		gol.setRandom(gol.textures.front);
 		gol.player_reset();
 	}
 
