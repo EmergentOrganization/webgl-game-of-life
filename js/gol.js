@@ -82,6 +82,7 @@ function GOL(canvas, scale) {
 	this.p_shield_size = this.player_size+2;
 	this.p_s_burstsize = 90;
 	this.p_s_burstcooldown = 0;
+	this.p_shield_charge_cooldown = 0;
 
 	//Game objects containers
 	this.bullets = new Array();
@@ -1078,7 +1079,7 @@ GOL.prototype.save_score = function() {
 		score_ar = JSON.parse ( localStorage.getItem('WebGoL-Highscores'));
 	}
 
-	var newscore = [this.statesize[0], this.statesize[1], gol.active_rule[1], gol.game_score];
+	var newscore = [this.statesize[0], this.statesize[1], gol.active_rule[1], gol.active_rule[0], gol.game_score, gol.game_frame];
 	score_ar.push(newscore);
 
 	// Put the object into storage
@@ -1512,7 +1513,7 @@ GOL.prototype.create_melee = function() {
 	var dist = gol.get_dist(this.statesize[0]/2, x, this.statesize[1]/2, y);
 
 	if(dist > 18 && dist < 64) {
-		gol.placeAll(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
+		gol.place_Rend_World(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
 		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
 		gol.p_power -= 6;
 		gol.play_sound(10);
@@ -1523,7 +1524,7 @@ GOL.prototype.create_melee = function() {
 		x = capped_pos[0];
 		y = capped_pos[1];
 
-		gol.placeAll(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
+		gol.place_Rend_World(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
 		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
 		gol.p_power -= 6;
 		gol.play_sound(10);
@@ -1778,9 +1779,10 @@ GOL.prototype.run_barriers = function() {
 GOL.prototype.run_shields = function() {
 
 	//Shield (deletes impacted objects)
-	if(gol.p_shield_cooldown == 0) {
+	if(gol.p_shield_cooldown <= 0 && gol.p_shield_charge_cooldown <= 0) {
 		gol.p_power -= 60;
 		gol.p_shield_cooldown = 15;
+		gol.p_shield_charge_cooldown = 4;
 
 		//figure out how large the burst should be
 		var shield_size_calc = Math.ceil((gol.p_power/gol.p_power_max)*gol.p_shield_size_max) + gol.p_shield_size;
@@ -1789,7 +1791,7 @@ GOL.prototype.run_shields = function() {
 		//gol.placeAll(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, shield_size_calc, 0, 0, 1, 1);
 
 		gol.create_explosion(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, 3, 0, 0, 0, 1, 1, true, 1);
-	}
+	} else {gol.p_shield_charge_cooldown -= 1;}
 
 	return this;
 }
@@ -2034,7 +2036,7 @@ GOL.prototype.run_player = function() {
 		if(!gol.r_click && gol.l_click) {
 			if(gol.shoot_cooldown <= 0) {
 				if(gol.p_power >= 125){
-					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 18, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 44, 101, 12);						
+					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 18, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 25, 101, 12);						
 					gol.shoot_cooldown = gol.p_rof;
 					gol.p_power -= 125;
 					gol.play_sound(9);
