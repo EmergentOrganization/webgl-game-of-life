@@ -12,7 +12,7 @@ void main() {
     float current = float(get(vec2(0.0, 0.0)));
     gl_FragColor = vec4(current, current, current, 1.0);
 
-    int sum =
+    int s1 =
         get(vec2(-14.0, -3.0)) +
         get(vec2(-14.0, -2.0)) +
         get(vec2(-14.0, -1.0)) +
@@ -148,7 +148,9 @@ void main() {
         get(vec2(-4.0, 12.0)) +
         get(vec2(-4.0, 13.0)) +
         get(vec2(-3.0, -14.0)) +
-        get(vec2(-3.0, -13.0)) +
+        get(vec2(-3.0, -13.0));
+
+	int s2 = 
         get(vec2(-3.0, -12.0)) +
         get(vec2(-3.0, -11.0)) +
         get(vec2(-3.0, -6.0)) +
@@ -183,9 +185,7 @@ void main() {
         get(vec2(-1.0, 4.0)) +
         get(vec2(-1.0, 7.0)) +
         get(vec2(-1.0, 11.0)) +
-        get(vec2(-1.0, 12.0));
-        
-		int sumTwo = 
+        get(vec2(-1.0, 12.0)) +
 		get(vec2(-1.0, 13.0)) + //crash
         get(vec2(-1.0, 14.0)) +
         get(vec2(0.0, -14.0)) +
@@ -246,7 +246,9 @@ void main() {
         get(vec2(4.0, -11.0)) +
         get(vec2(4.0, -6.0)) +
         get(vec2(4.0, -1.0)) +
-        get(vec2(4.0, 0.0)) +
+        get(vec2(4.0, 0.0));
+
+	int s3 =
         get(vec2(4.0, 1.0)) +
         get(vec2(4.0, 6.0)) +
         get(vec2(4.0, 11.0)) +
@@ -376,7 +378,7 @@ void main() {
         get(vec2(14.0, 2.0)) +
         get(vec2(14.0, 3.0));
 
-		sum = sum + sumTwo;
+		int sum = s1 + s2 + s3;
 
 	if(sum >= 220) 					{gl_FragColor = vec4(0.0, 0.9, 0.6, 1.0);}
 	if(sum >= 180 && sum <= 220) 	{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}

@@ -1762,7 +1762,7 @@ GOL.prototype.run_barriers = function() {
 				gol.barriers[i][0] = adjusted_pos[0];
 				gol.barriers[i][1] = adjusted_pos[1];
 
-				gol.placeAll(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size, 0, 0, gol.barriers[i][3]/gol.barrier_life_max, 1-(gol.barriers[i][3]/gol.barrier_life_max));
+				gol.place_Rend_World(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size, 0, 0, gol.barriers[i][3]/gol.barrier_life_max, 1-(gol.barriers[i][3]/gol.barrier_life_max));
 			}
 		}
 	}
@@ -2036,7 +2036,7 @@ GOL.prototype.run_player = function() {
 		if(!gol.r_click && gol.l_click) {
 			if(gol.shoot_cooldown <= 0) {
 				if(gol.p_power >= 125){
-					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 18, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 25, 101, 12);						
+					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 25, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 25, 101, 12);						
 					gol.shoot_cooldown = gol.p_rof;
 					gol.p_power -= 125;
 					gol.play_sound(9);
