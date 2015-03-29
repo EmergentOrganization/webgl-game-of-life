@@ -6,7 +6,7 @@
 function GOL(canvas, scale) {
 
 	// Core Engine
-    var igloo = this.igloo = new Igloo(canvas);
+    var igloo = this.igloo = new Igloo(canvas, { preserveDrawingBuffer: true });
     var gl = igloo.gl;
     if (gl == null) {
         alert('Could not initialize WebGL!');
@@ -253,29 +253,35 @@ function GOL(canvas, scale) {
 	//	Keep the neighbourhoods CPU-side?
 	//
 
-    this.programs = {
-        copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
-        gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
-        evo:  igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
-        orbw:  igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
-        MiniAtomConway:  igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
-        MicroFeeders:  igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-1.frag'),
-        		//ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
-        //Microbes:  igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
-        //Tether:  igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
-        //Feeders:  igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
-        //MiniAtom:  igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
-        Waves:  igloo.program('glsl/quad.vert', 'glsl/Waves.frag'),
-        Dunes:  igloo.program('glsl/quad.vert', 'glsl/Dunes.frag'),
-        Sweeper:  igloo.program('glsl/quad.vert', 'glsl/Sweeper.frag'),
-        //Tsunami:  igloo.program('glsl/quad.vert', 'glsl/Tsunami.frag'),
-        Minefield:  igloo.program('glsl/quad.vert', 'glsl/Minefield.frag'),
-        //Nemesis:  igloo.program('glsl/quad.vert', 'glsl/Nemesis.frag'),
+	this.programs = {
+        gol:  			igloo.program('glsl/quad.vert', 'glsl/gol.frag'),
+        evo:  			igloo.program('glsl/quad.vert', 'glsl/evo.frag'),
+        MiniAtomConway: igloo.program('glsl/quad.vert', 'glsl/MiniAtomConway.frag'),
+        MicroFeeders:  	igloo.program('glsl/quad.vert', 'glsl/MicroFeeders-1.frag'),
+        Waves:  		igloo.program('glsl/quad.vert', 'glsl/Waves.frag'),
+        Dunes:  		igloo.program('glsl/quad.vert', 'glsl/Dunes.frag'),
+        Sweeper:  		igloo.program('glsl/quad.vert', 'glsl/Sweeper.frag'),
+        Minefield:  	igloo.program('glsl/quad.vert', 'glsl/Minefield.frag'),
+
+		//Heavy Rules
+        	//Microbes:  		igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
+        	//orbw:  			igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
+        	//Tether:  			igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
+        	//Feeders:  		igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
+        	//MiniAtom:  		igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
+        	//Tsunami:  		igloo.program('glsl/quad.vert', 'glsl/Tsunami.frag'),
+        	//Nemesis:  		igloo.program('glsl/quad.vert', 'glsl/Nemesis.frag'),
+
+		//Unused Rules
         		//AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
-        ShiftCells:  igloo.program('glsl/quad.vert', 'glsl/ShiftCells_2.frag'),
-        PlaceCells:  igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag'),
-        RendMerge3:  igloo.program('glsl/quad.vert', 'glsl/RendMerge3.frag'),
-        DestInterf:  igloo.program('glsl/quad.vert', 'glsl/DestInterf.frag')
+        		//ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
+
+		//Utility shaders
+        copy: 			igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
+        ShiftCells:  	igloo.program('glsl/quad.vert', 'glsl/ShiftCells_2.frag'),
+        PlaceCells:  	igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag'),
+        RendMerge3:  	igloo.program('glsl/quad.vert', 'glsl/RendMerge3.frag'),
+        DestInterf:  	igloo.program('glsl/quad.vert', 'glsl/DestInterf.frag')
     };
 
 	//Rule & seed selection containers
