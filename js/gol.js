@@ -283,13 +283,13 @@ function GOL(canvas, scale) {
         Minefield:  	igloo.program('glsl/quad.vert', 'glsl/Minefield.frag'),
 
 		//Heavy Rules
-        	Microbes:  		igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
-        	orbw:  			igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
-        	 Tether:  		igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
-        	Feeders:  		igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
-        	MiniAtom:  		igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
-        	Tsunami:  		igloo.program('glsl/quad.vert', 'glsl/Tsunami.frag'),
-        	Nemesis:  		igloo.program('glsl/quad.vert', 'glsl/Nemesis.frag'),
+        	//Microbes:  		igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
+        	//orbw:  			igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
+        	// Tether:  		igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
+        	//Feeders:  		igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
+        	//MiniAtom:  		igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
+        	//Tsunami:  		igloo.program('glsl/quad.vert', 'glsl/Tsunami.frag'),
+        	//Nemesis:  		igloo.program('glsl/quad.vert', 'glsl/Nemesis.frag'),
 
 		//Unused Rules
         		//AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
@@ -298,7 +298,7 @@ function GOL(canvas, scale) {
 		//Utility shaders
         copy: 			igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
         ShiftCells:  	igloo.program('glsl/quad.vert', 'glsl/ShiftCells_2.frag'),
-        PlaceCells:  	igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag'),
+        PlaceCells:  	igloo.program('glsl/quad.vert', 'glsl/PlaceCircle.frag'),
         RendMerge3:  	igloo.program('glsl/quad.vert', 'glsl/RendMerge3.frag'),
         DestInterf:  	igloo.program('glsl/quad.vert', 'glsl/DestInterf.frag')
     };
@@ -1587,29 +1587,40 @@ GOL.prototype.create_melee = function() {
 };
 
 GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size, hive) {
-
+	var retry = false;
 	if(!gol.cpu_hit_test(this.statesize[0]/2, x, this.statesize[1]/2, y, gol.player_size, 96)) {
 
-		var new_obj = new Array(12);
+		for(var i = 0; i < gol.waypoints.length; i++) {
+			if(gol.cpu_hit_test(gol.waypoints[i][0], x, gol.waypoints[i][1], y, gol.player_size, 128)) {
+				retry = true;
+			}
+		}
 
-		new_obj[0] = x;			// Actual X pos
-		new_obj[1] = y;			// Actual Y pos
-		new_obj[2] = size;		// Square size
-		new_obj[3] = life;		// Life (frames)
-		new_obj[4] = life;		// Lifespan (frames)
-		new_obj[5] = cooldown/6;	// Shoot cooldown (frames)
-		new_obj[6] = cooldown;	// Cooldown Max (frames)
-		new_obj[7] = bul_size;	// bullet size
-		new_obj[8] = false;	// Moving?
-		new_obj[9] = 0;	// move_x
-		new_obj[10] = 0;	// move_y
-		new_obj[11] = hive;	// is_hive
+		if(!retry) {
+			var new_obj = new Array(12);
 
-		gol.enemies.push(new_obj);
+			new_obj[0] = x;			// Actual X pos
+			new_obj[1] = y;			// Actual Y pos
+			new_obj[2] = size;		// Square size
+			new_obj[3] = life;		// Life (frames)
+			new_obj[4] = life;		// Lifespan (frames)
+			new_obj[5] = cooldown/6;	// Shoot cooldown (frames)
+			new_obj[6] = cooldown;	// Cooldown Max (frames)
+			new_obj[7] = bul_size;	// bullet size
+			new_obj[8] = false;	// Moving?
+			new_obj[9] = 0;	// move_x
+			new_obj[10] = 0;	// move_y
+			new_obj[11] = hive;	// is_hive
 
-		if(hive > 0) {gol.play_sound(16);} else {gol.play_sound(14);}
+			gol.enemies.push(new_obj);
 
+			if(hive > 0) {gol.play_sound(16);} else {gol.play_sound(14);}
+		}
 	} else {
+		retry = true;
+	}
+
+	if(retry) {
 		gol.enemy_cooldown = 1;
 		if(hive > 0) {gol.queen_cooldown = 1;}
 	}
@@ -1668,7 +1679,7 @@ GOL.prototype.run_enemies = function() {
 					var rof = Math.random()*80+120;
 					var bul_rand = (rof/200)*10;
 					gol.enemies[i][11] -= 1;
-					gol.create_enemy(gol.enemies[i][0]+Math.floor(Math.random()*45-22), gol.enemies[i][1]+Math.floor(Math.random()*45-22), 18, 50+(gol.game_score/250), rof, Math.random()*bul_rand+2, 0);
+					gol.create_enemy(gol.enemies[i][0]+Math.floor(Math.random()*45-22), gol.enemies[i][1]+Math.floor(Math.random()*45-22), 18, 50+(gol.game_score/250), rof, Math.random()*bul_rand+3, 0);
 					if(gol.enemies[i][11] <= 0) {gol.enemies[i][6] = 240;}
 				}
 			}
