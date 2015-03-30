@@ -84,6 +84,7 @@ function GOL(canvas, scale) {
 	this.p_s_burstsize = 90;
 	this.p_s_burstcooldown = 0;
 	this.p_shield_charge_cooldown = 0;
+	this.shield_burst_duration = 0;
 
 	//Game objects containers
 	this.bullets = new Array();
@@ -1051,6 +1052,7 @@ function Controller(gol) {
 				if(gol.p_s_burstcooldown <= 0 && !gol.space_down && (gol.p_power/gol.p_power_max) >= 0.5) {
 					gol.space_down = true;
 			 		gol.play_sound(0);
+					gol.shield_burst_duration = 15;
 				}
 		        break;
 		};
@@ -2170,6 +2172,7 @@ GOL.prototype.run_player = function() {
 	}
 
 	if(gol.p_s_burstcooldown > 0) {gol.p_s_burstcooldown -= 1;}
+	if(gol.space_down && gol.shield_burst_duration > 0) {gol.shield_burst_duration -= 1;} else {gol.space_down = false;}
 			
 
 	//Game Over!	
