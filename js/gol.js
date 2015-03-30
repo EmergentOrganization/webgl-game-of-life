@@ -57,6 +57,7 @@ function GOL(canvas, scale) {
 	this.game_score = 0; //Scorekeeping
 	this.game_frame = 0; //timekeeping
 	this.healthflash = false;
+	this.health_low_flash = 0;
 	this.master_volume = 2.5;
 
 	//Player Stats
@@ -97,6 +98,7 @@ function GOL(canvas, scale) {
 
 	//enemy creation
 	this.enemy_cooldown = Math.floor(Math.random()*200+400);
+	this.queen_cooldown = 4000;
 
 	//waypoint creation
 	this.waypoint_cooldown = Math.floor(Math.random()*500+400);
@@ -106,7 +108,7 @@ function GOL(canvas, scale) {
 	this.place_barrier_cooldown = 0;
 	this.barrier_life_max = 1200;
 	
-	this.audio_ar = new Array(16);
+	this.audio_ar = new Array(18);
 	for(var i = 0; i < this.audio_ar.length; i++) {
 		this.audio_ar[i] = new Array(10);
 	}
@@ -238,6 +240,22 @@ function GOL(canvas, scale) {
 		this.audio_ar[j][7] = 0;
 		this.audio_ar[j][8] = 0;
 		this.audio_ar[j][9] = 12;
+
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/CreateEnemy2.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.2;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 12;
+
+		j += 1;
+
+		this.audio_ar[j][i] = new Audio("sounds/LowHealth.wav");
+		this.audio_ar[j][i].volume = this.master_volume*0.12;
+		this.audio_ar[j][7] = 0;
+		this.audio_ar[j][8] = 0;
+		this.audio_ar[j][9] = 60;
 		
 
 	}
@@ -264,13 +282,13 @@ function GOL(canvas, scale) {
         Minefield:  	igloo.program('glsl/quad.vert', 'glsl/Minefield.frag'),
 
 		//Heavy Rules
-        	//Microbes:  		igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
-        	//orbw:  			igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
-        	//Tether:  			igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
-        	//Feeders:  		igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
-        	//MiniAtom:  		igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
-        	//Tsunami:  		igloo.program('glsl/quad.vert', 'glsl/Tsunami.frag'),
-        	//Nemesis:  		igloo.program('glsl/quad.vert', 'glsl/Nemesis.frag'),
+        	Microbes:  		igloo.program('glsl/quad.vert', 'glsl/EF741-2.frag'),
+        	orbw:  			igloo.program('glsl/quad.vert', 'glsl/orbwave-2.frag'),
+        	 Tether:  		igloo.program('glsl/quad.vert', 'glsl/Tether.frag'),
+        	Feeders:  		igloo.program('glsl/quad.vert', 'glsl/Feeders12-3.frag'),
+        	MiniAtom:  		igloo.program('glsl/quad.vert', 'glsl/MiniAtom-2.frag'),
+        	Tsunami:  		igloo.program('glsl/quad.vert', 'glsl/Tsunami.frag'),
+        	Nemesis:  		igloo.program('glsl/quad.vert', 'glsl/Nemesis.frag'),
 
 		//Unused Rules
         		//AtomSmall:  igloo.program('glsl/quad.vert', 'glsl/AtomSmall.frag'),
@@ -1050,6 +1068,7 @@ function Controller(gol) {
 			gol.player_reset();
             break;
         case 46: /* [delete] */
+			gol.setEmpty(gol.textures.background_1);
             gol.setEmpty(gol.textures.front);
             gol.draw();
             break;
@@ -1150,6 +1169,7 @@ GOL.prototype.player_cap_mouse_pos_max = function(cap) {
 	return [x_fin, y_fin];
 }
 
+
 /* ************************
 // End General functions //
 ************************ */
@@ -1241,12 +1261,16 @@ GOL.prototype.run_hittests = function() {
 			if(gol.waypoints.length > 0 && gol.waypoints[i] != null) {
 				if(gol.enemies.length > 0 && gol.enemies[j] != null) {
 					if(gol.cpu_hit_test(gol.enemies[j][0], gol.waypoints[i][0], gol.enemies[j][1], gol.waypoints[i][1], gol.enemies[j][2], gol.waypoints[i][2])) {
-						gol.ar_kill(gol.enemies, j);
+						gol.waypoints[i][3] -= gol.enemies[j][3]*10;
+						gol.enemies[j][3] = 0;
+						hit_wp_sound = true;
 					}
 				}
 			}
 		}
 	}
+
+
 	//Bullet collision with bullet
 	var hit_bul_sound = false;
 	for(var i = 0; i < gol.bullets.length; i++) {
@@ -1348,6 +1372,11 @@ GOL.prototype.run_hittests = function() {
 					x = capped_pos[0];
 					y = capped_pos[1];
 				}
+				if(dist <= 18) {
+					var capped_pos = gol.player_cap_mouse_pos_max(18);
+					x = capped_pos[0];
+					y = capped_pos[1];
+				}
 				
 				if(gol.cpu_hit_test(x, gol.bullets[i][0], y, gol.bullets[i][1], (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, gol.bullets[i][2])) {
 					gol.ar_kill(gol.bullets, i);
@@ -1391,9 +1420,14 @@ GOL.prototype.run_hittests = function() {
 					x = capped_pos[0];
 					y = capped_pos[1];
 				}
+				if(dist <= 18) {
+					var capped_pos = gol.player_cap_mouse_pos_max(18);
+					x = capped_pos[0];
+					y = capped_pos[1];
+				}
 
 				if(gol.cpu_hit_test(x, gol.enemies[i][0], y, gol.enemies[i][1], (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, gol.enemies[i][2])) {
-				gol.enemies[i][3] -= 4;
+				gol.enemies[i][3] -= 8*(gol.p_power/gol.p_power_max)+1;
 				}
 			}
 		}
@@ -1534,17 +1568,27 @@ GOL.prototype.create_melee = function() {
 		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
 		gol.p_power -= 6;
 		gol.play_sound(10);
+	} else if(dist <= 18) {
+
+		var capped_pos = gol.player_cap_mouse_pos_max(18);
+
+		x = capped_pos[0];
+		y = capped_pos[1];
+
+		gol.place_Rend_World(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 1, 0.4);
+		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
+		gol.p_power -= 6;
+		gol.play_sound(10);
 	}
-	
     
 	return this;
 };
 
-GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size) {
+GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size, hive) {
 
 	if(!gol.cpu_hit_test(this.statesize[0]/2, x, this.statesize[1]/2, y, gol.player_size, 96)) {
 
-		var new_obj = new Array(11);
+		var new_obj = new Array(12);
 
 		new_obj[0] = x;			// Actual X pos
 		new_obj[1] = y;			// Actual Y pos
@@ -1553,55 +1597,84 @@ GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size) {
 		new_obj[4] = life;		// Lifespan (frames)
 		new_obj[5] = cooldown/6;	// Shoot cooldown (frames)
 		new_obj[6] = cooldown;	// Cooldown Max (frames)
-		new_obj[7] = bul_size;	// Cooldown Max (frames)
+		new_obj[7] = bul_size;	// bullet size
 		new_obj[8] = false;	// Moving?
 		new_obj[9] = 0;	// move_x
 		new_obj[10] = 0;	// move_y
+		new_obj[11] = hive;	// is_hive
 
 		gol.enemies.push(new_obj);
 
-		gol.play_sound(14);
+		if(hive > 0) {gol.play_sound(16);} else {gol.play_sound(14);}
 
-	} else {gol.enemy_cooldown = 1;}
+	} else {
+		gol.enemy_cooldown = 1;
+		if(hive > 0) {gol.queen_cooldown = 1;}
+	}
 
     return this;
 };
 
 GOL.prototype.run_enemies = function() {
-	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 2 + Math.floor(gol.game_score/2500)) {
-		gol.enemy_cooldown = 100+Math.random()*300;
+	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1 + Math.floor(gol.game_score/1500)) {
+		gol.enemy_cooldown = 180+Math.random()*300;
 
 		var rof = Math.random()*390+20;
 		var bul_rand = (rof/400)*25;
 
-		gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/10)+16, Math.random()*90+5+(gol.game_score/250), rof, Math.random()*bul_rand+4);
+		//create_queen
+		if(gol.enemies.length == 0 && gol.queen_cooldown <= 0) {
+			gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)+40, Math.random()*200+150+(gol.game_score/100), 30, 25, Math.random()*2+4);
+			gol.queen_cooldown = 2000;
+		} else {
+			//create_normal
+			gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/20)+22, Math.random()*90+5+(gol.game_score/250), rof, Math.random()*bul_rand+4, 0);
+		}
+	
+
 	}
+
 	for(var i = 0; i < gol.enemies.length; i++) {
 		if(gol.enemies.length > 0 && gol.enemies[i] != null) {
 
-			if(gol.enemies[i][5] <= 0) {
-				gol.enemies[i][5] = gol.enemies[i][6];
-				gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7], 150, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 0, 150, 32);						
-				gol.play_sound(5);
-			}
-
-			if(gol.enemies[i][5] >= 30 && gol.enemies[i][5] <= gol.enemies[i][6]*0.8) {
-				if(!gol.enemies[i][8]) {
-					gol.enemies[i][8] = true;
-					gol.enemies[i][9] = Math.floor(Math.random()*3-1);
-					gol.enemies[i][10] = Math.floor(Math.random()*3-1);
+			if(gol.enemies[i][11] <= 0) {
+				//shoot
+				if(gol.enemies[i][5] <= 0) {
+					gol.enemies[i][5] = gol.enemies[i][6];
+					gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7], 150, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 0, 150, 32);						
+					gol.play_sound(5);
+				}
+				//set direction and move-flag
+				if(gol.enemies[i][5] >= 30 && gol.enemies[i][5] <= gol.enemies[i][6]*0.8) {
+					if(!gol.enemies[i][8]) {
+						gol.enemies[i][8] = true;
+						gol.enemies[i][9] = Math.floor(Math.random()*3-1);
+						gol.enemies[i][10] = Math.floor(Math.random()*3-1);
+					}
+				} else {
+					gol.enemies[i][8] = false;
+				}
+				//move
+				if(gol.enemies[i][8]) {
+					gol.enemies[i][0] += gol.enemies[i][9];
+					gol.enemies[i][1] += gol.enemies[i][10];
 				}
 			} else {
-				gol.enemies[i][8] = false;
+				//Spawn
+				if(gol.enemies[i][5] <= 0) {
+					gol.enemies[i][5] = gol.enemies[i][6];
+					var rof = Math.random()*80+120;
+					var bul_rand = (rof/200)*10;
+					gol.enemies[i][11] -= 1;
+					gol.create_enemy(gol.enemies[i][0]+Math.floor(Math.random()*45-22), gol.enemies[i][1]+Math.floor(Math.random()*45-22), 18, 50+(gol.game_score/250), rof, Math.random()*bul_rand+2, 0);
+					if(gol.enemies[i][11] <= 0) {gol.enemies[i][6] = 240;}
+				}
 			}
 
-			if(gol.enemies[i][8]) {
-				gol.enemies[i][0] += gol.enemies[i][9];
-				gol.enemies[i][1] += gol.enemies[i][10];
-			}
-
+			//cooldown
 			gol.enemies[i][5]-= 1;
-
+			
+			//cpu offset adjustment
 			var adjusted_pos = gol.cpu_positioning(gol.enemies[i][0], gol.enemies[i][1]);
 			gol.enemies[i][0] = adjusted_pos[0];
 			gol.enemies[i][1] = adjusted_pos[1];
@@ -1611,6 +1684,7 @@ GOL.prototype.run_enemies = function() {
 
 			if(gol.enemies[i][3] <= 0) {
 				gol.game_score += 30;
+				if(gol.enemies[i][11] > 0) {gol.game_score += 200;}
 				gol.ar_kill(gol.enemies, i);
 				if(gol.enemy_cooldown <= 30){
 					gol.enemy_cooldown = 15+Math.random()*15;
@@ -1892,6 +1966,7 @@ GOL.prototype.player_reset = function() {
 	gol.game_score = 0; //Scorekeeping
 	gol.healthflash = false;
 	gol.game_frame = 0;
+	health_low_flash = 0;
 
 	//Player shield
 	gol.p_shield_cooldown = 0;
@@ -1908,6 +1983,7 @@ GOL.prototype.player_reset = function() {
 	gol.enemy_cooldown = 600;
 	gol.waypoint_cooldown = 900;
 	gol.place_barrier_cooldown = 0;
+	gol.queen_cooldown = 4000;
 
 	return this;
 };
@@ -1959,6 +2035,7 @@ GOL.prototype.run_player = function() {
 	gol.shoot_cooldown -= 1;
 	gol.enemy_cooldown -= 1;
 	gol.waypoint_cooldown -= 1;
+	gol.queen_cooldown -= 1;
 	
 
 	for(var i = 0; i < gol.audio_ar.length; i++) {
@@ -2017,6 +2094,14 @@ GOL.prototype.run_player = function() {
 		gol.healthflash = false;
 	}
 
+	if(gol.health_low_flash < 8 && gol.p_health/gol.p_health_max < 0.25) {
+		gol.healthflash = true;
+		if(gol.health_low_flash == 0) {
+			gol.play_sound(17);
+		}
+	}
+
+	gol.health_low_flash = (gol.health_low_flash + 1) % 16;
 
 	//status bars
 	//  Back bars
@@ -2042,7 +2127,7 @@ GOL.prototype.run_player = function() {
 		if(!gol.r_click && gol.l_click) {
 			if(gol.shoot_cooldown <= 0) {
 				if(gol.p_power >= 125){
-					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 25, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 25, 101, 12);						
+					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 25, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 39, 101, 12);						
 					gol.shoot_cooldown = gol.p_rof;
 					gol.p_power -= 125;
 					gol.play_sound(9);
