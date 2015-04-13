@@ -290,7 +290,6 @@ function GOL(canvas, scale) {
 		this.rule_paths.push('glsl/MiniAtomConway.frag'),
 		this.rule_paths.push('glsl/Nemesis.frag'),
 		this.rule_paths.push('glsl/OrbWave-9.frag'),
-		this.rule_paths.push('glsl/photo.frag'),
 		this.rule_paths.push('glsl/Tether.frag'),
 		this.rule_paths.push('glsl/Tsunami.frag'),
 		this.rule_paths.push('glsl/Waves.frag')
