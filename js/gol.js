@@ -275,7 +275,7 @@ function GOL(canvas, scale) {
 
 	this.rule_paths = new Array();
 
-	for (var i = 0; i < 18; i++){
+	for (var i = 0; i < 17; i++){
 		this.rule_paths.push('glsl/Dunes.frag'),
 		this.rule_paths.push('glsl/EF741-2.frag'),
 		this.rule_paths.push('glsl/evo.frag'),
@@ -860,10 +860,10 @@ GOL.prototype.start = function(canvas) {
 
 			if(gol.randrules) {
 				if(gol.game_frame % 600 == 0) {
-					gol.rand_buddy(18);
+					gol.rand_buddy(17);
 				}
 				if(gol.game_frame % 900 == 0) {
-					gol.rand_rule(18);
+					gol.rand_rule(17);
 				}
 			}
 
@@ -1101,10 +1101,9 @@ function addGUI() {
 		'MiniAtomConway': 11,
 		'Nemesis': 12,
 		'OrbWave-9': 13,
-		'photo': 14,
-		'Tether': 15,
-		'Tsunami': 16,
-		'Waves': 17,
+		'Tether': 14,
+		'Tsunami': 15,
+		'Waves': 16,
 		'Random': -1
 	}).name('Hostile Algorithm').onChange(set_rule);
 
@@ -1125,10 +1124,9 @@ function addGUI() {
 		'MiniAtomConway': 11,
 		'Nemesis': 12,
 		'OrbWave-9': 13,
-		'photo': 14,
-		'Tether': 15,
-		'Tsunami': 16,
-		'Waves': 17,
+		'Tether': 14,
+		'Tsunami': 15,
+		'Waves': 16,
 		'Random': -1
 	}).name('Player Algorithm').onChange(set_buddy_rule);
 
@@ -1157,7 +1155,7 @@ function addGUI() {
 
 	function set_rule(value){
 		if(value == -1) {
-			value = Math.floor(Math.random()*18);
+			value = Math.floor(Math.random()*17);
 			cont.rule = value;
 		}
 		gol.reset_rules(value, cont.buddy_rule);
@@ -1171,7 +1169,7 @@ function addGUI() {
 
 	function set_buddy_rule(value){
 		if(value == -1) {
-			value = Math.floor(Math.random()*18);
+			value = Math.floor(Math.random()*17);
 			cont.buddy_rule = value;
 		}
 		gol.reset_rules(cont.rule, value);
@@ -1191,7 +1189,7 @@ function myConfig() {
 	this.testInt = 0;
 	this.testBool = false;
 	this.rule = 3;
-	this.buddy_rule = 16;
+	this.buddy_rule = 15;
 }
 
 

@@ -7,7 +7,7 @@ class CreateList:
 		return filenames
 
 	def ignore_elements(self, files):
-		ignores = ['copy.frag', 'ShiftCells.frag', 'ShiftCells_2.frag', 'PlaceCells.frag', 'RendMerge3.frag', 'DestInterf.frag', 'quad.vert']
+		ignores = ['copy.frag', 'ShiftCells.frag', 'ShiftCells_2.frag', 'PlaceCells.frag', 'RendMerge3.frag', 'DestInterf.frag', 'quad.vert', 'photo.frag]
 		restart = False
 		for f in files:
 			if restart:
