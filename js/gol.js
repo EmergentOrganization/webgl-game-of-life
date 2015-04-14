@@ -30,6 +30,9 @@ function GOL(canvas, scale) {
 	this.render_frame = 0;
 	this.recordnow = false;
 
+	this.game_on = true;
+	this.seed_strength = 0.37;
+
 	//Player definition & control
 	this.player_size = 13;
 	this.player_x = w/scale/2+(this.player_size/2);
@@ -326,7 +329,7 @@ function GOL(canvas, scale) {
 		*/
 
 		Rule0:	igloo.program('glsl/quad.vert', this.rule_paths[3]),
-		Rule1:	igloo.program('glsl/quad.vert', this.rule_paths[16]),
+		Rule1:	igloo.program('glsl/quad.vert', this.rule_paths[15]),
 
 		//Utility shaders
         copy: 			igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
@@ -345,7 +348,7 @@ function GOL(canvas, scale) {
 
 	//set the seed strength defaults
 	for (var i = 0; i < this.rule_seeds.length; i++){
-		this.rule_seeds[i] = 0.37;
+		this.rule_seeds[i] = this.seed_strength;
 	}
 
 	//Define the rules
@@ -422,7 +425,9 @@ function GOL(canvas, scale) {
 	this.setEmpty(this.textures.foreground_1);
 
 	//clear the CA in an area around the player
-	this.place_cell_world(this.statesize[0]/scale/2, this.statesize[1]/scale/2, this.statesize[0]/3, this.statesize[1]/3, 0, 0, 0);
+	if(this.game_on) {
+		this.place_cell_world(this.statesize[0]/scale/2, this.statesize[1]/scale/2, this.statesize[0]/3, this.statesize[1]/3, 0, 0, 0);
+	}
 }
 
 
@@ -823,9 +828,11 @@ GOL.prototype.start = function(canvas) {
 			// shift, step, hit, bullet, enemy, swap_rend, waypoint, barrier, player, draw
 
 			//Offset the CA texture (front) by player's movements
-			gol.shift(gol.textures.front, gol.textures.back, 1, 1);	
-			gol.shift(gol.textures.background_1, gol.textures.background_2, 0, 1);	
-			gol.shift(gol.textures.foreground_1, gol.textures.foreground_2, 2, 1);	
+			if(gol.game_on) {
+				gol.shift(gol.textures.front, gol.textures.back, 1, 1);	
+				gol.shift(gol.textures.background_1, gol.textures.background_2, 0, 1);	
+				gol.shift(gol.textures.foreground_1, gol.textures.foreground_2, 2, 1);	
+			}
 			
 			//Compute the next frame(s) of the CA
 			for (var i = 0; i < 1; i++) { 
@@ -841,19 +848,23 @@ GOL.prototype.start = function(canvas) {
 
 			gol.destruct_interf();
 			
-        	gol.run_hittests();			//CPU Hit tests
-			gol.run_bullets();			//Step Bullet calcs
+			if(gol.game_on) {
+		    	gol.run_hittests();			//CPU Hit tests
+				gol.run_bullets();			//Step Bullet calcs
+			}
 
 			//gol.swap_rend();			//Merge the CA and Player texture layers
 			gol.runphotobackg();
 			gol.swap_MergeRend3();
 
-			gol.run_explosions();		//Detonations
+			if(gol.game_on) {
+				gol.run_explosions();		//Detonations
 
-			gol.run_waypoints();		//Step Waypoint calcs
-			gol.run_enemies();			//Step Enemy calcs
-			gol.run_barriers();			//Step Barrier calcs
-			gol.run_player();			//Step Player calcs
+				gol.run_waypoints();		//Step Waypoint calcs
+				gol.run_enemies();			//Step Enemy calcs
+				gol.run_barriers();			//Step Barrier calcs
+				gol.run_player();			//Step Player calcs
+			}
 
 			gol.draw();					//Render the final texture to the screen
 
@@ -1084,7 +1095,7 @@ function addGUI() {
     gui.add(cont, 'testBool').name('Pause').onFinishChange(tog);
     gui.add(cont, 'testBool').name('Randomize Rules').onFinishChange(ranrul);
     //gui.add(cont, 'testInt').name('TestMenu');
-    //gui.add(cont, 'testInt', 0, 20).step(1).name('TestMenu').onFinishChange(testFoo);
+    gui.add(cont, 'seed', 0, 1).step(0.01).name('Seed Strength').onFinishChange(set_seed_str);
 	gui.add(cont, 'rule', {
 		'Dunes': 0,
 		'EF741-2': 1,
@@ -1144,6 +1155,15 @@ function addGUI() {
 		document.getElementById("life").focus();
 	}
 
+
+	function set_seed_str(val){
+		gol.seed_strength = val;
+		
+		for (var i = 0; i < gol.rule_seeds.length; i++){
+			gol.rule_seeds[i] = gol.seed_strength;
+		}
+	}
+
 	function fpsChange(value) {
 		gol.toggle();
         if(value) {gol.fps_target = 16.7; }
@@ -1186,6 +1206,7 @@ function addGUI() {
 
 function myConfig() {
 	this.testInt = 0;
+	this.seed = gol.seed_strength;
 	this.testBool = false;
 	this.rule = 3;
 	this.buddy_rule = 15;
@@ -1899,7 +1920,7 @@ GOL.prototype.create_enemy = function(x, y, size, life, cooldown, bul_size, hive
 };
 
 GOL.prototype.run_enemies = function() {
-	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1 + Math.floor(gol.game_score/1500)) {
+	if(gol.enemy_cooldown <= 0 && gol.enemies.length <= 1 + Math.floor(gol.game_score/2500)) {
 		gol.enemy_cooldown = 180+Math.random()*300;
 
 		var rof = Math.random()*390+20;
@@ -1911,7 +1932,7 @@ GOL.prototype.run_enemies = function() {
 			gol.queen_cooldown = 2000;
 		} else {
 			//create_normal
-			gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/20)+22, Math.random()*90+5+(gol.game_score/250), rof, Math.random()*bul_rand+4, 0);
+			gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/20)+22, 5*(Math.random()*(gol.game_score/150))+5, rof, Math.random()*bul_rand+4, 0);
 		}
 	
 
@@ -1971,8 +1992,8 @@ GOL.prototype.run_enemies = function() {
 				if(gol.enemies[i][11] > 0) {gol.game_score += 200;}
 				gol.ar_kill(gol.enemies, i);
 				if(gol.enemy_cooldown <= 30){
-					gol.enemy_cooldown = 15+Math.random()*15;
-				} else {gol.enemy_cooldown += 15;}
+					gol.enemy_cooldown = 30+Math.random()*15;
+				} else {gol.enemy_cooldown += 30;}
 				
 				gol.play_sound(6);
 			}
@@ -2229,7 +2250,9 @@ GOL.prototype.player_hitbox = function() {
 GOL.prototype.player_reset = function() {
 	if(gol.game_score > 0) {gol.save_score();}
 
-	gol.place_cell_world(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, this.statesize[0]/3, this.statesize[1]/3, 0, 0, 0);
+	if(gol.game_on) {
+		gol.place_cell_world(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, this.statesize[0]/3, this.statesize[1]/3, 0, 0, 0);
+	}
 	
 	//others
 	gol.p_power = 1000;
@@ -2412,8 +2435,8 @@ GOL.prototype.run_player = function() {
 		//Main Shooter
 		if(!gol.r_click && gol.l_click) {
 			if(gol.shoot_cooldown <= 0) {
-				if(gol.p_power >= 125){
-					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 55, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 39, 101, 12, 1);						
+				if(gol.p_power >= 100){
+					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 55, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 39, 101, 12, 1);					
 					gol.shoot_cooldown = gol.p_rof;
 					gol.p_power -= 100;
 					gol.play_sound(9);
