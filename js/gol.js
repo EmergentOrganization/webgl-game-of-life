@@ -57,6 +57,7 @@ function GOL(canvas, scale) {
 	this.active_rule[0] = 1;
 	this.active_rule[1] = 0;
 	this.randrules = false;
+	this.photo_duration = 1.0;
 
 	this.game_score = 0; //Scorekeeping
 	this.game_frame = 0; //timekeeping
@@ -423,6 +424,7 @@ function GOL(canvas, scale) {
     this.setRandom(this.textures.front, 1);
     this.setEmpty(this.textures.background_1);
 	this.setEmpty(this.textures.foreground_1);
+    //if(this.game_on == false) {this.setRandom(this.textures.background_1, 1);}
 
 	//clear the CA in an area around the player
 	if(this.game_on) {
@@ -569,6 +571,7 @@ GOL.prototype.runphotobackg = function() {
         .uniformi('front', 1)
         .uniformi('back', 2)
         .uniform('scale', this.statesize)
+        .uniform('duration', this.photo_duration)
         .draw(gl.TRIANGLE_STRIP, 4);
 
     return this;
@@ -854,7 +857,7 @@ GOL.prototype.start = function(canvas) {
 			}
 
 			//gol.swap_rend();			//Merge the CA and Player texture layers
-			gol.runphotobackg();
+			if(gol.game_frame > 5) {gol.runphotobackg();}
 			gol.swap_MergeRend3();
 
 			if(gol.game_on) {
@@ -869,10 +872,10 @@ GOL.prototype.start = function(canvas) {
 			gol.draw();					//Render the final texture to the screen
 
 			if(gol.randrules) {
-				if(gol.game_frame % 600 == 0) {
+				if(gol.game_frame % 1200 == 0) {
 					gol.rand_buddy(17);
 				}
-				if(gol.game_frame % 900 == 0) {
+				if(gol.game_frame % 1200 == 0) {
 					gol.rand_rule(17);
 				}
 			}
@@ -888,7 +891,7 @@ GOL.prototype.start = function(canvas) {
 					var rendmod = 300;
 
 					if(gol.render_frame % rendmod === 0)	{
-						alert("Download");
+						//alert("Download");
 						//gol.imageDump();
 						gol.downloadAll(gol.export_images, gol.render_frame-rendmod);
 					}
@@ -937,6 +940,7 @@ GOL.prototype.start = function(canvas) {
 };*/
 
 GOL.prototype.exportImage = function(gl, texture, width, height) {
+
     // Create a framebuffer backed by the texture
     var framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
@@ -1093,9 +1097,11 @@ function addGUI() {
 
     gui.add(cont, 'testBool').name('Enable 60fps').onFinishChange(fpsChange);
     gui.add(cont, 'testBool').name('Pause').onFinishChange(tog);
+    gui.add(cont, 'testBool').name('Game Mode').onFinishChange(tog_game);
     gui.add(cont, 'testBool').name('Randomize Rules').onFinishChange(ranrul);
     //gui.add(cont, 'testInt').name('TestMenu');
     gui.add(cont, 'seed', 0, 1).step(0.01).name('Seed Strength').onFinishChange(set_seed_str);
+    gui.add(cont, 'trail', 0.5, 20).step(0.1).name('Trail Length').onFinishChange(set_trail_len);
 	gui.add(cont, 'rule', {
 		'Dunes': 0,
 		'EF741-2': 1,
@@ -1150,6 +1156,11 @@ function addGUI() {
 		document.getElementById("life").focus();
 	}
 
+	function tog_game(){
+		gol.game_on = !gol.game_on;
+		document.getElementById("life").focus();
+	}
+
 	function ranrul(){
 		gol.randrules = !gol.randrules;
 		document.getElementById("life").focus();
@@ -1162,6 +1173,11 @@ function addGUI() {
 		for (var i = 0; i < gol.rule_seeds.length; i++){
 			gol.rule_seeds[i] = gol.seed_strength;
 		}
+	}
+
+	function set_trail_len(val){
+		gol.photo_duration = val*0.1;
+		gol.reset_rules(cont.rule, cont.buddy_rule);
 	}
 
 	function fpsChange(value) {
@@ -1181,6 +1197,7 @@ function addGUI() {
 		gol.setRandom(gol.textures.front, 1);
 		gol.setEmpty(gol.textures.background_1);
 		gol.setEmpty(gol.textures.foreground_1);
+//    	if(gol.game_on == false) {gol.setRandom(gol.textures.background_1, 1);}
 		gol.player_reset();
 		document.getElementById("life").focus();
 		//gui.close();
@@ -1195,6 +1212,7 @@ function addGUI() {
 		gol.setRandom(gol.textures.front, 1);
 		gol.setEmpty(gol.textures.background_1);
 		gol.setEmpty(gol.textures.foreground_1);
+//    	if(gol.game_on == false) {gol.setRandom(gol.textures.background_1, 1);}
 		gol.player_reset();
 		document.getElementById("life").focus();
 		//gui.close();
@@ -1210,6 +1228,7 @@ function myConfig() {
 	this.testBool = false;
 	this.rule = 3;
 	this.buddy_rule = 15;
+	this.trail = 10.0;
 }
 
 
@@ -1300,6 +1319,7 @@ function Controller(gol) {
             gol.setRandom(gol.textures.front, 1);
 			gol.setEmpty(gol.textures.background_1);
 			gol.setEmpty(gol.textures.foreground_1);
+//    		if(gol.game_on == false) {gol.setRandom(gol.textures.background_1, 1);}
 			gol.player_reset();
             break;
         case 46: /* [delete] */
@@ -1411,6 +1431,7 @@ GOL.prototype.next_rule = function() {
 	gol.setRandom(gol.textures.front, 1);
 	gol.setEmpty(gol.textures.background_1);
 	gol.setEmpty(gol.textures.foreground_1);
+//    if(gol.game_on == false) {gol.setRandom(gol.textures.background_1, 1);}
 	gol.player_reset();
 	document.getElementById("life").focus();
 }
@@ -1422,6 +1443,7 @@ GOL.prototype.next_buddy = function() {
 	gol.setRandom(gol.textures.front, 1);
 	gol.setEmpty(gol.textures.background_1);
 	gol.setEmpty(gol.textures.foreground_1);
+//    if(gol.game_on == false) {gol.setRandom(gol.textures.background_1, 1);}
 	gol.player_reset();
 	document.getElementById("life").focus();
 }
@@ -1945,8 +1967,19 @@ GOL.prototype.run_enemies = function() {
 				//shoot
 				if(gol.enemies[i][5] <= 0) {
 					gol.enemies[i][5] = gol.enemies[i][6];
-					gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7], 200, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 0, 150, 32, 0);						
-					gol.play_sound(5);
+
+					var x = (this.statesize[0]/2) - gol.enemies[i][0];
+					var y = (this.statesize[1]/2) - gol.enemies[i][1];
+					var dist = gol.get_dist(0, x, 0, y);
+
+					if(dist < 600) {
+						gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7], 100, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 0, 150, 32, 0);						
+						gol.play_sound(5);
+					}
+					if(dist < 180) {
+						gol.enemies[i][5] = gol.enemies[i][6]/3;
+						if(gol.enemies[i][5] < 20) {gol.enemies[i][5] = 20;}
+					}
 				}
 				//set direction and move-flag
 				if(gol.enemies[i][5] >= 30 && gol.enemies[i][5] <= gol.enemies[i][6]*0.8) {
@@ -1985,6 +2018,7 @@ GOL.prototype.run_enemies = function() {
 
 			gol.placeAll(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], 1, 1, 0.0, 0.0);
 			gol.placeAll(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-6, 1, 1, (gol.enemies[i][3]/gol.enemies[i][4]), 0.0);
+			gol.place_cell_rend(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-12, gol.enemies[i][2]-12, 0.0, 0.0, 0.0);
 
 			if(gol.enemies[i][3] <= 0) {
 				gol.create_explosion(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]*2.8, 12, 1, 1, 1, 0.4, 0.7, false, 0);
@@ -2316,10 +2350,22 @@ GOL.prototype.run_player = function() {
 	gol.place_cell_rend(x_place, y_place, 7, 7, 0.3, 0.3, 0.3);
 
 
-	//Shoot marker
-	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)), 11, 11, 0, 0, 0);
-	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)), 9, 9, 1, 1, 1);
-	gol.place_cell_rend((this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)), (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)), 5, 5, 0.8, 0, 0);
+	//Shoot marker	
+	//limit marker
+	var x_place = (this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2));
+	var y_place = (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2));
+	var dist = gol.get_dist(this.statesize[0]/2, x_place, this.statesize[1]/2, y_place);
+				
+	if(dist >= 300) {
+		var capped_pos = gol.player_cap_mouse_pos_max(300);
+		x_place = capped_pos[0];
+		y_place = capped_pos[1];
+	}
+
+	gol.place_cell_rend(x_place, y_place, 15, 15, 1, 1, 1);
+	gol.place_cell_rend(x_place, y_place, 13, 13, 0, 0, 0);
+	gol.place_cell_rend(x_place, y_place, 9, 9, 1, 1, 1);
+	gol.place_cell_rend(x_place, y_place, 5, 5, 0.8, 0, 0);
 	
 
 	//Melee marker
@@ -2384,7 +2430,7 @@ GOL.prototype.run_player = function() {
 
 	//regens
 	if(gol.p_fuel < 1000) {gol.p_fuel += 4;}
-	//if(gol.p_health < gol.p_health_max) {gol.p_health += 1;}
+	if(gol.p_health < gol.p_health_max && gol.game_frame % 2 == 0) {gol.p_health += 1;}
 	if(gol.p_power < 1000) {gol.p_power += 4;}
 
 	//Regen overflow cases
@@ -2436,11 +2482,29 @@ GOL.prototype.run_player = function() {
 		if(!gol.r_click && gol.l_click) {
 			if(gol.shoot_cooldown <= 0) {
 				if(gol.p_power >= 100){
-					gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 55, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 39, 101, 12, 1);					
-					gol.shoot_cooldown = gol.p_rof;
-					gol.p_power -= 100;
-					gol.play_sound(9);
+					var x = (gol.mouse_x - this.statesize[0]/2);
+					var y = (gol.mouse_y - this.statesize[1]/2);
+					var dist = gol.get_dist(0, x, 0, y);
+
+					if(dist <= 300) {
+						gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 35, (gol.mouse_x - this.statesize[0]/2), (gol.mouse_y - this.statesize[1]/2), 0, 39, 101, 12, 1);					
+						gol.shoot_cooldown = gol.p_rof;
+						gol.p_power -= 100;
+						gol.play_sound(9);
+					} else {
+						var capped_pos = gol.player_cap_mouse_pos_max(300);
+						x = capped_pos[0] - this.statesize[0]/2;
+						y = capped_pos[1] - this.statesize[1]/2;
+
+						gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 35, x, y, 0, 39, 101, 12, 1);	
+						//gol.create_bullet(0, 0, 9, 55, x, y, 0, 39, 101, 12, 1);	//close	
+						gol.shoot_cooldown = gol.p_rof;
+						gol.p_power -= 100;
+						gol.play_sound(9);
+					}
 				}
+				
+				
 			}
 		}         
 		

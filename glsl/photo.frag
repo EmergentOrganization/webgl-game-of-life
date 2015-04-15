@@ -4,6 +4,7 @@ uniform sampler2D state;
 uniform sampler2D front;
 uniform sampler2D back;
 uniform vec2 scale;
+uniform float duration;
 
 
 int get(vec2 offset, sampler2D tex) {
@@ -31,32 +32,38 @@ void main() {
 	float current_state = float(get(vec2(0.0, 0.0), state));
 	float current_front = float(get(vec2(0.0, 0.0), front));
 
+	//float duration = 0.1;
+
+	int mode = 0;
+
 	if(current_back == 0.0) {
 		float r = getR(vec2(0, 0), front);
 		float g = getG(vec2(0, 0), front);
 		float b = getB(vec2(0, 0), front);
 
 		if(r == g && r == b && r > 0.0) {
-			gl_FragColor = vec4((r-0.04), (g-0.04), (b-0.04), 1.0);
+			gl_FragColor = vec4((r-(0.04*duration)), (g-(0.04*duration)), (b-(0.04*duration)), 1.0);
+			mode = 1;
 		}
-	} else if (current_back != 0.0){
+	} else {
 		gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+		mode = 1;
 	}
 
-	if(current_back == 0.0 && current_state == 0.0) {
+	if(current_back == 0.0 && current_state == 0.0 && mode == 0) {
 		float r = getR(vec2(0, 0), front);
 		float g = getG(vec2(0, 0), front);
 		float b = getB(vec2(0, 0), front);
 
-		if((r != g && r != b) || b > r) {
+		//if((r != g && r != b) || b > r) {
 			if(r > 0.0) {
-				gl_FragColor = vec4((r-0.04), (g+0.08), (b+0.04), 1.0);
+				gl_FragColor = vec4((r-(0.04*duration)), (g+(0.08*duration)), (b+(0.04*duration)), 1.0);
 			} else if (g > 0.0) {
-				gl_FragColor = vec4(r, (g-0.06), (b+0.08), 1.0);
+				gl_FragColor = vec4(r, (g-(0.06*duration)), (b+(0.08*duration)), 1.0);
 			} else {
-				gl_FragColor = vec4(r, g, (b-0.08), 1.0);
+				gl_FragColor = vec4(r, g, (b-(0.08*duration)), 1.0);
 			}
-		}
+		//}
 		
 
 		//gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
