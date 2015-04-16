@@ -1541,7 +1541,7 @@ GOL.prototype.run_hittests = function() {
 				gol.p_power += 4;
 				gol.p_fuel += 4;
 				gol.game_score += 1;
-				gol.waypoints[i][3] -= 3;
+				gol.waypoints[i][3] -= 5;
 				gol.play_sound(15);
 			}
 		}
@@ -1571,7 +1571,7 @@ GOL.prototype.run_hittests = function() {
 			if(gol.waypoints.length > 0 && gol.waypoints[i] != null) {
 				if(gol.enemies.length > 0 && gol.enemies[j] != null) {
 					if(gol.cpu_hit_test(gol.enemies[j][0], gol.waypoints[i][0], gol.enemies[j][1], gol.waypoints[i][1], gol.enemies[j][2], gol.waypoints[i][2])) {
-						gol.waypoints[i][3] -= gol.enemies[j][3]*10;
+						gol.waypoints[i][3] -= gol.enemies[j][3]*30;
 						gol.enemies[j][3] = 0;
 						hit_wp_sound = true;
 					}
@@ -2025,9 +2025,10 @@ GOL.prototype.run_enemies = function() {
 				gol.game_score += 30;
 				if(gol.enemies[i][11] > 0) {gol.game_score += 200;}
 				gol.ar_kill(gol.enemies, i);
-				if(gol.enemy_cooldown <= 30){
-					gol.enemy_cooldown = 30+Math.random()*15;
-				} else {gol.enemy_cooldown += 30;}
+				var delay_spawn = 30 + ((Math.random()*10)*(gol.game_score/1000));
+				if(gol.enemy_cooldown <= delay_spawn){
+					gol.enemy_cooldown = delay_spawn;
+				} else {gol.enemy_cooldown += delay_spawn;}
 				
 				gol.play_sound(6);
 			}
@@ -2060,7 +2061,7 @@ GOL.prototype.create_waypoint = function(x, y, size, cooldown) {
 GOL.prototype.run_waypoints = function() {
 
 	if(gol.waypoint_cooldown == 0) {
-		gol.create_waypoint(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], 65, 3200);
+		gol.create_waypoint(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], 65, 5000);
 		if(gol.waypoint_cooldown == 0) {gol.waypoint_cooldown = -1;}
 		
 	}
@@ -2082,7 +2083,7 @@ GOL.prototype.run_waypoints = function() {
 			gol.waypoints[i][3]-= 1;
 
 			if(gol.waypoints[i][3] <= 0) {
-				gol.waypoint_cooldown = Math.floor((Math.random()*900*3)+360);
+				gol.waypoint_cooldown = Math.floor((Math.random()*900*4)+360);
 				gol.ar_kill(gol.waypoints, i);
 				gol.play_sound(7);
 			}
