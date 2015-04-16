@@ -279,7 +279,7 @@ function GOL(canvas, scale) {
 
 	this.rule_paths = new Array();
 
-	for (var i = 0; i < 17; i++){
+	//for (var i = 0; i < 17; i++){
 		this.rule_paths.push('glsl/Dunes.frag'),
 		this.rule_paths.push('glsl/EF741-2.frag'),
 		this.rule_paths.push('glsl/evo.frag'),
@@ -297,7 +297,7 @@ function GOL(canvas, scale) {
 		this.rule_paths.push('glsl/Tether.frag'),
 		this.rule_paths.push('glsl/Tsunami.frag'),
 		this.rule_paths.push('glsl/Waves.frag')
-	}
+	//}
 
 
 
@@ -329,8 +329,8 @@ function GOL(canvas, scale) {
         		//ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
 		*/
 
-		Rule0:	igloo.program('glsl/quad.vert', this.rule_paths[3]),
-		Rule1:	igloo.program('glsl/quad.vert', this.rule_paths[15]),
+		Rule0:	igloo.program('glsl/quad.vert', this.rule_paths[2]),
+		Rule1:	igloo.program('glsl/quad.vert', this.rule_paths[7]),
 
 		//Utility shaders
         copy: 			igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
@@ -1226,8 +1226,8 @@ function myConfig() {
 	this.testInt = 0;
 	this.seed = gol.seed_strength;
 	this.testBool = false;
-	this.rule = 3;
-	this.buddy_rule = 15;
+	this.rule = 2;
+	this.buddy_rule = 7;
 	this.trail = 10.0;
 }
 
