@@ -17,6 +17,14 @@ void main() {
 
 	if( (int(gl_FragCoord.x) > int(x)) && (int(gl_FragCoord.x) < int(x+w)) && (int(gl_FragCoord.y) > int(y)) && (int(gl_FragCoord.y) < int(y+h)) ) { gl_FragColor = vec4(value, g, b, 1.0); }
 
+	/*vec2 center = vec2(0.5, 0.5);
+	float radius = 0.5;
+
+	float distanceFromCenter = 0.6;// distance(center, gl_FragCoord);
+    float checkForPresenceWithinCircle = step(distanceFromCenter, radius);
+
+    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0) * checkForPresenceWithinCircle; */
+
     /*
 	unsigned int i = get_global_id(0);
 	unsigned int j = get_global_id(1);
