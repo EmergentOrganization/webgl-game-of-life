@@ -56,7 +56,10 @@ function GOL(canvas, scale) {
 	this.active_rule = new Array(2); //Which level?
 	this.active_rule[0] = 1;
 	this.active_rule[1] = 0;
-	this.randrules = false;
+	
+	this.randrule_player = false;
+	this.randrule_enviro = false;
+	this.shuffletime = 1800;
 	this.photo_duration = 1.0;
 	this.rule_count = 168;
 	this.use_trails = true;
@@ -65,13 +68,13 @@ function GOL(canvas, scale) {
 	this.game_frame = 0; //timekeeping
 	this.healthflash = false;
 	this.health_low_flash = 0;
-	this.master_volume = 2.5;
+	this.master_volume = 0.6;
 
 	//Player Stats
-	this.p_health_max = 7500;
+	this.p_health_max = 8000;
 	this.p_health = this.p_health_max;
 	this.p_fuel = 1000;
-	this.p_power_max = 1250;
+	this.p_power_max = 1400;
 	this.p_power = this.p_power_max;
 	this.p_shot_cost = 30;
 
@@ -88,7 +91,7 @@ function GOL(canvas, scale) {
 	//Player shield
 	this.p_shield_cooldown = 0;
 	this.p_shield_size_max = 8;
-	this.p_shield_size = this.player_size+2;
+	this.p_shield_size = this.player_size+4;
 	this.p_s_burstsize = 90;
 	this.p_s_burstcooldown = 0;
 	this.p_shield_charge_cooldown = 0;
@@ -120,7 +123,7 @@ function GOL(canvas, scale) {
 	//Placeable Barrier object
 	this.barrier_size = 18;
 	this.place_barrier_cooldown = 0;
-	this.barrier_life_max = 6000;
+	this.barrier_life_max = 8000;
 	
 	this.audio_ar = new Array(18);
 	for(var i = 0; i < this.audio_ar.length; i++) {
@@ -131,7 +134,7 @@ function GOL(canvas, scale) {
 		var j = 0;
 
 		this.audio_ar[j][i] = new Audio("sounds/ShieldBurst.wav");
-		this.audio_ar[j][i].volume = this.master_volume*0.15;
+		this.audio_ar[j][i].volume = this.master_volume*0.1;
 		this.audio_ar[j][7] = 0;
 		this.audio_ar[j][8] = 0;
 		this.audio_ar[j][9] = 5;
@@ -287,8 +290,7 @@ function GOL(canvas, scale) {
 
 	this.rule_paths = new Array();
 
-	this.rule_paths.push('glsl/EF7TCWave-5.frag'),
-    this.rule_paths.push('glsl/EF7TCWave-6.frag'),
+	this.rule_paths.push('glsl/EF7TCWave-6.frag'),
     this.rule_paths.push('glsl/EF7TCWave-8.frag'),
     this.rule_paths.push('glsl/EF7TCWave-9.frag'),
     this.rule_paths.push('glsl/EF7Tether-1.frag'),
@@ -303,8 +305,8 @@ function GOL(canvas, scale) {
     this.rule_paths.push('glsl/EW-FMA7-11.frag'),
     this.rule_paths.push('glsl/EW-FMA7-12.frag'),
     this.rule_paths.push('glsl/EW-FMA7-13.frag'),
+    this.rule_paths.push('glsl/EW-FMA7-14.frag'),
     this.rule_paths.push('glsl/EW-FMA7-15.frag'),
-    this.rule_paths.push('glsl/EW-FMA7-16.frag'),
     this.rule_paths.push('glsl/EW-FMA7-17.frag'),
     this.rule_paths.push('glsl/EW-FMA7-18.frag'),
     this.rule_paths.push('glsl/EW-FMA7-19.frag'),
@@ -320,6 +322,13 @@ function GOL(canvas, scale) {
     this.rule_paths.push('glsl/EW-FMA7-8.frag'),
     this.rule_paths.push('glsl/EW-FMA7-9.frag'),
     this.rule_paths.push('glsl/F15225-1.frag'),
+    this.rule_paths.push('glsl/F15225-10.frag'),
+    this.rule_paths.push('glsl/F15225-11.frag'),
+    this.rule_paths.push('glsl/F15225-12.frag'),
+    this.rule_paths.push('glsl/F15225-13.frag'),
+    this.rule_paths.push('glsl/F15225-2.frag'),
+    this.rule_paths.push('glsl/F15225-3.frag'),
+    this.rule_paths.push('glsl/F15225-5.frag'),
     this.rule_paths.push('glsl/A2R3-2.frag'),
     this.rule_paths.push('glsl/AsymPuffers.frag'),
     this.rule_paths.push('glsl/Atom-Original.frag'),
@@ -346,21 +355,55 @@ function GOL(canvas, scale) {
     this.rule_paths.push('glsl/EF7TCWave-2.frag'),
     this.rule_paths.push('glsl/EF7TCWave-3.frag'),
     this.rule_paths.push('glsl/EF7TCWave-4.frag'),
-    this.rule_paths.push('glsl/EW-FMA7-14.frag'),
-    this.rule_paths.push('glsl/F15225-10.frag'),
-    this.rule_paths.push('glsl/Feeders12-3.frag'),
-    this.rule_paths.push('glsl/FMA15-13.frag'),
-    this.rule_paths.push('glsl/FMA15-4.frag'),
-    this.rule_paths.push('glsl/Maze-3.frag'),
+    this.rule_paths.push('glsl/EF7TCWave-5.frag'),
+    this.rule_paths.push('glsl/EW-FMA7-16.frag'),
+    this.rule_paths.push('glsl/F15225-6.frag'),
+    this.rule_paths.push('glsl/Feeders-9.frag'),
+    this.rule_paths.push('glsl/FMA15-18.frag'),
+    this.rule_paths.push('glsl/MicroFeeders-1.frag'),
     this.rule_paths.push('glsl/orbwave-2.frag'),
     this.rule_paths.push('glsl/Sweeper.frag'),
-    this.rule_paths.push('glsl/F15225-11.frag'),
-    this.rule_paths.push('glsl/F15225-12.frag'),
-    this.rule_paths.push('glsl/F15225-13.frag'),
-    this.rule_paths.push('glsl/F15225-2.frag'),
-    this.rule_paths.push('glsl/F15225-3.frag'),
-    this.rule_paths.push('glsl/F15225-5.frag'),
-    this.rule_paths.push('glsl/F15225-6.frag'),
+    this.rule_paths.push('glsl/FMA15-19.frag'),
+    this.rule_paths.push('glsl/FMA15-2.frag'),
+    this.rule_paths.push('glsl/FMA15-20.frag'),
+    this.rule_paths.push('glsl/FMA15-21.frag'),
+    this.rule_paths.push('glsl/FMA15-22-2.frag'),
+    this.rule_paths.push('glsl/FMA15-22.frag'),
+    this.rule_paths.push('glsl/FMA15-23.frag'),
+    this.rule_paths.push('glsl/FMA15-24.frag'),
+    this.rule_paths.push('glsl/FMA15-3.frag'),
+    this.rule_paths.push('glsl/FMA15-4.frag'),
+    this.rule_paths.push('glsl/FMA15-5.frag'),
+    this.rule_paths.push('glsl/FMA15-6.frag'),
+    this.rule_paths.push('glsl/FMA15-7.frag'),
+    this.rule_paths.push('glsl/FMA15-9.frag'),
+    this.rule_paths.push('glsl/FMA15227-1.frag'),
+    this.rule_paths.push('glsl/FMA15227-2.frag'),
+    this.rule_paths.push('glsl/gol.frag'),
+    this.rule_paths.push('glsl/Infection-2.frag'),
+    this.rule_paths.push('glsl/Feeders12-3.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom-17.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom-2.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom-3.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom-4.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom-5.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom-6.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom-7.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom-8.frag'),
+    this.rule_paths.push('glsl/FeedersMicroAtom.frag'),
+    this.rule_paths.push('glsl/FMA15-1.frag'),
+    this.rule_paths.push('glsl/FMA15-10-1.frag'),
+    this.rule_paths.push('glsl/FMA15-10-2.frag'),
+    this.rule_paths.push('glsl/FMA15-10-3.frag'),
+    this.rule_paths.push('glsl/FMA15-10-4.frag'),
+    this.rule_paths.push('glsl/FMA15-10.frag'),
+    this.rule_paths.push('glsl/FMA15-11.frag'),
+    this.rule_paths.push('glsl/FMA15-12.frag'),
+    this.rule_paths.push('glsl/FMA15-13.frag'),
+    this.rule_paths.push('glsl/FMA15-14.frag'),
+    this.rule_paths.push('glsl/FMA15-15.frag'),
+    this.rule_paths.push('glsl/FMA15-16.frag'),
+    this.rule_paths.push('glsl/FMA15-17.frag'),
     this.rule_paths.push('glsl/F15225-7.frag'),
     this.rule_paths.push('glsl/F15225-8.frag'),
     this.rule_paths.push('glsl/F15225-9.frag'),
@@ -378,30 +421,6 @@ function GOL(canvas, scale) {
     this.rule_paths.push('glsl/Feeders-6.frag'),
     this.rule_paths.push('glsl/Feeders-7.frag'),
     this.rule_paths.push('glsl/Feeders-8.frag'),
-    this.rule_paths.push('glsl/Feeders-9.frag'),
-    this.rule_paths.push('glsl/FMA15-14.frag'),
-    this.rule_paths.push('glsl/FMA15-15.frag'),
-    this.rule_paths.push('glsl/FMA15-16.frag'),
-    this.rule_paths.push('glsl/FMA15-17.frag'),
-    this.rule_paths.push('glsl/FMA15-18.frag'),
-    this.rule_paths.push('glsl/FMA15-19.frag'),
-    this.rule_paths.push('glsl/FMA15-2.frag'),
-    this.rule_paths.push('glsl/FMA15-20.frag'),
-    this.rule_paths.push('glsl/FMA15-21.frag'),
-    this.rule_paths.push('glsl/FMA15-22-2.frag'),
-    this.rule_paths.push('glsl/FMA15-22.frag'),
-    this.rule_paths.push('glsl/FMA15-23.frag'),
-    this.rule_paths.push('glsl/FMA15-24.frag'),
-    this.rule_paths.push('glsl/FMA15-3.frag'),
-    this.rule_paths.push('glsl/FMA15-5.frag'),
-    this.rule_paths.push('glsl/FMA15-6.frag'),
-    this.rule_paths.push('glsl/FMA15-7.frag'),
-    this.rule_paths.push('glsl/FMA15-9.frag'),
-    this.rule_paths.push('glsl/FMA15227-1.frag'),
-    this.rule_paths.push('glsl/FMA15227-2.frag'),
-    this.rule_paths.push('glsl/gol.frag'),
-    this.rule_paths.push('glsl/Infection-2.frag'),
-    this.rule_paths.push('glsl/MicroFeeders-1.frag'),
     this.rule_paths.push('glsl/Minefield.frag'),
     this.rule_paths.push('glsl/MiniAtom-10.frag'),
     this.rule_paths.push('glsl/MiniAtom-11.frag'),
@@ -425,23 +444,6 @@ function GOL(canvas, scale) {
     this.rule_paths.push('glsl/OrbReplicator.frag'),
     this.rule_paths.push('glsl/OrbWave-1.frag'),
     this.rule_paths.push('glsl/OrbWave-2.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom-17.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom-2.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom-3.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom-4.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom-5.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom-6.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom-7.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom-8.frag'),
-    this.rule_paths.push('glsl/FeedersMicroAtom.frag'),
-    this.rule_paths.push('glsl/FMA15-1.frag'),
-    this.rule_paths.push('glsl/FMA15-10-1.frag'),
-    this.rule_paths.push('glsl/FMA15-10-2.frag'),
-    this.rule_paths.push('glsl/FMA15-10-3.frag'),
-    this.rule_paths.push('glsl/FMA15-10-4.frag'),
-    this.rule_paths.push('glsl/FMA15-10.frag'),
-    this.rule_paths.push('glsl/FMA15-11.frag'),
-    this.rule_paths.push('glsl/FMA15-12.frag'),
     this.rule_paths.push('glsl/OrbWave-4.frag'),
     this.rule_paths.push('glsl/OrbWave-8.frag'),
     this.rule_paths.push('glsl/OrbWave-9.frag'),
@@ -485,14 +487,16 @@ function GOL(canvas, scale) {
         		//ManyRings:  igloo.program('glsl/quad.vert', 'glsl/ManyRings.frag'),
 		*/
 
-		Rule0:	igloo.program('glsl/quad.vert', this.rule_paths[166]),
-		Rule1:	igloo.program('glsl/quad.vert', this.rule_paths[112]),
+		Rule0:	igloo.program('glsl/quad.vert', this.rule_paths[165]),
+		Rule1:	igloo.program('glsl/quad.vert', this.rule_paths[89]),
 
 		//Utility shaders
         copy: 			igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
         ShiftCells:  	igloo.program('glsl/quad.vert', 'glsl/ShiftCells_2.frag'),
         PlaceCells:  	igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag'),
         RendMerge3:  	igloo.program('glsl/quad.vert', 'glsl/RendMerge3.frag'),
+        PlaceCircle:  	igloo.program('glsl/quad.vert', 'glsl/PlaceCircle.frag'),
+        ViewRadius:  	igloo.program('glsl/quad.vert', 'glsl/ViewRadius.frag'),
         DestInterf:  	igloo.program('glsl/quad.vert', 'glsl/DestInterf.frag'),
         photo:  		igloo.program('glsl/quad.vert', 'glsl/photo.frag')
     };
@@ -600,12 +604,13 @@ function GOL(canvas, scale) {
 
 	cost_flat += ((this.p_bullet_ar[1]-2)/15)*60;
 	cost_flat += (4-((this.p_bullet_ar[2]/150)*8));
-	cost_flat += (this.p_bullet_ar[4]/32)*6;
+	cost_flat += (this.p_bullet_ar[4]/48)*6;
 	cost_flat += (this.p_bullet_ar[5]/32)*14;
 	cost_flat += (this.p_bullet_ar[6]/130*15);
 	cost_flat += (4-((this.p_bullet_ar[7]/100)*8));
 
 	this.p_shot_cost = (6 + cost_flat*2)*cost_mult;
+
 
 }
 
@@ -828,6 +833,25 @@ GOL.prototype.place_cell_rend = function(x, y, w, h, r, g, b) {
         .draw(gl.TRIANGLE_STRIP, 4);
     return this;
 };
+GOL.prototype.place_circle_rend = function(x, y, w, h, r, g, b) {
+    var gl = this.igloo.gl;
+    this.framebuffers.step.attach(this.textures.rend);
+    this.textures.rend.bind(0);
+    //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
+    this.programs.PlaceCircle.use()
+        .attrib('quad', this.buffers.quad, 2)
+        .uniformi('state', 0)
+        .uniform('scale', this.statesize)
+        .uniform('x', x - w/2)
+        .uniform('y', y - h/2)
+        .uniform('w', w)
+        .uniform('h', h)
+        .uniform('value', r)
+        .uniform('g', g)
+        .uniform('b', b)
+        .draw(gl.TRIANGLE_STRIP, 4);
+    return this;
+};
 
 
 //draw a rectangle only on the CA texture (front)
@@ -837,6 +861,25 @@ GOL.prototype.place_cell_world = function(x, y, w, h, r, g, b) {
     this.textures.front.bind(0);
     //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
     this.programs.PlaceCells.use()
+        .attrib('quad', this.buffers.quad, 2)
+        .uniformi('state', 0)
+        .uniform('scale', this.statesize)
+        .uniform('x', x - w/2)
+        .uniform('y', y - h/2)
+        .uniform('w', w)
+        .uniform('h', h)
+        .uniform('value', r)
+        .uniform('g', g)
+        .uniform('b', b)
+        .draw(gl.TRIANGLE_STRIP, 4);
+    return this;
+};
+GOL.prototype.place_circle_world = function(x, y, w, h, r, g, b) {
+    var gl = this.igloo.gl;
+    this.framebuffers.step.attach(this.textures.front);
+    this.textures.front.bind(0);
+    //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
+    this.programs.PlaceCircle.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
@@ -874,6 +917,27 @@ GOL.prototype.place_cell_back = function(x, y, w, h, r, g, b) {
         .draw(gl.TRIANGLE_STRIP, 4);
     return this;
 };
+GOL.prototype.place_circle_back = function(x, y, w, h, r, g, b) {
+	//if(r == 1) {r = 0;} else {r = 1;}
+    var gl = this.igloo.gl;
+    this.framebuffers.step.attach(this.textures.background_1);
+    this.textures.background_1.bind(0);
+    //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
+    this.programs.PlaceCircle.use()
+        .attrib('quad', this.buffers.quad, 2)
+        .uniformi('state', 0)
+        .uniform('scale', this.statesize)
+        .uniform('x', x - w/2)
+        .uniform('y', y - h/2)
+        .uniform('w', w)
+        .uniform('h', h)
+        .uniform('value', r)
+        .uniform('g', g)
+        .uniform('b', b)
+        .draw(gl.TRIANGLE_STRIP, 4);
+    return this;
+};
+
 
 //draw a rectangle only on the CA texture (front)
 GOL.prototype.place_cell_fore = function(x, y, w, h, r, g, b) {
@@ -896,8 +960,46 @@ GOL.prototype.place_cell_fore = function(x, y, w, h, r, g, b) {
     return this;
 };
 
+GOL.prototype.place_circle_fore = function(x, y, w, h, r, g, b) {
+    var gl = this.igloo.gl;
+    this.framebuffers.step.attach(this.textures.foreground_1);
+    this.textures.foreground_1.bind(0);
+    //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
+    this.programs.PlaceCircle.use()
+        .attrib('quad', this.buffers.quad, 2)
+        .uniformi('state', 0)
+        .uniform('scale', this.statesize)
+        .uniform('x', x - w/2)
+        .uniform('y', y - h/2)
+        .uniform('w', w)
+        .uniform('h', h)
+        .uniform('value', r)
+        .uniform('g', g)
+        .uniform('b', b)
+        .draw(gl.TRIANGLE_STRIP, 4);
+    return this;
+};
 
 
+GOL.prototype.place_view_radius = function(x, y, w, h, r, g, b) {
+     var gl = this.igloo.gl;
+    this.framebuffers.step.attach(this.textures.rend);
+    this.textures.rend.bind(0);
+    //gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
+    this.programs.ViewRadius.use()
+        .attrib('quad', this.buffers.quad, 2)
+        .uniformi('state', 0)
+        .uniform('scale', this.statesize)
+        .uniform('x', x - w/2)
+        .uniform('y', y - h/2)
+        .uniform('w', w)
+        .uniform('h', h)
+        .uniform('value', r)
+        .uniform('g', g)
+        .uniform('b', b)
+        .draw(gl.TRIANGLE_STRIP, 4);
+    return this;
+};
 //Offset the 'front' texture by the the player's movements
 GOL.prototype.shift = function(tex_front, tex_back, layer, mult) {
     var gl = this.igloo.gl;
@@ -959,6 +1061,11 @@ GOL.prototype.place_back_rend = function(x, y, size, valRend, valWorld, g, b) {
 	gol.place_cell_rend(x,y,size,size,valRend,g,b);
     return this;
 };
+GOL.prototype.place_back_rend_circle = function(x, y, size, valRend, valWorld, g, b) {
+	gol.place_circle_back(x,y,size,size,valWorld,g,b);
+	gol.place_circle_rend(x,y,size,size,valRend,g,b);
+    return this;
+};
 
 
 
@@ -966,6 +1073,11 @@ GOL.prototype.place_back_rend = function(x, y, size, valRend, valWorld, g, b) {
 GOL.prototype.place_Rend_World = function(x, y, size, valRend, valWorld, g, b) {
 	gol.place_cell_world(x,y,size,size,valWorld,g,b);
 	gol.place_cell_rend(x,y,size,size,valRend,g,b);
+    return this;
+};
+GOL.prototype.place_Rend_World_circle = function(x, y, size, valRend, valWorld, g, b) {
+	gol.place_circle_world(x,y,size,size,valWorld,g,b);
+	gol.place_circle_rend(x,y,size,size,valRend,g,b);
     return this;
 };
 
@@ -1044,18 +1156,21 @@ GOL.prototype.start = function(canvas) {
 				gol.run_explosions();		//Detonations
 
 				gol.run_waypoints();		//Step Waypoint calcs
-				gol.run_enemies();			//Step Enemy calcs
 				gol.run_barriers();			//Step Barrier calcs
+				gol.run_enemies();			//Step Enemy calcs
 				gol.run_player();			//Step Player calcs
+				gol.view_distortion();      //view range limiter
 			}
 
 			gol.draw();					//Render the final texture to the screen
 
-			if(gol.randrules) {
-				if(gol.game_frame % 600 == 0) {
+			if(gol.randrule_player) {
+				if(gol.game_frame % gol.shuffletime == 0) {
 					gol.rand_buddy(gol.rule_count);
 				}
-				if(gol.game_frame % 600 == 0) {
+			}
+			if(gol.randrule_enviro) {
+				if(gol.game_frame % gol.shuffletime == 0) {
 					gol.rand_rule(gol.rule_count);
 				}
 			}
@@ -1063,7 +1178,7 @@ GOL.prototype.start = function(canvas) {
 			//Image Export handler
 			if (gol.recordnow === true) {
 				gol.gen += 1;
-				if(gol.gen % 4 === 0/*(gol.gen > 600 && gol.gen % 100 === 0) || (gol.gen < 600 && gol.gen % 10 === 0) || (gol.gen < 30)*/){
+				if(gol.gen % 2 === 0/*(gol.gen > 600 && gol.gen % 100 === 0) || (gol.gen < 600 && gol.gen % 10 === 0) || (gol.gen < 30)*/){
 					gol.export_image = gol.exportImage(gol.igloo.gl, gol.textures.rend.texture, gol.canvas.width, gol.canvas.height);
 					gol.export_images.push(gol.export_image);
 					gol.render_frame += 1;
@@ -1279,12 +1394,14 @@ function addGUI() {
     gui.add(cont, 'booloff').name('Pause').onFinishChange(tog);
     gui.add(cont, 'boolon').name('Game Mode').onFinishChange(tog_game);
     gui.add(cont, 'booloff').name('Enable 60fps').onFinishChange(fpsChange);
+    gui.add(cont, 'volume', 0.0, 2.5).step(0.1).name('Sound Volume').onFinishChange(set_volume);
 
 	var f1 = gui.addFolder('Config');
 	var f3 = gui.addFolder('Game');
 	//var f3 = f2.addFolder('Customization');
 
-    f1.add(cont, 'booloff').name('Rule Shuffle').onFinishChange(ranrul);
+    f1.add(cont, 'booloff').name('Player Shuffle').onFinishChange(ranrul_player);
+    f1.add(cont, 'booloff').name('Rule Shuffle').onFinishChange(ranrul_enviro);
     f1.add(cont, 'boolon').name('Trails').onFinishChange(tog_trail);
 
     //gui.add(cont, 'testInt').name('TestMenu');
@@ -1299,370 +1416,370 @@ function addGUI() {
 		'Shotgun': 3,   	
 		'Defense': 4,   	
 		'Explosive': 5,   	
-		'Mines': 6
+		'Mines': 6,   	
+		'BigShot': 7
 	}).name('Presets').onChange(set_shot);
 
     f3.add(cont, 'pb_proj', 1, 6).step(1).name('Projectiles').onFinishChange(set_pb);
     f3.add(cont, 'pb_size', 3, 15).step(1).name('Size').onFinishChange(set_pb);
     f3.add(cont, 'pb_life', 25, 150).step(1).name('Duration').onFinishChange(set_pb);
-    f3.add(cont, 'pb_expmax', 1, 32).step(1).name('ExplodeMax').onFinishChange(set_pb);
+    f3.add(cont, 'pb_expmax', 1, 48).step(1).name('ExplodeMax').onFinishChange(set_pb);
     f3.add(cont, 'pb_expmin', 1, 32).step(1).name('ExplodeMin').onFinishChange(set_pb);
     f3.add(cont, 'pb_oPen', 0, 130).step(1).name('Overpenetration').onFinishChange(set_pb);
     f3.add(cont, 'pb_rand', 0, 100).step(1).name('Accuracy').onFinishChange(set_pb);
     f3.add(cont, 'pb_rof', 8, 60).step(1).name('RoF').onFinishChange(set_pb);
 
 	f1.add(cont, 'rule', {    	
-		'EF7TCWave-5': 0,
-		'EF7TCWave-6': 1,
-		'EF7TCWave-8': 2,
-		'EF7TCWave-9': 3,
-		'EF7Tether-1': 4,
-		'EF7Tether-2': 5,
-		'EF7Tether-3': 6,
-		'EF7Tether-4': 7,
-		'EF7Tether-5': 8,
-		'EF7Tether-6': 9,
-		'evo': 10,
-		'EW-FMA7-1': 11,
-		'EW-FMA7-10': 12,
-		'EW-FMA7-11': 13,
-		'EW-FMA7-12': 14,
-		'EW-FMA7-13': 15,
-		'EW-FMA7-15': 16,
-		'EW-FMA7-16': 17,
-		'EW-FMA7-17': 18,
-		'EW-FMA7-18': 19,
-		'EW-FMA7-19': 20,
-		'EW-FMA7-2': 21,
-		'EW-FMA7-20': 22,
-		'EW-FMA7-22': 23,
-		'EW-FMA7-3': 24,
-		'EW-FMA7-4-1': 25,
-		'EW-FMA7-4': 26,
-		'EW-FMA7-5': 27,
-		'EW-FMA7-6': 28,
-		'EW-FMA7-7': 29,
-		'EW-FMA7-8': 30,
-		'EW-FMA7-9': 31,
-		'F15225-1': 32,
-		'A2R3-2': 33,
-		'AsymPuffers': 34,
-		'Atom-Original': 35,
-		'Brane-3': 36,
-		'Bugs': 37,
-		'BurstingBubbles': 38,
-		'Conway': 39,
-		'Crawlers-2': 40,
-		'Crawlers': 41,
-		'Dunes': 42,
-		'EF74-1': 43,
-		'EF74-2': 44,
-		'EF74-3': 45,
-		'EF74-4': 46,
-		'EF74-5': 47,
-		'EF74-6': 48,
-		'EF74-7': 49,
-		'EF741-2': 50,
-		'EF7TCWave-1': 51,
-		'EF7TCWave-10': 52,
-		'EF7TCWave-12': 53,
-		'EF7TCWave-13': 54,
-		'EF7TCWave-14': 55,
-		'EF7TCWave-2': 56,
-		'EF7TCWave-3': 57,
-		'EF7TCWave-4': 58,
-		'EW-FMA7-14': 59,
-		'F15225-10': 60,
-		'Feeders12-3': 61,
-		'FMA15-13': 62,
-		'FMA15-4': 63,
-		'Maze-3': 64,
-		'orbwave-2': 65,
-		'Sweeper': 66,
-		'F15225-11': 67,
-		'F15225-12': 68,
-		'F15225-13': 69,
-		'F15225-2': 70,
-		'F15225-3': 71,
-		'F15225-5': 72,
-		'F15225-6': 73,
-		'F15225-7': 74,
-		'F15225-8': 75,
-		'F15225-9': 76,
-		'Feeders-1': 77,
-		'Feeders-16': 78,
-		'Feeders-17': 79,
-		'Feeders-18': 80,
-		'Feeders-19': 81,
-		'Feeders-2': 82,
-		'Feeders-20': 83,
-		'Feeders-21': 84,
-		'Feeders-3': 85,
-		'Feeders-4': 86,
-		'Feeders-5': 87,
-		'Feeders-6': 88,
-		'Feeders-7': 89,
-		'Feeders-8': 90,
-		'Feeders-9': 91,
-		'FMA15-14': 92,
-		'FMA15-15': 93,
-		'FMA15-16': 94,
-		'FMA15-17': 95,
-		'FMA15-18': 96,
-		'FMA15-19': 97,
-		'FMA15-2': 98,
-		'FMA15-20': 99,
-		'FMA15-21': 100,
-		'FMA15-22-2': 101,
-		'FMA15-22': 102,
-		'FMA15-23': 103,
-		'FMA15-24': 104,
-		'FMA15-3': 105,
-		'FMA15-5': 106,
-		'FMA15-6': 107,
-		'FMA15-7': 108,
-		'FMA15-9': 109,
-		'FMA15227-1': 110,
-		'FMA15227-2': 111,
-		'gol': 112,
-		'Infection-2': 113,
-		'MicroFeeders-1': 114,
-		'Minefield': 115,
-		'MiniAtom-10': 116,
-		'MiniAtom-11': 117,
-		'MiniAtom-12': 118,
-		'MiniAtom-13': 119,
-		'MiniAtom-14': 120,
-		'MiniAtom-15': 121,
-		'MiniAtom-16': 122,
-		'MiniAtom-17': 123,
-		'MiniAtom-18': 124,
-		'MiniAtom-2': 125,
-		'MiniAtom-21': 126,
-		'MiniAtom-22': 127,
-		'MiniAtom-5': 128,
-		'MiniAtom-6': 129,
-		'MiniAtom-7': 130,
-		'MiniAtom-8': 131,
-		'MiniAtom-9': 132,
-		'MiniAtomConway': 133,
-		'Nemesis': 134,
-		'OrbReplicator': 135,
-		'OrbWave-1': 136,
-		'OrbWave-2': 137,
-		'FeedersMicroAtom-17': 138,
-		'FeedersMicroAtom-2': 139,
-		'FeedersMicroAtom-3': 140,
-		'FeedersMicroAtom-4': 141,
-		'FeedersMicroAtom-5': 142,
-		'FeedersMicroAtom-6': 143,
-		'FeedersMicroAtom-7': 144,
-		'FeedersMicroAtom-8': 145,
-		'FeedersMicroAtom': 146,
-		'FMA15-1': 147,
-		'FMA15-10-1': 148,
-		'FMA15-10-2': 149,
-		'FMA15-10-3': 150,
-		'FMA15-10-4': 151,
-		'FMA15-10': 152,
-		'FMA15-11': 153,
-		'FMA15-12': 154,
-		'OrbWave-4': 155,
-		'OrbWave-8': 156,
-		'OrbWave-9': 157,
-		'PullApart-2': 158,
-		'PullApart-3': 159,
-		'PullApart-4': 160,
-		'PullApart-5': 161,
-		'SpinningTops-2': 162,
-		'Tether': 163,
-		'Tsunami': 164,
-		'Wave': 165,
-		'Waves': 166,
-		'WaveShield': 167,
-		'Random': -1
+		    'EF7TCWave-6': 0,
+			'EF7TCWave-8': 1,
+			'EF7TCWave-9': 2,
+			'EF7Tether-1': 3,
+			'EF7Tether-2': 4,
+			'EF7Tether-3': 5,
+			'EF7Tether-4': 6,
+			'EF7Tether-5': 7,
+			'EF7Tether-6': 8,
+			'evo': 9,
+			'EW-FMA7-1': 10,
+			'EW-FMA7-10': 11,
+			'EW-FMA7-11': 12,
+			'EW-FMA7-12': 13,
+			'EW-FMA7-13': 14,
+			'EW-FMA7-14': 15,
+			'EW-FMA7-15': 16,
+			'EW-FMA7-17': 17,
+			'EW-FMA7-18': 18,
+			'EW-FMA7-19': 19,
+			'EW-FMA7-2': 20,
+			'EW-FMA7-20': 21,
+			'EW-FMA7-22': 22,
+			'EW-FMA7-3': 23,
+			'EW-FMA7-4-1': 24,
+			'EW-FMA7-4': 25,
+			'EW-FMA7-5': 26,
+			'EW-FMA7-6': 27,
+			'EW-FMA7-7': 28,
+			'EW-FMA7-8': 29,
+			'EW-FMA7-9': 30,
+			'F15225-1': 31,
+			'F15225-10': 32,
+			'F15225-11': 33,
+			'F15225-12': 34,
+			'F15225-13': 35,
+			'F15225-2': 36,
+			'F15225-3': 37,
+			'F15225-5': 38,
+			'A2R3-2': 39,
+			'AsymPuffers': 40,
+			'Atom-Original': 41,
+			'Brane-3': 42,
+			'Bugs': 43,
+			'BurstingBubbles': 44,
+			'Conway': 45,
+			'Crawlers-2': 46,
+			'Crawlers': 47,
+			'Dunes': 48,
+			'EF74-1': 49,
+			'EF74-2': 50,
+			'EF74-3': 51,
+			'EF74-4': 52,
+			'EF74-5': 53,
+			'EF74-6': 54,
+			'EF74-7': 55,
+			'EF741-2': 56,
+			'EF7TCWave-1': 57,
+			'EF7TCWave-10': 58,
+			'EF7TCWave-12': 59,
+			'EF7TCWave-13': 60,
+			'EF7TCWave-14': 61,
+			'EF7TCWave-2': 62,
+			'EF7TCWave-3': 63,
+			'EF7TCWave-4': 64,
+			'EF7TCWave-5': 65,
+			'EW-FMA7-16': 66,
+			'F15225-6': 67,
+			'Feeders-9': 68,
+			'FMA15-18': 69,
+			'MicroFeeders-1': 70,
+			'orbwave-2': 71,
+			'Sweeper': 72,
+			'FMA15-19': 73,
+			'FMA15-2': 74,
+			'FMA15-20': 75,
+			'FMA15-21': 76,
+			'FMA15-22-2': 77,
+			'FMA15-22': 78,
+			'FMA15-23': 79,
+			'FMA15-24': 80,
+			'FMA15-3': 81,
+			'FMA15-4': 82,
+			'FMA15-5': 83,
+			'FMA15-6': 84,
+			'FMA15-7': 85,
+			'FMA15-9': 86,
+			'FMA15227-1': 87,
+			'FMA15227-2': 88,
+			'gol': 89,
+			'Infection-2': 90,
+			'Feeders12-3': 91,
+			'FeedersMicroAtom-17': 92,
+			'FeedersMicroAtom-2': 93,
+			'FeedersMicroAtom-3': 94,
+			'FeedersMicroAtom-4': 95,
+			'FeedersMicroAtom-5': 96,
+			'FeedersMicroAtom-6': 97,
+			'FeedersMicroAtom-7': 98,
+			'FeedersMicroAtom-8': 99,
+			'FeedersMicroAtom': 100,
+			'FMA15-1': 101,
+			'FMA15-10-1': 102,
+			'FMA15-10-2': 103,
+			'FMA15-10-3': 104,
+			'FMA15-10-4': 105,
+			'FMA15-10': 106,
+			'FMA15-11': 107,
+			'FMA15-12': 108,
+			'FMA15-13': 109,
+			'FMA15-14': 110,
+			'FMA15-15': 111,
+			'FMA15-16': 112,
+			'FMA15-17': 113,
+			'F15225-7': 114,
+			'F15225-8': 115,
+			'F15225-9': 116,
+			'Feeders-1': 117,
+			'Feeders-16': 118,
+			'Feeders-17': 119,
+			'Feeders-18': 120,
+			'Feeders-19': 121,
+			'Feeders-2': 122,
+			'Feeders-20': 123,
+			'Feeders-21': 124,
+			'Feeders-3': 125,
+			'Feeders-4': 126,
+			'Feeders-5': 127,
+			'Feeders-6': 128,
+			'Feeders-7': 129,
+			'Feeders-8': 130,
+			'Minefield': 131,
+			'MiniAtom-10': 132,
+			'MiniAtom-11': 133,
+			'MiniAtom-12': 134,
+			'MiniAtom-13': 135,
+			'MiniAtom-14': 136,
+			'MiniAtom-15': 137,
+			'MiniAtom-16': 138,
+			'MiniAtom-17': 139,
+			'MiniAtom-18': 140,
+			'MiniAtom-2': 141,
+			'MiniAtom-21': 142,
+			'MiniAtom-22': 143,
+			'MiniAtom-5': 144,
+			'MiniAtom-6': 145,
+			'MiniAtom-7': 146,
+			'MiniAtom-8': 147,
+			'MiniAtom-9': 148,
+			'MiniAtomConway': 149,
+			'Nemesis': 150,
+			'OrbReplicator': 151,
+			'OrbWave-1': 152,
+			'OrbWave-2': 153,
+			'OrbWave-4': 154,
+			'OrbWave-8': 155,
+			'OrbWave-9': 156,
+			'PullApart-2': 157,
+			'PullApart-3': 158,
+			'PullApart-4': 159,
+			'PullApart-5': 160,
+			'SpinningTops-2': 161,
+			'Tether': 162,
+			'Tsunami': 163,
+			'Wave': 164,
+			'Waves': 165,
+			'WaveShield': 166,
+			'Random': -1
+
 
 
 	}).name('Hostile Algorithm').onChange(set_rule);
 
 
 
-	f1.add(cont, 'buddy_rule', {
-		
-		'EF7TCWave-5': 0,
-		'EF7TCWave-6': 1,
-		'EF7TCWave-8': 2,
-		'EF7TCWave-9': 3,
-		'EF7Tether-1': 4,
-		'EF7Tether-2': 5,
-		'EF7Tether-3': 6,
-		'EF7Tether-4': 7,
-		'EF7Tether-5': 8,
-		'EF7Tether-6': 9,
-		'evo': 10,
-		'EW-FMA7-1': 11,
-		'EW-FMA7-10': 12,
-		'EW-FMA7-11': 13,
-		'EW-FMA7-12': 14,
-		'EW-FMA7-13': 15,
-		'EW-FMA7-15': 16,
-		'EW-FMA7-16': 17,
-		'EW-FMA7-17': 18,
-		'EW-FMA7-18': 19,
-		'EW-FMA7-19': 20,
-		'EW-FMA7-2': 21,
-		'EW-FMA7-20': 22,
-		'EW-FMA7-22': 23,
-		'EW-FMA7-3': 24,
-		'EW-FMA7-4-1': 25,
-		'EW-FMA7-4': 26,
-		'EW-FMA7-5': 27,
-		'EW-FMA7-6': 28,
-		'EW-FMA7-7': 29,
-		'EW-FMA7-8': 30,
-		'EW-FMA7-9': 31,
-		'F15225-1': 32,
-		'A2R3-2': 33,
-		'AsymPuffers': 34,
-		'Atom-Original': 35,
-		'Brane-3': 36,
-		'Bugs': 37,
-		'BurstingBubbles': 38,
-		'Conway': 39,
-		'Crawlers-2': 40,
-		'Crawlers': 41,
-		'Dunes': 42,
-		'EF74-1': 43,
-		'EF74-2': 44,
-		'EF74-3': 45,
-		'EF74-4': 46,
-		'EF74-5': 47,
-		'EF74-6': 48,
-		'EF74-7': 49,
-		'EF741-2': 50,
-		'EF7TCWave-1': 51,
-		'EF7TCWave-10': 52,
-		'EF7TCWave-12': 53,
-		'EF7TCWave-13': 54,
-		'EF7TCWave-14': 55,
-		'EF7TCWave-2': 56,
-		'EF7TCWave-3': 57,
-		'EF7TCWave-4': 58,
-		'EW-FMA7-14': 59,
-		'F15225-10': 60,
-		'Feeders12-3': 61,
-		'FMA15-13': 62,
-		'FMA15-4': 63,
-		'Maze-3': 64,
-		'orbwave-2': 65,
-		'Sweeper': 66,
-		'F15225-11': 67,
-		'F15225-12': 68,
-		'F15225-13': 69,
-		'F15225-2': 70,
-		'F15225-3': 71,
-		'F15225-5': 72,
-		'F15225-6': 73,
-		'F15225-7': 74,
-		'F15225-8': 75,
-		'F15225-9': 76,
-		'Feeders-1': 77,
-		'Feeders-16': 78,
-		'Feeders-17': 79,
-		'Feeders-18': 80,
-		'Feeders-19': 81,
-		'Feeders-2': 82,
-		'Feeders-20': 83,
-		'Feeders-21': 84,
-		'Feeders-3': 85,
-		'Feeders-4': 86,
-		'Feeders-5': 87,
-		'Feeders-6': 88,
-		'Feeders-7': 89,
-		'Feeders-8': 90,
-		'Feeders-9': 91,
-		'FMA15-14': 92,
-		'FMA15-15': 93,
-		'FMA15-16': 94,
-		'FMA15-17': 95,
-		'FMA15-18': 96,
-		'FMA15-19': 97,
-		'FMA15-2': 98,
-		'FMA15-20': 99,
-		'FMA15-21': 100,
-		'FMA15-22-2': 101,
-		'FMA15-22': 102,
-		'FMA15-23': 103,
-		'FMA15-24': 104,
-		'FMA15-3': 105,
-		'FMA15-5': 106,
-		'FMA15-6': 107,
-		'FMA15-7': 108,
-		'FMA15-9': 109,
-		'FMA15227-1': 110,
-		'FMA15227-2': 111,
-		'gol': 112,
-		'Infection-2': 113,
-		'MicroFeeders-1': 114,
-		'Minefield': 115,
-		'MiniAtom-10': 116,
-		'MiniAtom-11': 117,
-		'MiniAtom-12': 118,
-		'MiniAtom-13': 119,
-		'MiniAtom-14': 120,
-		'MiniAtom-15': 121,
-		'MiniAtom-16': 122,
-		'MiniAtom-17': 123,
-		'MiniAtom-18': 124,
-		'MiniAtom-2': 125,
-		'MiniAtom-21': 126,
-		'MiniAtom-22': 127,
-		'MiniAtom-5': 128,
-		'MiniAtom-6': 129,
-		'MiniAtom-7': 130,
-		'MiniAtom-8': 131,
-		'MiniAtom-9': 132,
-		'MiniAtomConway': 133,
-		'Nemesis': 134,
-		'OrbReplicator': 135,
-		'OrbWave-1': 136,
-		'OrbWave-2': 137,
-		'FeedersMicroAtom-17': 138,
-		'FeedersMicroAtom-2': 139,
-		'FeedersMicroAtom-3': 140,
-		'FeedersMicroAtom-4': 141,
-		'FeedersMicroAtom-5': 142,
-		'FeedersMicroAtom-6': 143,
-		'FeedersMicroAtom-7': 144,
-		'FeedersMicroAtom-8': 145,
-		'FeedersMicroAtom': 146,
-		'FMA15-1': 147,
-		'FMA15-10-1': 148,
-		'FMA15-10-2': 149,
-		'FMA15-10-3': 150,
-		'FMA15-10-4': 151,
-		'FMA15-10': 152,
-		'FMA15-11': 153,
-		'FMA15-12': 154,
-		'OrbWave-4': 155,
-		'OrbWave-8': 156,
-		'OrbWave-9': 157,
-		'PullApart-2': 158,
-		'PullApart-3': 159,
-		'PullApart-4': 160,
-		'PullApart-5': 161,
-		'SpinningTops-2': 162,
-		'Tether': 163,
-		'Tsunami': 164,
-		'Wave': 165,
-		'Waves': 166,
-		'WaveShield': 167,
-		'Random': -1
+	f1.add(cont, 'buddy_rule', {   	
+		    'EF7TCWave-6': 0,
+			'EF7TCWave-8': 1,
+			'EF7TCWave-9': 2,
+			'EF7Tether-1': 3,
+			'EF7Tether-2': 4,
+			'EF7Tether-3': 5,
+			'EF7Tether-4': 6,
+			'EF7Tether-5': 7,
+			'EF7Tether-6': 8,
+			'evo': 9,
+			'EW-FMA7-1': 10,
+			'EW-FMA7-10': 11,
+			'EW-FMA7-11': 12,
+			'EW-FMA7-12': 13,
+			'EW-FMA7-13': 14,
+			'EW-FMA7-14': 15,
+			'EW-FMA7-15': 16,
+			'EW-FMA7-17': 17,
+			'EW-FMA7-18': 18,
+			'EW-FMA7-19': 19,
+			'EW-FMA7-2': 20,
+			'EW-FMA7-20': 21,
+			'EW-FMA7-22': 22,
+			'EW-FMA7-3': 23,
+			'EW-FMA7-4-1': 24,
+			'EW-FMA7-4': 25,
+			'EW-FMA7-5': 26,
+			'EW-FMA7-6': 27,
+			'EW-FMA7-7': 28,
+			'EW-FMA7-8': 29,
+			'EW-FMA7-9': 30,
+			'F15225-1': 31,
+			'F15225-10': 32,
+			'F15225-11': 33,
+			'F15225-12': 34,
+			'F15225-13': 35,
+			'F15225-2': 36,
+			'F15225-3': 37,
+			'F15225-5': 38,
+			'A2R3-2': 39,
+			'AsymPuffers': 40,
+			'Atom-Original': 41,
+			'Brane-3': 42,
+			'Bugs': 43,
+			'BurstingBubbles': 44,
+			'Conway': 45,
+			'Crawlers-2': 46,
+			'Crawlers': 47,
+			'Dunes': 48,
+			'EF74-1': 49,
+			'EF74-2': 50,
+			'EF74-3': 51,
+			'EF74-4': 52,
+			'EF74-5': 53,
+			'EF74-6': 54,
+			'EF74-7': 55,
+			'EF741-2': 56,
+			'EF7TCWave-1': 57,
+			'EF7TCWave-10': 58,
+			'EF7TCWave-12': 59,
+			'EF7TCWave-13': 60,
+			'EF7TCWave-14': 61,
+			'EF7TCWave-2': 62,
+			'EF7TCWave-3': 63,
+			'EF7TCWave-4': 64,
+			'EF7TCWave-5': 65,
+			'EW-FMA7-16': 66,
+			'F15225-6': 67,
+			'Feeders-9': 68,
+			'FMA15-18': 69,
+			'MicroFeeders-1': 70,
+			'orbwave-2': 71,
+			'Sweeper': 72,
+			'FMA15-19': 73,
+			'FMA15-2': 74,
+			'FMA15-20': 75,
+			'FMA15-21': 76,
+			'FMA15-22-2': 77,
+			'FMA15-22': 78,
+			'FMA15-23': 79,
+			'FMA15-24': 80,
+			'FMA15-3': 81,
+			'FMA15-4': 82,
+			'FMA15-5': 83,
+			'FMA15-6': 84,
+			'FMA15-7': 85,
+			'FMA15-9': 86,
+			'FMA15227-1': 87,
+			'FMA15227-2': 88,
+			'gol': 89,
+			'Infection-2': 90,
+			'Feeders12-3': 91,
+			'FeedersMicroAtom-17': 92,
+			'FeedersMicroAtom-2': 93,
+			'FeedersMicroAtom-3': 94,
+			'FeedersMicroAtom-4': 95,
+			'FeedersMicroAtom-5': 96,
+			'FeedersMicroAtom-6': 97,
+			'FeedersMicroAtom-7': 98,
+			'FeedersMicroAtom-8': 99,
+			'FeedersMicroAtom': 100,
+			'FMA15-1': 101,
+			'FMA15-10-1': 102,
+			'FMA15-10-2': 103,
+			'FMA15-10-3': 104,
+			'FMA15-10-4': 105,
+			'FMA15-10': 106,
+			'FMA15-11': 107,
+			'FMA15-12': 108,
+			'FMA15-13': 109,
+			'FMA15-14': 110,
+			'FMA15-15': 111,
+			'FMA15-16': 112,
+			'FMA15-17': 113,
+			'F15225-7': 114,
+			'F15225-8': 115,
+			'F15225-9': 116,
+			'Feeders-1': 117,
+			'Feeders-16': 118,
+			'Feeders-17': 119,
+			'Feeders-18': 120,
+			'Feeders-19': 121,
+			'Feeders-2': 122,
+			'Feeders-20': 123,
+			'Feeders-21': 124,
+			'Feeders-3': 125,
+			'Feeders-4': 126,
+			'Feeders-5': 127,
+			'Feeders-6': 128,
+			'Feeders-7': 129,
+			'Feeders-8': 130,
+			'Minefield': 131,
+			'MiniAtom-10': 132,
+			'MiniAtom-11': 133,
+			'MiniAtom-12': 134,
+			'MiniAtom-13': 135,
+			'MiniAtom-14': 136,
+			'MiniAtom-15': 137,
+			'MiniAtom-16': 138,
+			'MiniAtom-17': 139,
+			'MiniAtom-18': 140,
+			'MiniAtom-2': 141,
+			'MiniAtom-21': 142,
+			'MiniAtom-22': 143,
+			'MiniAtom-5': 144,
+			'MiniAtom-6': 145,
+			'MiniAtom-7': 146,
+			'MiniAtom-8': 147,
+			'MiniAtom-9': 148,
+			'MiniAtomConway': 149,
+			'Nemesis': 150,
+			'OrbReplicator': 151,
+			'OrbWave-1': 152,
+			'OrbWave-2': 153,
+			'OrbWave-4': 154,
+			'OrbWave-8': 155,
+			'OrbWave-9': 156,
+			'PullApart-2': 157,
+			'PullApart-3': 158,
+			'PullApart-4': 159,
+			'PullApart-5': 160,
+			'SpinningTops-2': 161,
+			'Tether': 162,
+			'Tsunami': 163,
+			'Wave': 164,
+			'Waves': 165,
+			'WaveShield': 166,
+			'Random': -1
+
 
 
 	}).name('Player Algorithm').onChange(set_buddy_rule);
 
-
+	
 	
 
 	function testFoo(value) {
@@ -1679,8 +1796,16 @@ function addGUI() {
 		document.getElementById("life").focus();
 	}
 
-	function ranrul(){
-		gol.randrules = !gol.randrules;
+	function ranrul_player(){
+		//gol.randrules gol.randrules;
+		gol.randrule_player = !gol.randrule_player;
+		document.getElementById("life").focus();
+	}
+
+
+	function ranrul_enviro(){
+		//gol.randrules gol.randrules;
+		gol.randrule_enviro = !gol.randrule_enviro;
 		document.getElementById("life").focus();
 	}
 
@@ -1696,8 +1821,8 @@ function addGUI() {
 
 		cost_flat += ((gol.p_bullet_ar[1]-2)/15)*60;
 		cost_flat += (4-((gol.p_bullet_ar[2]/150)*8));
-		cost_flat += (gol.p_bullet_ar[4]/32)*6;
-		cost_flat += (gol.p_bullet_ar[5]/32)*14;
+		cost_flat += (gol.p_bullet_ar[4]/48)*6;
+		cost_flat += (gol.p_bullet_ar[5]/32)*12;
 		cost_flat += (gol.p_bullet_ar[6]/130*15);
 		cost_flat += (4-((gol.p_bullet_ar[7]/100)*8));
 
@@ -1722,6 +1847,48 @@ function addGUI() {
 	function set_trail_len(val){
 		gol.photo_duration = val*0.1;
 		gol.reset_rules(cont.rule, cont.buddy_rule);
+	}
+
+	function set_volume(val){
+		gol.master_volume = val;
+		for(i = 0; i < 7; i++) {
+			var j = 0;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.1;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.03;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.1;		
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.1;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.1;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.1;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.3;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.25;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.1;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.03;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.05;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.18;		
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.1;		
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.2;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.15;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.025;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.2;
+			j += 1;
+			gol.audio_ar[j][i].volume = gol.master_volume*0.12;
+		}
 	}
 
 	function fpsChange(value) {
@@ -1796,13 +1963,13 @@ function addGUI() {
 			cont.pb_rand = 0;
 		}
 		if(value == 3) {
-			cont.pb_proj = 6;
-			cont.pb_size = 3;
-			cont.pb_life = 25;
-			cont.pb_rof = 20;
+			cont.pb_proj = 5;
+			cont.pb_size = 5;
+			cont.pb_life = 40;
+			cont.pb_rof = 30;
 			cont.pb_expmax = 1;
 			cont.pb_expmin = 1;
-			cont.pb_oPen = 60;
+			cont.pb_oPen = 115;
 			cont.pb_rand = 45;
 		}
 		if(value == 4) {
@@ -1820,7 +1987,7 @@ function addGUI() {
 			cont.pb_size = 3;
 			cont.pb_life = 45;
 			cont.pb_rof = 15;
-			cont.pb_expmax = 32;
+			cont.pb_expmax = 48;
 			cont.pb_expmin = 32;
 			cont.pb_oPen = 100;
 			cont.pb_rand = 0;
@@ -1830,10 +1997,20 @@ function addGUI() {
 			cont.pb_size = 3;
 			cont.pb_life = 90;
 			cont.pb_rof = 8;
-			cont.pb_expmax = 32;
+			cont.pb_expmax = 48;
 			cont.pb_expmin = 32;
 			cont.pb_oPen = 0;
 			cont.pb_rand = 100;
+		}
+		if(value == 7) {
+			cont.pb_proj = 1;
+			cont.pb_size = 15;
+			cont.pb_life = 70;
+			cont.pb_rof = 28;
+			cont.pb_expmax = 48;
+			cont.pb_expmin = 0;
+			cont.pb_oPen = 130;
+			cont.pb_rand = 30;
 		}
 
 		set_pb();
@@ -1857,9 +2034,10 @@ function myConfig() {
 	this.testBool = false;
 	this.booloff = false;
 	this.boolon = true;
-	this.rule = 166;
+	this.rule = 165;
 	this.buddy_rule = 112;
 	this.trail = 10.0;
+	this.volume = gol.master_volume;
 
 	this.pb_proj = gol.p_bullet_ar[0];
 	this.pb_size = gol.p_bullet_ar[1];
@@ -1941,9 +2119,13 @@ function Controller(gol) {
 		        break;        
 		    case 85: /* U */
 				gol.recordnow = !gol.recordnow;
+		        break;       
+		    case 67: /* C */
+				gol.shuffletime = 60;
 		        break;    
 			case 32: /* space */
-				if(gol.p_s_burstcooldown <= 0 && !gol.space_down && (gol.p_power/gol.p_power_max) >= 0.5) {
+				if(gol.p_s_burstcooldown <= 0 && !gol.space_down && (gol.p_power/gol.p_power_max) >= 0.28) {
+					gol.start_shieldburst()
 					gol.space_down = true;
 			 		gol.play_sound(0);
 					gol.shield_burst_duration = 22;
@@ -1988,7 +2170,10 @@ function Controller(gol) {
 		    break;
 		case 68: /* D */
 		    gol.p_move_R = 0;
-		    break;
+		    break;     
+		case 67: /* C */
+			gol.shuffletime = 1800;
+		    break;    
         };
     });
 }
@@ -2114,6 +2299,8 @@ GOL.prototype.reset_rules = function(rule0, rule1) {
         ShiftCells:  	gol.igloo.program('glsl/quad.vert', 'glsl/ShiftCells_2.frag'),
         PlaceCells:  	gol.igloo.program('glsl/quad.vert', 'glsl/PlaceCells.frag'),
         RendMerge3:  	gol.igloo.program('glsl/quad.vert', 'glsl/RendMerge3.frag'),
+        PlaceCircle:  	gol.igloo.program('glsl/quad.vert', 'glsl/PlaceCircle.frag'),
+        ViewRadius:  	gol.igloo.program('glsl/quad.vert', 'glsl/ViewRadius.frag'),
         DestInterf:  	gol.igloo.program('glsl/quad.vert', 'glsl/DestInterf.frag'),
         photo:  		gol.igloo.program('glsl/quad.vert', 'glsl/photo.frag')
     };
@@ -2216,7 +2403,7 @@ GOL.prototype.run_hittests = function() {
 			if(gol.waypoints.length > 0 && gol.waypoints[i] != null) {
 				if(gol.enemies.length > 0 && gol.enemies[j] != null) {
 					if(gol.cpu_hit_test(gol.enemies[j][0], gol.waypoints[i][0], gol.enemies[j][1], gol.waypoints[i][1], gol.enemies[j][2], gol.waypoints[i][2])) {
-						gol.waypoints[i][3] -= ((gol.enemies[j][3]*gol.enemies[j][3])/3) + 100;
+						gol.waypoints[i][3] -= gol.enemies[j][3] + 500;
 						gol.enemies[j][3] -= 450;
 						hit_wp_sound = true;
 					}
@@ -2257,7 +2444,7 @@ GOL.prototype.run_hittests = function() {
 						if(gol.cpu_hit_test(gol.enemies[j][0], gol.bullets[i][0], gol.enemies[j][1], gol.bullets[i][1], gol.enemies[j][2], gol.bullets[i][2])) {
 							//gol.ar_kill(gol.bullets, i);
 							gol.bullets[i][3] = 0;
-							gol.enemies[j][3] -= (gol.bullets[i][2]*2) + 15;
+							gol.enemies[j][3] -= (gol.bullets[i][2]*6) + 15;
 							hit_enemy_sound = true;
 						}
 					}
@@ -2289,7 +2476,7 @@ GOL.prototype.run_hittests = function() {
 				if(gol.barriers.length > 0 && gol.barriers[j] != null) {
 					if(gol.explosions[i][3] == gol.explosions[i][4]-1) {
 						if(gol.cpu_hit_test(gol.barriers[j][0], gol.explosions[i][0], gol.barriers[j][1], gol.explosions[i][1], gol.barriers[j][2], gol.explosions[i][2])) {
-							gol.barriers[j][3] -= 300;
+							gol.barriers[j][3] -= 1200;
 							//hit_enemy_sound = true;
 						}
 					}
@@ -2525,15 +2712,23 @@ GOL.prototype.run_bullets = function() {
 					if(gol.bullets[i][0] > 0) {gol.bullets[i][0] = gol.bullets[i][0]%gol.statesize[0];}
 					if(gol.bullets[i][1] > 0) {gol.bullets[i][1] = gol.bullets[i][1]%gol.statesize[1];}
 
+					//player
 					if(gol.bullets[i][13] == 1) {
-						gol.place_back_rend(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], 1, 1, 1, 1);
-						gol.place_cell_fore(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+15, gol.bullets[i][2]+15, 0.7, 0.7, 0.7, 0.7);
+						gol.place_back_rend_circle(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], 1, 1, 1, 1);
+						if(gol.use_trails){gol.place_circle_fore(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+15, gol.bullets[i][2]+15, 0.7, 0.7, 0.7, 0.7);}
 					}
 
+					//enemy
 					if(gol.bullets[i][13] == 0) {
-						gol.place_cell_back(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], gol.bullets[i][2], 0, 0, 0);
-						gol.place_Rend_World(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], 1, gol.bullets[i][9], 1, 1);
-						gol.place_cell_fore(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+15, gol.bullets[i][2]+15, 1, 0, 1, 1);
+						gol.place_circle_back(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], gol.bullets[i][2], 0, 0, 0);
+						gol.place_Rend_World_circle(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2], 1, gol.bullets[i][9], 1, 1);
+						if(gol.use_trails){
+							if(gol.bullets[i][10] > 0){
+								gol.place_circle_fore(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+15, gol.bullets[i][2]+15, 0.5, 1, 0, 0);
+							} else {
+								gol.place_circle_fore(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+9, gol.bullets[i][2]+5, 1, 0, 1, 1);
+							}
+						}
 					}
 					
 					gol.bullets[i][3] -= 1;
@@ -2574,10 +2769,11 @@ GOL.prototype.create_melee = function() {
 	var dist = gol.get_dist(this.statesize[0]/2, x, this.statesize[1]/2, y);
 
 	if(dist > 18 && dist < 64) {
-		gol.place_Rend_World(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
-		gol.place_cell_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
-		gol.place_cell_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
-		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
+		if(gol.use_trails){gol.place_circle_fore(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 1, 1, 1, 1);}
+		gol.place_Rend_World_circle(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
+		gol.place_circle_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
+		gol.place_circle_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
+		gol.place_circle_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
 		gol.p_power -= 10;
 		gol.play_sound(10);
 	} else if(dist >= 64) {
@@ -2587,10 +2783,11 @@ GOL.prototype.create_melee = function() {
 		x = capped_pos[0];
 		y = capped_pos[1];
 
-		gol.place_Rend_World(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
-		gol.place_cell_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
-		gol.place_cell_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
-		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
+		if(gol.use_trails){gol.place_circle_fore(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 1, 1, 1, 1);}
+		gol.place_Rend_World_circle(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
+		gol.place_circle_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
+		gol.place_circle_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
+		gol.place_circle_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
 		gol.p_power -= 10;
 		gol.play_sound(10);
 	} else if(dist <= 18) {
@@ -2600,10 +2797,11 @@ GOL.prototype.create_melee = function() {
 		x = capped_pos[0];
 		y = capped_pos[1];
 
-		gol.place_Rend_World(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
-		gol.place_cell_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
-		gol.place_cell_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
-		gol.place_cell_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
+		if(gol.use_trails){gol.place_circle_fore(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 1, 1, 1, 1);}
+		gol.place_Rend_World_circle(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
+		gol.place_circle_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
+		gol.place_circle_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
+		gol.place_circle_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
 		gol.p_power -= 10;
 		gol.play_sound(10);
 	}
@@ -2669,7 +2867,7 @@ GOL.prototype.run_enemies = function() {
 			if(mobtype == 3) {gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*8)+28, Math.random()*200+400+(gol.game_score/100), 200, 25, 1, mobtype);}
 		} else {
 			//create_normal
-			gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/20)+22, 5*(Math.random()*(gol.game_score/300))+20, rof, Math.random()*bul_rand+4, 0, 0);
+			gol.create_enemy(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], (Math.random()*10)*(bul_rand/20)+22, 5*(Math.random()*(gol.game_score/150))+40, rof, Math.random()*bul_rand+4, 0, 0);
 		}
 	
 
@@ -2716,7 +2914,7 @@ GOL.prototype.run_enemies = function() {
 					if(gol.enemies[i][11] <= 0) {
 						gol.enemies[i][6] = 240;
 						gol.enemies[i][12] = 0;
-						gol.queen_cooldown = 900; 
+						gol.queen_cooldown = 1800; 
 					}
 				}
 			}
@@ -2824,11 +3022,11 @@ GOL.prototype.run_enemies = function() {
 
 			//gol.placeAll(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], 1, 1, 0.0, 0.0);
 			//gol.placeAll(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-6, 1, 1, (gol.enemies[i][3]/gol.enemies[i][4]), 0.0);
-			gol.place_cell_back(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], gol.enemies[i][2], 0, 0, 0);
-			gol.place_Rend_World(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], 1, 1, 1, 1);
-			gol.place_Rend_World(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-6, 1, 1, (gol.enemies[i][3]/gol.enemies[i][4]), 0.0);
+			gol.place_circle_back(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], gol.enemies[i][2], 0, 0, 0);
+			gol.place_Rend_World_circle(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], 1, 1, 1, 1);
+			gol.place_Rend_World_circle(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-6, 1, 1, (gol.enemies[i][3]/gol.enemies[i][4]), 0.0);
 
-			gol.place_cell_rend(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-12, gol.enemies[i][2]-12, 0.0, 0.0, 0.0);
+			gol.place_circle_rend(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]-12, gol.enemies[i][2]-12, 0.0, 0.0, 0.0);
 
 			if(gol.enemies[i][3] <= 0) {
 				//gol.create_explosion(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2]*2.8, 12, 1, 1, 1, 0.4, 0.7, false, 0);
@@ -2837,7 +3035,7 @@ GOL.prototype.run_enemies = function() {
 				if(gol.enemies[i][12] == 1) {gol.game_score += 400;}
 				if(gol.enemies[i][12] == 2) {gol.game_score += 500;}
 				if(gol.enemies[i][12] == 3) {gol.game_score += 300;}
-				if(gol.enemies[i][12] != 0){gol.queen_cooldown = 900;}
+				if(gol.enemies[i][12] != 0){gol.queen_cooldown = 1800;}
 				gol.ar_kill(gol.enemies, i);
 				var delay_spawn = 120 + (Math.random()*10)*((gol.game_score/750)+1);
 				if(gol.enemy_cooldown >= 450){gol.enemy_cooldown = 450;}
@@ -2853,6 +3051,18 @@ GOL.prototype.run_enemies = function() {
 	}
 
 	return this;
+}
+
+
+GOL.prototype.view_distortion = function() {
+	//enemy view distortion
+	//for(var i = 0; i < gol.enemies.length; i++) {
+	//	if(gol.enemies.length > 0 && gol.enemies[i] != null) {
+	//		gol.place_view_radius(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][2], gol.enemies[i][2], 0.2, 0.2, 0.2);
+	//	}
+	//}
+	//main view distortion
+	gol.place_view_radius(gol.statesize[0]/2, gol.statesize[1]/2, 512, 512, 0.2, 0.2, 0.2);
 }
 
 GOL.prototype.create_waypoint = function(x, y, size, cooldown) {
@@ -2893,8 +3103,8 @@ GOL.prototype.run_waypoints = function() {
 			
 			//gol.placeAll(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]+4, 1, 1, 0, 0);
 			gol.place_Rend_World(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2], 0, 0, 0, 0);
-			gol.place_back_rend(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2], 0, 0, 0.8, 0);
-			gol.place_back_rend(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]-8, 0, 0, 0.2, 0);
+			gol.place_back_rend_circle(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2], 0, 0, 0.8, 0);
+			gol.place_back_rend_circle(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]-8, 0, 0, 0.2, 0);
 			gol.place_cell_rend(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]-48, gol.waypoints[i][2]-24, 1-col, col, col);
 			gol.place_cell_rend(gol.waypoints[i][0], gol.waypoints[i][1], gol.waypoints[i][2]-24, gol.waypoints[i][2]-48, 1-col, col, col);
 
@@ -2953,23 +3163,25 @@ GOL.prototype.run_explosions = function() {
 			}
 
 			if(gol.explosions[i][11] == 1) {
-				gol.place_Rend_World(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 		gol.explosions[i][7], 	gol.explosions[i][5], 	gol.explosions[i][8], 	gol.explosions[i][9]);
-				gol.place_Rend_World(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 				1, 						gol.explosions[i][6], 	1, 						col);
+				gol.place_Rend_World_circle(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 		gol.explosions[i][7], 	gol.explosions[i][5], 	gol.explosions[i][8], 	gol.explosions[i][9]);
+				gol.place_Rend_World_circle(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 				1, 						gol.explosions[i][6], 	1, 						col);
 			}
 
 			if(gol.explosions[i][11] == 2) {
-				gol.place_back_rend(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 		gol.explosions[i][7], 	gol.explosions[i][5], 	gol.explosions[i][8], 	gol.explosions[i][9]);
-				gol.place_back_rend(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 				1, 						gol.explosions[i][6], 	1, 						col);
+				gol.place_back_rend_circle(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5), 		gol.explosions[i][7], 	gol.explosions[i][5], 	gol.explosions[i][8], 	gol.explosions[i][9]);
+				gol.place_back_rend_circle(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 				1, 						gol.explosions[i][6], 	1, 						col);
 			}*/
 
+			//enemy explosion
 			if(gol.explosions[i][11] == 0) {
-				gol.place_Rend_World(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5),	gol.explosions[i][2]*((col/2)+0.5), 			1, 1, 	1, 1);
-				gol.place_cell_fore(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5),	gol.explosions[i][2]*((col/2)+0.5), gol.explosions[i][2]*((col/2)+0.5), 1, 	0, 0);
+				gol.place_Rend_World_circle(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5),	gol.explosions[i][2]*((col/2)+0.5), 			1, 1, 	1, 1);
+				gol.place_circle_back(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5),	gol.explosions[i][2]*((col/2)+0.5), 			0,	0, 	0, 0);
+				if(gol.use_trails){gol.place_circle_fore(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5),	gol.explosions[i][2]*((col/2)+0.5), gol.explosions[i][2]*((col/2)+0.5), 1, 	0, 0);}
 				//gol.placeAll(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7, 						0, 	0, 	0, 0);
 			}
 
 			if(gol.explosions[i][11] == 2) {
-				gol.place_cell_back(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5),	gol.explosions[i][2]*((col/2)+0.5), 			1, 	1, 1);
+				gol.place_circle_back(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5),	gol.explosions[i][2]*((col/2)+0.5), 			1, 	1, 1);
 				//gol.place_cell_back(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7,		gol.explosions[i][2]*col*0.7, 					1, 	0.7, 0.1);
 			}
 			
@@ -3008,7 +3220,7 @@ GOL.prototype.run_barriers = function() {
 		//alert(gol.barriers[i]);
 		if(gol.barriers.length > 0 && gol.barriers[i] != null) {
 			if(gol.barriers[i][3] <= 0) {
-				gol.create_explosion(gol.barriers[i][0], gol.barriers[i][1], gol.barriers[i][2]*1.5, 9, 0, 0, 0.6, 0, 0, false, 2);
+				gol.create_explosion(gol.barriers[i][0], gol.barriers[i][1], gol.barriers[i][2]*1.8, 9, 0, 0, 0.6, 0, 0, false, 2);
 				gol.ar_kill(gol.barriers, i);			
 				gol.play_sound(11);
 			} else {
@@ -3018,13 +3230,14 @@ GOL.prototype.run_barriers = function() {
 				gol.barriers[i][0] = adjusted_pos[0];
 				gol.barriers[i][1] = adjusted_pos[1];
 
-				gol.place_back_rend(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size, 0, 0, gol.barriers[i][3]/gol.barrier_life_max, 1-(gol.barriers[i][3]/gol.barrier_life_max));
-			}
+				gol.place_circle_back(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size, gol.barrier_size, 1, 1, 1);
+				gol.place_circle_rend(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size, gol.barrier_size, 0, gol.barriers[i][3]/gol.barrier_life_max, 1-(gol.barriers[i][3]/gol.barrier_life_max));
+				}
 		}
 	}
 	for(var i = 0; i < gol.barriers.length; i++) {
 		if(gol.barriers[i] != null) {
-			gol.place_cell_rend(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size*0.8, gol.barrier_size*0.8, 0.4, 0.4, 0.4);
+			gol.place_circle_rend(gol.barriers[i][0], gol.barriers[i][1], gol.barrier_size*0.8, gol.barrier_size*0.8, 0.4, 0.4, 0.4);
 		}
 	}
 
@@ -3174,6 +3387,27 @@ GOL.prototype.player_reset = function() {
 };
 
 
+GOL.prototype.start_shieldburst = function() {
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 45, -96, 0, 0, 0, 100, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 45, 96, 0, 0, 0, 100, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 45, 0, -96, 0, 0, 100, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 45, 0, 96, 0, 0, 100, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 45, -96, -96, 0, 0, 70, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 45, -96, 96, 0, 0, 70, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 45, 96, -96, 0, 0, 70, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 9, 45, 96, 96, 0, 0, 70, 1, 1, 0);	
+
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, -96, 0, 0, 0, 100, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, 96, 0, 0, 0, 100, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, 0, -96, 0, 0, 100, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, 0, 96, 0, 0, 100, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, -96, -96, 0, 0, 70, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, -96, 96, 0, 0, 70, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, 96, -96, 0, 0, 70, 1, 1, 0);		
+	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, 96, 96, 0, 0, 70, 1, 1, 0);	
+}
+
+
 //Player controller
 GOL.prototype.run_player = function() {
 
@@ -3188,8 +3422,8 @@ GOL.prototype.run_player = function() {
 		y_place = capped_pos[1];
 	}
 
-	gol.place_cell_rend(x_place, y_place, 9, 9, 0.8, 0.8, 0.8);
-	gol.place_cell_rend(x_place, y_place, 7, 7, 0.3, 0.3, 0.3);
+	gol.place_circle_rend(x_place, y_place, 9, 9, 0.8, 0.8, 0.8);
+	gol.place_circle_rend(x_place, y_place, 7, 7, 0.3, 0.3, 0.3);
 
 
 	//Shoot marker	
@@ -3204,10 +3438,10 @@ GOL.prototype.run_player = function() {
 		y_place = capped_pos[1];
 	}
 
-	gol.place_cell_rend(x_place, y_place, 15, 15, 1, 1, 1);
-	gol.place_cell_rend(x_place, y_place, 13, 13, 0, 0, 0);
-	gol.place_cell_rend(x_place, y_place, 9, 9, 1, 1, 1);
-	gol.place_cell_rend(x_place, y_place, 5, 5, 0.8, 0, 0);
+	gol.place_circle_rend(x_place, y_place, 15, 15, 1, 1, 1);
+	gol.place_circle_rend(x_place, y_place, 13, 13, 0, 0, 0);
+	gol.place_circle_rend(x_place, y_place, 9, 9, 1, 1, 1);
+	gol.place_circle_rend(x_place, y_place, 5, 5, 0.8, 0, 0);
 	
 
 	//Melee marker
@@ -3221,8 +3455,8 @@ GOL.prototype.run_player = function() {
 		y_mel = capped_pos[1];
 	}
 
-	gol.place_cell_rend(x_mel, y_mel, 7, 7, 0.4, 0.8, 0.4);
-	gol.place_cell_rend(x_mel, y_mel, 5, 5, 1, 1, 1);
+	gol.place_circle_rend(x_mel, y_mel, 7, 7, 0.4, 0.8, 0.4);
+	gol.place_circle_rend(x_mel, y_mel, 5, 5, 1, 1, 1);
 
 
 
@@ -3243,23 +3477,28 @@ GOL.prototype.run_player = function() {
 		gol.p_shield_cooldown -= 1;
 	} else { 
 		//show 'shield-ready' glow
-		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size+4, gol.player_size+4, 0, 0.5, 0.7); 
+		gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size+4, gol.player_size+4, 0, 0.5, 0.7); 
 	}	
 
 	//attempt hit detection and give me the result
 	var hit = gol.hitplayer();
 
 	//draw player	
-	if(gol.use_trails){gol.place_cell_fore(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 1, 1)}
+	if(gol.use_trails){gol.place_circle_fore(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 1, 1)}
 
-	if(hit == 0) {gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 1, 0);} else {
-		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 0, 0)
-		gol.place_cell_rend(gol.statesize[0]/2, gol.statesize[1]/2, 9, 9, 1, 1, 0)
+
+	if(hit == 0) {gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 1, 0);} else {
+		gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 0, 0)
+		gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, 9, 9, 1, 1, 0)
 	}
 
 	if(hit > 0) {
 		gol.run_shields();
 	}
+
+	//gol.place_view_radius(gol.statesize[0]/2, gol.statesize[1]/2, 500, 500, 0.5, 0.5, 0.5);
+	//gol.place_view_radius(gol.statesize[0]/2, gol.statesize[1]/2, 520, 520, 0.6, 0.6, 0.6);
+
 
 	//If moving, drain fuel and slow down
 	gol.drainfuel();
@@ -3389,9 +3628,12 @@ GOL.prototype.run_player = function() {
 	//Shield burst attack
 	if(gol.space_down) {
 		//gol.place_Rend_World(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, (gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size, 0, 0, 1, 1);
-		gol.place_cell_rend(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size)*0.85, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size)*0.85, 0.9, 0.9, 1)
-		gol.place_cell_back(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), 0, 0.9, 1)
-		gol.p_power -= 30;
+		gol.place_circle_back(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), 0, 0, 0);
+		gol.place_circle_world(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), 0, 0, 0);
+		if(gol.use_trails){gol.place_circle_fore(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), 1, 1, 1);}
+		gol.place_circle_rend(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size), 0, 0.9, 1);
+		gol.place_circle_rend(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size)*0.85, ((gol.p_s_burstsize/3)+gol.p_s_burstsize*(gol.p_power/gol.p_power_max)+gol.player_size)*0.85, 0.9, 1, 1);
+		gol.p_power -= 40;
 	}
 
 	if(gol.p_s_burstcooldown > 0) {gol.p_s_burstcooldown -= 1;}

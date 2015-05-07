@@ -15,9 +15,13 @@ void main() {
 
 	gl_FragColor = texture2D(state, gl_FragCoord.xy / scale);
 
-	if( (gl_FragCoord.x > x) && (gl_FragCoord.x < x+w) && (gl_FragCoord.y > y) && (gl_FragCoord.y < y+h) ) { 
-		gl_FragColor = vec4(value, g, b, 1.0); 
-	}
+	//if( (gl_FragCoord.x > x) && (gl_FragCoord.x < x+w) && (gl_FragCoord.y > y) && (gl_FragCoord.y < y+h) ) { 
+		float centerx = w / 2.0;
+		float centery = h / 2.0;
+		if(sqrt(((gl_FragCoord.x-(x+centerx))*(gl_FragCoord.x-(x+centerx))) + ((gl_FragCoord.y-(y+centery))*(gl_FragCoord.y-(y+centery)))) <= sqrt((centerx*centerx)+(centery*centery))) {
+			gl_FragColor = vec4(value, g, b, 1.0); 
+		}
+	//}
 
 
 
