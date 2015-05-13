@@ -34,7 +34,7 @@ function GOL(canvas, scale) {
 	this.seed_strength = 0.37;
 
 	//Player definition & control
-	this.player_size = 13;
+	this.player_size = 21;
 	this.player_x = w/scale/2+(this.player_size/2);
 	this.player_y = h/scale/2+(this.player_size/2);
 	this.p_move_x = 0;
@@ -68,13 +68,14 @@ function GOL(canvas, scale) {
 	this.game_frame = 0; //timekeeping
 	this.healthflash = false;
 	this.health_low_flash = 0;
+	this.hit_flash = 0;
 	this.master_volume = 0.6;
 
 	//Player Stats
 	this.p_health_max = 8000;
 	this.p_health = this.p_health_max;
 	this.p_fuel = 1000;
-	this.p_power_max = 1400;
+	this.p_power_max = 2750;
 	this.p_power = this.p_power_max;
 	this.p_shot_cost = 30;
 
@@ -91,7 +92,7 @@ function GOL(canvas, scale) {
 	//Player shield
 	this.p_shield_cooldown = 0;
 	this.p_shield_size_max = 8;
-	this.p_shield_size = this.player_size+4;
+	this.p_shield_size = this.player_size+8;
 	this.p_s_burstsize = 90;
 	this.p_s_burstcooldown = 0;
 	this.p_shield_charge_cooldown = 0;
@@ -121,7 +122,7 @@ function GOL(canvas, scale) {
 	this.waypoint_cooldown = Math.floor(Math.random()*500+400);
 
 	//Placeable Barrier object
-	this.barrier_size = 18;
+	this.barrier_size = 25;
 	this.place_barrier_cooldown = 0;
 	this.barrier_life_max = 8000;
 	
@@ -2371,7 +2372,7 @@ GOL.prototype.run_hittests = function() {
 				gol.p_power += 8;
 				gol.p_fuel += 4;
 				gol.game_score += 1;
-				gol.waypoints[i][3] -= 5;
+				gol.waypoints[i][3] -= 2;
 				gol.play_sound(15);
 			}
 		}
@@ -2629,7 +2630,7 @@ GOL.prototype.check_barrier_placement = function() {
 					y = capped_pos[1];
 				}
 
-				if(gol.cpu_hit_test(x, gol.barriers[i][0], y, gol.barriers[i][1], gol.barrier_size/2, gol.barrier_size/2)) {
+				if(gol.cpu_hit_test(x, gol.barriers[i][0], y, gol.barriers[i][1], gol.barrier_size/1.4, gol.barrier_size/1.4)) {
 					hit = true;
 				}
 			} else {
@@ -2643,7 +2644,7 @@ GOL.prototype.check_barrier_placement = function() {
 					y = capped_pos[1];
 				}
 
-				if(gol.cpu_hit_test(x, gol.barriers[i][0], y, gol.barriers[i][1], gol.barrier_size/2, gol.barrier_size/2)) {
+				if(gol.cpu_hit_test(x, gol.barriers[i][0], y, gol.barriers[i][1], gol.barrier_size/1.4, gol.barrier_size/1.4)) {
 					gol.barriers[i][3] = 0;
 					hit = true;
 				}
@@ -2774,7 +2775,7 @@ GOL.prototype.create_melee = function() {
 		gol.place_circle_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
 		gol.place_circle_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
 		gol.place_circle_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
-		gol.p_power -= 10;
+		gol.p_power -= 12;
 		gol.play_sound(10);
 	} else if(dist >= 64) {
 
@@ -2788,7 +2789,7 @@ GOL.prototype.create_melee = function() {
 		gol.place_circle_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
 		gol.place_circle_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
 		gol.place_circle_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
-		gol.p_power -= 10;
+		gol.p_power -= 12;
 		gol.play_sound(10);
 	} else if(dist <= 18) {
 
@@ -2802,7 +2803,7 @@ GOL.prototype.create_melee = function() {
 		gol.place_circle_back(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 0, 0, 0);
 		gol.place_circle_rend(x, y, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, 0, 1, 0.2);
 		gol.place_circle_rend(x, y, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, ((gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min)-gol.melee_size_min, 0.9, 1, 0.9);
-		gol.p_power -= 10;
+		gol.p_power -= 12;
 		gol.play_sound(10);
 	}
     
@@ -3182,6 +3183,7 @@ GOL.prototype.run_explosions = function() {
 
 			if(gol.explosions[i][11] == 2) {
 				gol.place_circle_back(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*((col/2)+0.5),	gol.explosions[i][2]*((col/2)+0.5), 			1, 	1, 1);
+		
 				//gol.place_cell_back(gol.explosions[i][0], gol.explosions[i][1], gol.explosions[i][2]*col*0.7,		gol.explosions[i][2]*col*0.7, 					1, 	0.7, 0.1);
 			}
 			
@@ -3260,7 +3262,7 @@ GOL.prototype.run_shields = function() {
 		//gol.placeAll(gol.statesize[0]/gol.scale/2, gol.statesize[1]/gol.scale/2, shield_size_calc, 0, 0, 1, 1);
 
 		//unction(x, y, size, cooldown, outval, inval, r, g, b, shift, layers)
-		gol.create_explosion(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, 3, 0, 0, 0, 1, 1, true, 2);
+		gol.create_explosion(gol.statesize[0]/2, gol.statesize[1]/2, shield_size_calc, 12, 0, 0, 0, 1, 1, true, 2);
 	} else {gol.p_shield_charge_cooldown -= 1;}
 
 	return this;
@@ -3280,7 +3282,7 @@ GOL.prototype.hitplayer = function() {
 		//do damage
 		var minhit = 50;
 		if(hit > 0) {gol.p_fuel -= (hit+10); gol.play_sound(8);}
-		if(hit > 4) {gol.p_health -= (hit*gol.hitrate + minhit);}
+		if(hit > 4) {gol.p_health -= (hit*gol.hitrate + minhit)/2;}
 		if(hit > ((gol.player_size*gol.player_size)/3) ) {/*gol.p_health -= hit/2;*/ gol.play_sound(12);}
 			
 
@@ -3488,8 +3490,15 @@ GOL.prototype.run_player = function() {
 
 
 	if(hit == 0) {gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 1, 0);} else {
-		gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 0, 0)
-		gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, 9, 9, 1, 1, 0)
+		gol.hit_flash = 6;
+		//gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size, gol.player_size, 1, 0, 0)
+		//gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, 9, 9, 1, 1, 0)
+	}
+
+	if(gol.hit_flash > 0) {
+		gol.hit_flash -= 1;
+		gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size+6, gol.player_size+6, 1, 0, 0)
+		gol.place_circle_rend(gol.statesize[0]/2, gol.statesize[1]/2, gol.player_size-10, gol.player_size-10, 1, 1, 0)
 	}
 
 	if(hit > 0) {
@@ -3604,7 +3613,7 @@ GOL.prototype.run_player = function() {
 		
 		if(!gol.l_click && gol.r_click && !gol.melee_on) {gol.p_power -= 125; gol.melee_on = true;}       		
 		
-		if(gol.l_click && gol.r_click && gol.p_power >= 30 && gol.melee_on && gol.place_barrier_cooldown <= 0) {
+		if(gol.l_click && gol.r_click && gol.p_power >= 60 && gol.melee_on && gol.place_barrier_cooldown <= 0) {
 			if(!gol.check_barrier_placement()) {
 				var x = (this.statesize[0]/this.scale/2) + ((gol.mouse_x - this.statesize[0]/2)/2.5);
 				var y = (this.statesize[1]/this.scale/2) + ((gol.mouse_y - this.statesize[1]/2)/2.5);
@@ -3618,7 +3627,7 @@ GOL.prototype.run_player = function() {
 
 				gol.create_barrier(x, y, gol.barrier_size, gol.barrier_life_max+Math.floor(Math.random()*200)); 
 				gol.place_barrier_cooldown = 5;
-				gol.p_power -= 40;					
+				gol.p_power -= 60;					
 				gol.play_sound(11);
 			}
 		}
