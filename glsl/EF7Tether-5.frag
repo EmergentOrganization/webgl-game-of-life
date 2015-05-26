@@ -264,8 +264,11 @@ float s3 = 		getR(vec2(7.0, -1.0)) +
 	//restore last frame's data (current, a[my_id])
 
 	if(sum_0 >= 37 && sum_0 <= 90) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_0 >= 44 && sum_0 <= 45) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }
-	if(sum_0 >= 91 && sum_0 <= 145) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }
+	if(sum_0 >= 44 && sum_0 <= 45) { gl_FragColor = vec4(1.0, 1.0, 0.4, 1.0); }
+	if(sum_0 >= 91 && sum_0 <= 145) { gl_FragColor = vec4(1.0, 0.3, 0.0, 1.0); }
+	if(sum_0 >= 101 && sum_0 <= 135) { gl_FragColor = vec4(1.0, 0.1, 0.0, 1.0); }
+	if(sum_0 >= 118 && sum_0 <= 125) { gl_FragColor = vec4(1.0, 0.8, 0.5, 1.0); }
+	if(sum_0 >= 138 && sum_0 <= 145) { gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); }
 	
 	
 
@@ -300,8 +303,8 @@ float s4 =
 		getR(vec2(3.0, 1.0));   /*NEWLINE*/ int sum_1 = int(s4); //EDGE_0
 
 
-	if(sum_1 >= 13 && sum_1 <= 19) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }	
-	if(sum_1 >= 9 && sum_1 <= 9) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }	
+	if(sum_1 >= 13 && sum_1 <= 19) { gl_FragColor = vec4(1.0, 1.0, 0.3, 1.0); }	
+	if(sum_1 >= 9 && sum_1 <= 9) { gl_FragColor = vec4(1.0, 0.8, 0.5, 1.0); }	
 
 	
 
@@ -718,10 +721,10 @@ float s10 = 		getR(vec2(11.0, -9.0)) +
 		getR(vec2(14.0, 2.0)) +
 		getR(vec2(14.0, 3.0));   /*NEWLINE*/ int sum_2 = int(s5 + s6 + s7 + s8 + s9 + s10); //EDGE_0
 
-	if(sum_2 >= 185 && sum_2 <= 235) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_2 >= 320) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	if(sum_2 >= 185 && sum_2 <= 235) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	if(sum_2 >= 320) 					{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 
-	//if(sum_2 >= 316 && sum_2 <= 316) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }	
+	//if(sum_2 >= 316 && sum_2 <= 316) 	{ gl_FragColor = vec4(1.0, 0.3, 0.5, 1.0); }	
 
 
 	//EDGE_2

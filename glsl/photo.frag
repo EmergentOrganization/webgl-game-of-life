@@ -56,12 +56,16 @@ void main() {
 		float b = getB(vec2(0, 0), front);
 
 		//if((r != g && r != b) || b > r) {
-			if(r > 0.0) {
-				gl_FragColor = vec4((r-(0.04*duration)), (g+(0.08*duration)), (b+(0.04*duration)), 1.0);
+			if(r > 0.5) {
+				gl_FragColor = vec4((r-(0.04*duration)), (g+(0.06*duration)), (b), 1.0);
+			} else if(r > 0.0) {
+				gl_FragColor = vec4((r-(0.04*duration)), (g+(0.08*duration)), (b+(0.08*duration)), 1.0);
+			} else if (g > 0.5) {
+				gl_FragColor = vec4(r, (g-(0.24*duration)), (b+(0.12*duration)), 1.0);
 			} else if (g > 0.0) {
-				gl_FragColor = vec4(r, (g-(0.06*duration)), (b+(0.08*duration)), 1.0);
+				gl_FragColor = vec4(r, (g-(0.12*duration)), (b-(0.08*duration)), 1.0);
 			} else {
-				gl_FragColor = vec4(r, g, (b-(0.08*duration)), 1.0);
+				gl_FragColor = vec4(r, g, (b-(0.32*duration)), 1.0);
 			}
 		//}
 		

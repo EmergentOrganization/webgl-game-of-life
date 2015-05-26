@@ -51,6 +51,7 @@ function GOL(canvas, scale) {
 	this.mouse_x = 0
 	this.mouse_y = 0
 	this.space_down = false;
+	this.sb_mousesize = 25;
 
 	//General game values
 	this.active_rule = new Array(2); //Which level?
@@ -72,7 +73,7 @@ function GOL(canvas, scale) {
 	this.master_volume = 0.6;
 
 	//Player Stats
-	this.p_health_max = 8000;
+	this.p_health_max = 5000;
 	this.p_health = this.p_health_max;
 	this.p_fuel = 1000;
 	this.p_power_max = 2750;
@@ -1069,7 +1070,6 @@ GOL.prototype.place_back_rend_circle = function(x, y, size, valRend, valWorld, g
 };
 
 
-
 //Create a square at the location and size in both rend and front textures
 GOL.prototype.place_Rend_World = function(x, y, size, valRend, valWorld, g, b) {
 	gol.place_cell_world(x,y,size,size,valWorld,g,b);
@@ -1145,8 +1145,6 @@ GOL.prototype.start = function(canvas) {
 			gol.destruct_interf();
 			
 			if(gol.game_on) {
-		    	gol.run_hittests();			//CPU Hit tests
-				gol.run_bullets();			//Step Bullet calcs
 			}
 
 			//gol.swap_rend();			//Merge the CA and Player texture layers
@@ -1154,13 +1152,17 @@ GOL.prototype.start = function(canvas) {
 			gol.swap_MergeRend3();
 
 			if(gol.game_on) {
+		    	gol.run_hittests();			//CPU Hit tests
 				gol.run_explosions();		//Detonations
 
 				gol.run_waypoints();		//Step Waypoint calcs
 				gol.run_barriers();			//Step Barrier calcs
+				gol.run_bullets();			//Step Bullet calcs
 				gol.run_enemies();			//Step Enemy calcs
 				gol.run_player();			//Step Player calcs
 				gol.view_distortion();      //view range limiter
+			} else {
+				gol.run_sandbox();			//Step sandbox
 			}
 
 			gol.draw();					//Render the final texture to the screen
@@ -1179,7 +1181,7 @@ GOL.prototype.start = function(canvas) {
 			//Image Export handler
 			if (gol.recordnow === true) {
 				gol.gen += 1;
-				if(gol.gen % 2 === 0/*(gol.gen > 600 && gol.gen % 100 === 0) || (gol.gen < 600 && gol.gen % 10 === 0) || (gol.gen < 30)*/){
+				if(gol.gen % 6 === 0/*(gol.gen > 600 && gol.gen % 100 === 0) || (gol.gen < 600 && gol.gen % 10 === 0) || (gol.gen < 30)*/){
 					gol.export_image = gol.exportImage(gol.igloo.gl, gol.textures.rend.texture, gol.canvas.width, gol.canvas.height);
 					gol.export_images.push(gol.export_image);
 					gol.render_frame += 1;
@@ -1282,7 +1284,7 @@ GOL.prototype.imageDump = function() {
 	newWindow.document.close();
 
 	//Clear the images from memory
-	gol.export_images = new Array()
+	gol.export_images = [];
 
 
 	//unused test function for prompting the user to download the images
@@ -2036,7 +2038,7 @@ function myConfig() {
 	this.booloff = false;
 	this.boolon = true;
 	this.rule = 165;
-	this.buddy_rule = 112;
+	this.buddy_rule = 89;
 	this.trail = 10.0;
 	this.volume = gol.master_volume;
 
@@ -2124,6 +2126,9 @@ function Controller(gol) {
 		    case 67: /* C */
 				gol.shuffletime = 60;
 		        break;    
+		    case 89: /* Y */
+				gol.setRandom(gol.textures.background_1, 1);
+		        break;        
 			case 32: /* space */
 				if(gol.p_s_burstcooldown <= 0 && !gol.space_down && (gol.p_power/gol.p_power_max) >= 0.28) {
 					gol.start_shieldburst()
@@ -2593,7 +2598,7 @@ GOL.prototype.run_hittests = function() {
 				}
 
 				if(gol.cpu_hit_test(x, gol.enemies[i][0], y, gol.enemies[i][1], (gol.melee_size_max*(gol.p_power/gol.p_power_max))+gol.melee_size_min, gol.enemies[i][2])) {
-				gol.enemies[i][3] -= 5*(gol.p_power/gol.p_power_max)+1;
+				gol.enemies[i][3] -= 10*(gol.p_power/gol.p_power_max)+1;
 				}
 			}
 		}
@@ -2736,10 +2741,10 @@ GOL.prototype.run_bullets = function() {
 
 					if(gol.bullets[i][10] > 0 && gol.bullets[i][3] <= 0) {	
 						if(gol.bullets[i][13] == 0) {
-							gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 12, 1, 1, 0.0, 1, 0.3, false, 0);
+							gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 16, 1, 1, 0.0, 1, 0.3, false, 0);
 							gol.play_sound(4);
 						} else {
-							gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 12, 0, 0, 0.6, 0, 0, false, 2);
+							gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 16, 0, 0, 0.6, 0, 0, false, 2);
 							gol.play_sound(4);
 						}
 					}
@@ -2748,10 +2753,10 @@ GOL.prototype.run_bullets = function() {
 				if(gol.bullets[i][3] <= 0){
 					if(gol.bullets[i][10] > 0) {
 						if(gol.bullets[i][13] == 0) {
-							gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 12, 1, 1, 0.0, 1, 0.3, false, 0);
+							gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 16, 1, 1, 0.0, 1, 0.3, false, 0);
 							gol.play_sound(4);
 						} else {
-							gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 12, 0, 0, 0.6, 0, 0, false, 2);
+							gol.create_explosion(gol.bullets[i][0], gol.bullets[i][1], gol.bullets[i][2]+gol.bullets[i][10], 16, 0, 0, 0.6, 0, 0, false, 2);
 							gol.play_sound(4);
 						}
 					}
@@ -2890,8 +2895,8 @@ GOL.prototype.run_enemies = function() {
 					var dist = gol.get_dist(0, x, 0, y);
 					var bul_life = Math.random()*120 + 90;
 					if(dist < 450) {
-						if(Math.floor(Math.random()*4) == 0) {
-							gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], (gol.enemies[i][7]/3)+3, bul_life*1.5, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 25, 95, 16, 0, 0);	
+						if(dist > 180 && Math.floor(Math.random()*4) == 0) {
+							gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7]+12, bul_life*1.5, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 25, 95, (gol.enemies[i][7]+12)*1.5, 0, 0);	
 						} else {
 							gol.create_bullet(gol.enemies[i][0], gol.enemies[i][1], gol.enemies[i][7], bul_life, (this.statesize[0]/2) - gol.enemies[i][0], (this.statesize[1]/2) - gol.enemies[i][1], 1, 0, 150, 32, 0, 0);					
 						}
@@ -3409,6 +3414,19 @@ GOL.prototype.start_shieldburst = function() {
 	gol.create_bullet(this.statesize[0]/2, this.statesize[1]/2, 4, 95, 96, 96, 0, 0, 70, 1, 1, 0);	
 }
 
+//sandbox
+GOL.prototype.run_sandbox = function() {
+	if(gol.l_click) {
+		gol.place_back_rend_circle(gol.mouse_x, gol.mouse_y, gol.sb_mousesize, 1, 1, 1, 1);
+		gol.place_back_rend_circle(gol.mouse_x, gol.mouse_y, gol.sb_mousesize-2, 0, 0, 0, 0);
+		gol.place_back_rend_circle(gol.mouse_x, gol.mouse_y, gol.sb_mousesize-4, 1, 1, 1, 1);
+	}
+
+	if(gol.r_click) {
+		gol.place_back_rend_circle(gol.mouse_x, gol.mouse_y, gol.sb_mousesize, 1, 0, 0, 0);
+		//gol.place_world_rend_circle(gol.mouse_x, gol.mouse_y, gol.sb_mousesize, 0, 0, 0, 0);
+	}
+}
 
 //Player controller
 GOL.prototype.run_player = function() {
