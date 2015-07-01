@@ -69,11 +69,15 @@ float s0 =
 		getR(vec2(3.0, 0.0)) +
 		getR(vec2(3.0, 1.0));   /*NEWLINE*/ int sum_0 = int(s0); //EDGE_0
 
-	if(sum_0 >= 14 && sum_0 <= 17) 	{ gl_FragColor = vec4(1.0, 0.4, 1.0, 1.0); }	
-	if(sum_0 >= 18) 				{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_0 >= 0 && sum_0 <= 4) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_0 >= 7 && sum_0 <= 8) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_0 == 9) 					{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }	
+	if(sum_0 >= 11 && sum_0 <= 12) 	{ gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); }	//14, 17
+	if(sum_0 >= 14 && sum_0 <= 14) 	{ gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); }	//14, 17
+	if(sum_0 >= 15 && sum_0 <= 15) 	{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }	//14, 17
+	if(sum_0 >= 16 && sum_0 <= 16) 	{ gl_FragColor = vec4(1.0, 0.2, 0.1, 1.0); }	//14, 17
+
+	if(sum_0 >= 17) 				{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	if(sum_0 >= 0 && sum_0 <= 3) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	if(sum_0 >= 5 && sum_0 <= 5) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	if(sum_0 >= 10 && sum_0 <= 10) 	{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }	
 
 	
 
@@ -308,10 +312,16 @@ float s4 = 		getR(vec2(7.0, -1.0)) +
 
 
 
-	if(sum_1 >= 94 && sum_1 <= 135) 		{ gl_FragColor = vec4(1.0, 0.9, 0.7, 1.0); }
 	if(sum_1 >= 15 && sum_1 <= 15) 			{ gl_FragColor = vec4(1.0, 0.4, 0.4, 1.0); }
-	if(sum_1 >= 115 && sum_1 <= 244) 		{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_1 >= 43 && sum_1 <= 50) 			{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	if(sum_1 >= 16 && sum_1 <= 19) 			{ gl_FragColor = vec4(1.0, 0.4, 0.4, 1.0); }
+	//if(sum_1 >= 80 && sum_1 <= 80) 			{ gl_FragColor = vec4(1.0, 0.4, 0.4, 1.0); }
+
+	if(sum_1 >= 63 && sum_1 <= 80) 			{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	if(sum_1 >= 16 && sum_1 <= 20) 			{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+
+	if(sum_1 >= 57 && sum_1 <= 57) 			{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }
+
+	//if(sum_1 >= 180 && sum_1 <= 180) 			{ gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); }
 
 	
 

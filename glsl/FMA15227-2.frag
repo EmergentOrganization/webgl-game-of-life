@@ -23,7 +23,7 @@ void main() {
     float cB = getB(vec2(0.0, 0.0));
 	
 	//set to last frame's colour
-    gl_FragColor = vec4(cR, cR, cR, 1.0);
+    gl_FragColor = vec4(cG, cG, cG, 1.0);
 
 
 
@@ -38,126 +38,126 @@ void main() {
 	//EDGE_1
 float s0 = 
  		
-		getR(vec2(-4.0, -1.0)) +
-		getR(vec2(-4.0, 0.0)) +
-		getR(vec2(-4.0, 1.0)) +
-		getR(vec2(-3.0, -3.0)) +
-		getR(vec2(-3.0, -2.0)) +
-		getR(vec2(-3.0, 0.0)) +
-		getR(vec2(-3.0, 2.0)) +
-		getR(vec2(-3.0, 3.0)) +
-		getR(vec2(-2.0, -3.0)) +
-		getR(vec2(-2.0, -1.0)) +
-		getR(vec2(-2.0, 1.0)) +
-		getR(vec2(-2.0, 3.0)) +
-		getR(vec2(-1.0, -4.0)) +
-		getR(vec2(-1.0, -2.0)) +
-		getR(vec2(-1.0, -1.0)) +
-		getR(vec2(-1.0, 0.0)) +
-		getR(vec2(-1.0, 1.0)) +
-		getR(vec2(-1.0, 2.0)) +
-		getR(vec2(-1.0, 4.0)) +
-		getR(vec2(0.0, -4.0)) +
-		getR(vec2(0.0, -3.0)) +
-		getR(vec2(0.0, -1.0)) +
-		getR(vec2(0.0, 1.0)) +
-		getR(vec2(0.0, 3.0)) +
-		getR(vec2(0.0, 4.0)) +
-		getR(vec2(1.0, -4.0)) +
-		getR(vec2(1.0, -2.0)) +
-		getR(vec2(1.0, -1.0)) +
-		getR(vec2(1.0, 0.0)) +
-		getR(vec2(1.0, 1.0)) +
-		getR(vec2(1.0, 2.0)) +
-		getR(vec2(1.0, 4.0)) +
-		getR(vec2(2.0, -3.0)) +
-		getR(vec2(2.0, -1.0)) +
-		getR(vec2(2.0, 1.0)) +
-		getR(vec2(2.0, 3.0)) +
-		getR(vec2(3.0, -3.0)) +
-		getR(vec2(3.0, -2.0)) +
-		getR(vec2(3.0, 0.0)) +
-		getR(vec2(3.0, 2.0)) +
-		getR(vec2(3.0, 3.0)) +
-		getR(vec2(4.0, -1.0)) +
-		getR(vec2(4.0, 0.0)) +
-		getR(vec2(4.0, 1.0));   /*NEWLINE*/ int sum_0 = int(s0); //EDGE_0
+		getG(vec2(-4.0, -1.0)) +
+		getG(vec2(-4.0, 0.0)) +
+		getG(vec2(-4.0, 1.0)) +
+		getG(vec2(-3.0, -3.0)) +
+		getG(vec2(-3.0, -2.0)) +
+		getG(vec2(-3.0, 0.0)) +
+		getG(vec2(-3.0, 2.0)) +
+		getG(vec2(-3.0, 3.0)) +
+		getG(vec2(-2.0, -3.0)) +
+		getG(vec2(-2.0, -1.0)) +
+		getG(vec2(-2.0, 1.0)) +
+		getG(vec2(-2.0, 3.0)) +
+		getG(vec2(-1.0, -4.0)) +
+		getG(vec2(-1.0, -2.0)) +
+		getG(vec2(-1.0, -1.0)) +
+		getG(vec2(-1.0, 0.0)) +
+		getG(vec2(-1.0, 1.0)) +
+		getG(vec2(-1.0, 2.0)) +
+		getG(vec2(-1.0, 4.0)) +
+		getG(vec2(0.0, -4.0)) +
+		getG(vec2(0.0, -3.0)) +
+		getG(vec2(0.0, -1.0)) +
+		getG(vec2(0.0, 1.0)) +
+		getG(vec2(0.0, 3.0)) +
+		getG(vec2(0.0, 4.0)) +
+		getG(vec2(1.0, -4.0)) +
+		getG(vec2(1.0, -2.0)) +
+		getG(vec2(1.0, -1.0)) +
+		getG(vec2(1.0, 0.0)) +
+		getG(vec2(1.0, 1.0)) +
+		getG(vec2(1.0, 2.0)) +
+		getG(vec2(1.0, 4.0)) +
+		getG(vec2(2.0, -3.0)) +
+		getG(vec2(2.0, -1.0)) +
+		getG(vec2(2.0, 1.0)) +
+		getG(vec2(2.0, 3.0)) +
+		getG(vec2(3.0, -3.0)) +
+		getG(vec2(3.0, -2.0)) +
+		getG(vec2(3.0, 0.0)) +
+		getG(vec2(3.0, 2.0)) +
+		getG(vec2(3.0, 3.0)) +
+		getG(vec2(4.0, -1.0)) +
+		getG(vec2(4.0, 0.0)) +
+		getG(vec2(4.0, 1.0));   /*NEWLINE*/ int sum_0 = int(s0); //EDGE_0
 
 		
-	if(sum_0 >= 19 && sum_0 <= 23) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }	
-	if(sum_0 >= 8 && sum_0 <= 8) { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }	
-	if(sum_0 >= 9 && sum_0 <= 18) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }	
+	if(sum_0 >= 19 && sum_0 <= 23) 	{ gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); }
+	if(sum_0 >= 20 && sum_0 <= 22) 	{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }	
+	if(sum_0 >= 8 && sum_0 <= 8) 	{ gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0); }	
+	if(sum_0 >= 9 && sum_0 <= 18) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }	
 
 	
 
 //EDGE_1
 float s1 = 
  		
-		getR(vec2(-6.0, -1.0)) +
-		getR(vec2(-6.0, 0.0)) +
-		getR(vec2(-6.0, 1.0)) +
-		getR(vec2(-5.0, -3.0)) +
-		getR(vec2(-5.0, -2.0)) +
-		getR(vec2(-5.0, 2.0)) +
-		getR(vec2(-5.0, 3.0)) +
-		getR(vec2(-4.0, -4.0)) +
-		getR(vec2(-4.0, 4.0)) +
-		getR(vec2(-3.0, -5.0)) +
-		getR(vec2(-3.0, -2.0)) +
-		getR(vec2(-3.0, -1.0)) +
-		getR(vec2(-3.0, 0.0)) +
-		getR(vec2(-3.0, 1.0)) +
-		getR(vec2(-3.0, 2.0)) +
-		getR(vec2(-3.0, 5.0)) +
-		getR(vec2(-2.0, -5.0)) +
-		getR(vec2(-2.0, -3.0)) +
-		getR(vec2(-2.0, 3.0)) +
-		getR(vec2(-2.0, 5.0)) +
-		getR(vec2(-1.0, -6.0)) +
-		getR(vec2(-1.0, -3.0)) +
-		getR(vec2(-1.0, -1.0)) +
-		getR(vec2(-1.0, 0.0)) +
-		getR(vec2(-1.0, 1.0)) +
-		getR(vec2(-1.0, 3.0)) +
-		getR(vec2(-1.0, 6.0)) +
-		getR(vec2(0.0, -6.0)) +
-		getR(vec2(0.0, -3.0)) +
-		getR(vec2(0.0, -1.0)) +
-		getR(vec2(0.0, 1.0)) +
-		getR(vec2(0.0, 3.0)) +
-		getR(vec2(0.0, 6.0)) +
-		getR(vec2(1.0, -6.0)) +
-		getR(vec2(1.0, -3.0)) +
-		getR(vec2(1.0, -1.0)) +
-		getR(vec2(1.0, 0.0)) +
-		getR(vec2(1.0, 1.0)) +
-		getR(vec2(1.0, 3.0)) +
-		getR(vec2(1.0, 6.0)) +
-		getR(vec2(2.0, -5.0)) +
-		getR(vec2(2.0, -3.0)) +
-		getR(vec2(2.0, 3.0)) +
-		getR(vec2(2.0, 5.0)) +
-		getR(vec2(3.0, -5.0)) +
-		getR(vec2(3.0, -2.0)) +
-		getR(vec2(3.0, -1.0)) +
-		getR(vec2(3.0, 0.0)) +
-		getR(vec2(3.0, 1.0)) +
-		getR(vec2(3.0, 2.0)) +
-		getR(vec2(3.0, 5.0)) +
-		getR(vec2(4.0, -4.0)) +
-		getR(vec2(4.0, 4.0)) +
-		getR(vec2(5.0, -3.0)) +
-		getR(vec2(5.0, -2.0)) +
-		getR(vec2(5.0, 2.0)) +
-		getR(vec2(5.0, 3.0)) +
-		getR(vec2(6.0, -1.0)) +
-		getR(vec2(6.0, 0.0)) +
-		getR(vec2(6.0, 1.0));   /*NEWLINE*/ int sum_1 = int(s1); //EDGE_0
+		getG(vec2(-6.0, -1.0)) +
+		getG(vec2(-6.0, 0.0)) +
+		getG(vec2(-6.0, 1.0)) +
+		getG(vec2(-5.0, -3.0)) +
+		getG(vec2(-5.0, -2.0)) +
+		getG(vec2(-5.0, 2.0)) +
+		getG(vec2(-5.0, 3.0)) +
+		getG(vec2(-4.0, -4.0)) +
+		getG(vec2(-4.0, 4.0)) +
+		getG(vec2(-3.0, -5.0)) +
+		getG(vec2(-3.0, -2.0)) +
+		getG(vec2(-3.0, -1.0)) +
+		getG(vec2(-3.0, 0.0)) +
+		getG(vec2(-3.0, 1.0)) +
+		getG(vec2(-3.0, 2.0)) +
+		getG(vec2(-3.0, 5.0)) +
+		getG(vec2(-2.0, -5.0)) +
+		getG(vec2(-2.0, -3.0)) +
+		getG(vec2(-2.0, 3.0)) +
+		getG(vec2(-2.0, 5.0)) +
+		getG(vec2(-1.0, -6.0)) +
+		getG(vec2(-1.0, -3.0)) +
+		getG(vec2(-1.0, -1.0)) +
+		getG(vec2(-1.0, 0.0)) +
+		getG(vec2(-1.0, 1.0)) +
+		getG(vec2(-1.0, 3.0)) +
+		getG(vec2(-1.0, 6.0)) +
+		getG(vec2(0.0, -6.0)) +
+		getG(vec2(0.0, -3.0)) +
+		getG(vec2(0.0, -1.0)) +
+		getG(vec2(0.0, 1.0)) +
+		getG(vec2(0.0, 3.0)) +
+		getG(vec2(0.0, 6.0)) +
+		getG(vec2(1.0, -6.0)) +
+		getG(vec2(1.0, -3.0)) +
+		getG(vec2(1.0, -1.0)) +
+		getG(vec2(1.0, 0.0)) +
+		getG(vec2(1.0, 1.0)) +
+		getG(vec2(1.0, 3.0)) +
+		getG(vec2(1.0, 6.0)) +
+		getG(vec2(2.0, -5.0)) +
+		getG(vec2(2.0, -3.0)) +
+		getG(vec2(2.0, 3.0)) +
+		getG(vec2(2.0, 5.0)) +
+		getG(vec2(3.0, -5.0)) +
+		getG(vec2(3.0, -2.0)) +
+		getG(vec2(3.0, -1.0)) +
+		getG(vec2(3.0, 0.0)) +
+		getG(vec2(3.0, 1.0)) +
+		getG(vec2(3.0, 2.0)) +
+		getG(vec2(3.0, 5.0)) +
+		getG(vec2(4.0, -4.0)) +
+		getG(vec2(4.0, 4.0)) +
+		getG(vec2(5.0, -3.0)) +
+		getG(vec2(5.0, -2.0)) +
+		getG(vec2(5.0, 2.0)) +
+		getG(vec2(5.0, 3.0)) +
+		getG(vec2(6.0, -1.0)) +
+		getG(vec2(6.0, 0.0)) +
+		getG(vec2(6.0, 1.0));   /*NEWLINE*/ int sum_1 = int(s1); //EDGE_0
 
 
-	if(sum_1 >= 35) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }	
-	if(sum_1 >= 0 && sum_1 <= 4) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }	
-	//if(sum_1 >= 5 && sum_1 <= 6) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }	
+	if(sum_1 >= 35) 				{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }	
+	if(sum_1 >= 0 && sum_1 <= 4) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }	
 
 
 

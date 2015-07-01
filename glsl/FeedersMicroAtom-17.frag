@@ -441,7 +441,7 @@ float s5 = 		getB(vec2(11.0, -9.0)) +
 	if(sum_0 >= 125 && sum_0 <= 210) 	{ gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0); }	
 
 	if(sum_0 >= 211) 					{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_0 >= 50 && sum_0 <= 124) 	{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }
+	if(sum_0 >= 50 && sum_0 <= 124) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 	
 	if(sum_0 >= 65 && sum_0 <= 68) 		{ gl_FragColor = vec4(0.0, 0.6, 1.0, 1.0); }
 

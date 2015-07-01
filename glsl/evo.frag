@@ -36,7 +36,7 @@ void main() {
         get(vec2( 1.0,  2.0));
 
 
-    if (sum == 4) { gl_FragColor = vec4(0.0, 0.7, 1.0, 1.0); }
+    if (sum == 4) { gl_FragColor = vec4(0.4, 1.0, 1.0, 1.0); }
 	if (sum != 4) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if (sum == 3) { gl_FragColor = vec4(1.0, 0.4, 0.0, 1.0); }
+	//if (sum == 3) { gl_FragColor = vec4(1.0, 0.4, 0.0, 1.0); }
 }

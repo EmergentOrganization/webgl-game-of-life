@@ -11,16 +11,16 @@ uniform float value;
 uniform float g;
 uniform float b;
 
-float getR(vec2 offset) {
-	return (texture2D(state, (gl_FragCoord.xy + offset) / scale).r);
+float getR(vec2 offset, sampler2D tex) {
+	return (texture2D(tex, (gl_FragCoord.xy + offset) / scale).r);
 }
 
-float getG(vec2 offset) {
-	return (texture2D(state, (gl_FragCoord.xy + offset) / scale).g);
+float getG(vec2 offset, sampler2D tex) {
+	return (texture2D(tex, (gl_FragCoord.xy + offset) / scale).g);
 }
 
-float getB(vec2 offset) {
-	return (texture2D(state, (gl_FragCoord.xy + offset) / scale).b);
+float getB(vec2 offset, sampler2D tex) {
+	return (texture2D(tex, (gl_FragCoord.xy + offset) / scale).b);
 }
 
 void main() {
@@ -37,49 +37,39 @@ void main() {
 	float rad_dist_ratio = dist_to_rad/center_dist; 	//radius multiplied by (ratio of dist_to_rad to full dist to center)
 
 
+				//zoom							//how many wraps around the circle
+	float getx = 1.5/(rad_dist_ratio/center_dist)/10.0;
+	float gety = 1.5/(rad_dist_ratio/center_dist)/10.0;
 
+	float R = 0.0;
+	float G = 0.0;
+	float B = 0.0;
 
+	float R0 = 0.0;
+	float G0 = 0.0;
+	float B0 = 0.0;
+	float R1 = 0.0;
+	float G1 = 0.0;
+	float B1 = 0.0;
 
-	//float getx = 0.0;//gl_FragCoord.x;
-	//float gety = 0.0;//gl_FragCoord.y;	
+	if(center_dist > center_radius+28.0 && center_dist < (center_radius+16.0)*1.6) {
 
+		R1 = (getR(vec2(getx, gety), render) + getR(vec2(getx, gety), render) + getR(vec2(getx, gety), render) + getR(vec2(getx, gety), render) + getR(vec2(getx, gety), render))/5.0;
+		G1 = (getG(vec2(getx, gety), render) + getG(vec2(getx, gety), render) + getG(vec2(getx, gety), render) + getG(vec2(getx, gety), render) + getG(vec2(getx, gety), render))/5.0;
+		B1 = (getB(vec2(getx, gety), render) + getB(vec2(getx, gety), render) + getB(vec2(getx, gety), render) + getB(vec2(getx, gety), render) + getB(vec2(getx, gety), render))/5.0;
 
-	//float getx = (1.0/(rad_dist_ratio/5.0));
-	//float gety = (1.0/(rad_dist_ratio/5.0));
+		R = R1;
+		G = G1; //(G0+G1)/2.0;
+		B = B1;
 
-	//float getx = 1.0/(rad_dist_ratio/center_dist);
-	//float gety = 1.0/(rad_dist_ratio/center_dist);
+		float bright = 0.5;
 
-	float getx = 2.1/(rad_dist_ratio/center_dist)/10.0;
-	float gety = 2.1/(rad_dist_ratio/center_dist)/10.0;
-
-	//float getx = (center_radius - (center_radius*rad_dist_ratio));
-	//float gety = (center_radius - (center_radius*rad_dist_ratio));
-
-
-	if(center_dist > center_radius && center_dist < (center_radius+16.0)*1.5) {
-		//gl_FragColor = vec4(value, g, b, 1.0); 
-		
-		float R = (getR(vec2(getx, gety)) + getR(vec2(getx+1.0, gety)) + getR(vec2(getx, gety+1.0)) + getR(vec2(getx-1.0, gety)) + getR(vec2(getx, gety-1.0)))/5.0;
-		float G = (getG(vec2(getx, gety)) + getG(vec2(getx+1.0, gety)) + getG(vec2(getx, gety+1.0)) + getG(vec2(getx-1.0, gety)) + getG(vec2(getx, gety-1.0)))/5.0;
-		float B = (getB(vec2(getx, gety)) + getB(vec2(getx+1.0, gety)) + getB(vec2(getx, gety+1.0)) + getB(vec2(getx-1.0, gety)) + getB(vec2(getx, gety-1.0)))/5.0;
-
-		//float R = getR(vec2(getx, gety))*1.0;
-		//float G = getG(vec2(getx, gety))*1.0;
-		//float B = getB(vec2(getx, gety))*1.0;
-
-		gl_FragColor = vec4(R, G, B,  1.0);
+		gl_FragColor = vec4(R*bright, G*bright, B*bright,  1.0);
 	}
 
-	if(center_dist > (center_radius+16.0)*1.5 && center_dist < ((center_radius+16.0)*1.6)) {
+	if(center_dist > (center_radius+16.0)*1.6 && center_dist < ((center_radius+16.0)*1.7)) {
 		gl_FragColor = vec4(value, g, b, 1.0); 
 	}
-
-
-	/*if(center_dist > center_radius) {
-		float col = 0.02+rad_dist_ratio;
-		gl_FragColor = vec4(getR(vec2(0.0, 0.0))*col, getG(vec2(0.0, 0.0))*col, getB(vec2(0.0, 0.0))*col, 1.0); 
-	}*/
 	
 
 }

@@ -485,8 +485,8 @@ void main() {
 	if(sum_two >= 183 && sum_two <= 290) 	{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
 	if(sum_two >= 101 && sum_two <= 103) 	{gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);}
 	if(sum_two >= 70 && sum_two <= 74) 		{gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);}
-	if(sum_two >= 55 && sum_two <= 65) 		{gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);}
-	if(sum_two >= 220) 						{gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);}
+	if(sum_two >= 55 && sum_two <= 65) 		{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+	if(sum_two >= 220) 						{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
 
 
 

@@ -73,7 +73,7 @@ float s0 =
 	if(sum_0 >= 18) 				{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 	if(sum_0 >= 0 && sum_0 <= 4) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 	if(sum_0 >= 7 && sum_0 <= 8) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_0 == 9) 					{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }	
+	if(sum_0 >= 10 && sum_0 <= 13) 	{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }	
 
 	
 

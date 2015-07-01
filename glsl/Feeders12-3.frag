@@ -638,15 +638,15 @@ void main() {
 
 	int sum_one = s1 + s2;
 
-	if(sum_one >= 113 && sum_one <= 129) 	{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
-	//if(sum_one >= 65 && sum_one <= 66) 		{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
-	if(sum_one >= 83 && sum_one <= 84) 		{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
-	//if(sum_one >= 23 && sum_one <= 23) 		{gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
+	if(sum_one >= 113 && sum_one <= 129) 	{gl_FragColor = vec4(1.0, 0.7, 0.0, 1.0);}
+	if(sum_one >= 115 && sum_one <= 122) 	{gl_FragColor = vec4(1.0, 0.2, 0.0, 1.0);}
+	if(sum_one >= 83 && sum_one <= 84) 		{gl_FragColor = vec4(1.0, 0.6, 1.0, 1.0);}
+	if(sum_one >= 83 && sum_one <= 83) 		{gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);}
 
-	if(sum_one >= 167) 					{gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);}
-	if(sum_one >= 40 && sum_one <= 55) 	{gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);}
-	if(sum_one >= 87 && sum_one <= 89) 	{gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);}
-	if(sum_one >= 143 && sum_one <= 155) 	{gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);}
+	if(sum_one >= 167) 					{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+	if(sum_one >= 40 && sum_one <= 55) 	{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+	if(sum_one >= 87 && sum_one <= 89) 	{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+	if(sum_one >= 143 && sum_one <= 155) 	{gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
 
 
 

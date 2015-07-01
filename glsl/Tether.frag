@@ -641,7 +641,7 @@ void main() {
     int sum_three = s4 + s5 + s6;
 
     
-    if(sum_one >= 31 && sum_one <= 131)         {gl_FragColor = vec4(0.0, 0.4, 0.5, 1.0);}
+    /*if(sum_one >= 31 && sum_one <= 131)         {gl_FragColor = vec4(0.0, 0.4, 0.5, 1.0);}
     if(sum_one >= 42 && sum_one <= 43)             {gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);}
     if(sum_one >= 121 && sum_one <= 132)         {gl_FragColor = vec4(1.0, 0.8, 0.0, 1.0);}
     if(sum_one >= 68 && sum_one <= 75)             {gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);}
@@ -653,6 +653,21 @@ void main() {
     if(sum_three >= 41 && sum_three <= 41)         {gl_FragColor = vec4(0.0, 0.0, 0.9, 1.0);}
     if(sum_three >= 222 && sum_three <= 229)     {gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);}
     if(sum_three >= 255 && sum_three <= 290)     {gl_FragColor = vec4(0.0, 0.7, 0.9, 1.0);}
+    if(sum_three >= 285 && sum_three <= 999)     {gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}*/
+
+
+    if(sum_one >= 31 && sum_one <= 131)         {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+    if(sum_one >= 42 && sum_one <= 43)             {gl_FragColor = vec4(1.0, 0.8, 1.0, 1.0);}
+    if(sum_one >= 121 && sum_one <= 132)         {gl_FragColor = vec4(1.0, 0.8, 0.0, 1.0);}
+    if(sum_one >= 68 && sum_one <= 75)             {gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);}
+
+    if(sum_two >= 14 && sum_two <= 19)             {gl_FragColor = vec4(1.0, 0.3, 0.0, 1.0);}    
+    if(sum_two >= 9 && sum_two <= 9)             {gl_FragColor = vec4(1.0, 0.5, 1.0, 1.0);}    
+
+    if(sum_three >= 91 && sum_three <= 93)         {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+    if(sum_three >= 41 && sum_three <= 41)         {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
+    if(sum_three >= 222 && sum_three <= 229)     {gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);}
+    if(sum_three >= 255 && sum_three <= 290)     {gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);}
     if(sum_three >= 285 && sum_three <= 999)     {gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}
 
 

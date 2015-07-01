@@ -32,48 +32,65 @@ void main() {
 	float current_state = float(get(vec2(0.0, 0.0), state));
 	float current_front = float(get(vec2(0.0, 0.0), front));
 
-	//float duration = 0.1;
+	//dissipate (flat + mult)
 
-	int mode = 0;
+	float r = getR(vec2(0, 0), state)*0.125;
+	float g = getG(vec2(0, 0), state)*0.125;
+	float b = getB(vec2(0, 0), state)*0.125;
 
-	if(current_back == 0.0) {
-		float r = getR(vec2(0, 0), front);
-		float g = getG(vec2(0, 0), front);
-		float b = getB(vec2(0, 0), front);
+	//gl_FragColor = vec4((r*0.95)-0.05, (g*0.95)-0.05, (b*0.95)-0.05, 1.0);
 
-		if(r == g && r == b && r > 0.0) {
-			gl_FragColor = vec4((r-(0.04*duration)), (g-(0.04*duration)), (b-(0.04*duration)), 1.0);
-			mode = 1;
-		}
-	} else {
-		gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-		mode = 1;
+	//reinforce (take from moore)
+
+	float r1 = (getR(vec2(1, 0), front) + getR(vec2(1, 1), front) + getR(vec2(0, 1), front) + getR(vec2(-1, 0), front) + getR(vec2(-1, -1), front) + getR(vec2(0, -1), front) + getR(vec2(1, -1), front) + getR(vec2(-1, 1), front) + getR(vec2(0, 0), front)) / 9.0;
+	float g1 = (getG(vec2(1, 0), front) + getG(vec2(1, 1), front) + getG(vec2(0, 1), front) + getG(vec2(-1, 0), front) + getG(vec2(-1, -1), front) + getG(vec2(0, -1), front) + getG(vec2(1, -1), front) + getG(vec2(-1, 1), front) + getG(vec2(0, 0), front)) / 9.0;
+	float b1 = (getB(vec2(1, 0), front) + getB(vec2(1, 1), front) + getB(vec2(0, 1), front) + getB(vec2(-1, 0), front) + getB(vec2(-1, -1), front) + getB(vec2(0, -1), front) + getB(vec2(1, -1), front) + getB(vec2(-1, 1), front) + getB(vec2(0, 0), front)) / 9.0;
+
+	float rb = (getR(vec2(0, 0), back));
+	float gb = (getG(vec2(0, 0), back));
+	float bb = (getB(vec2(0, 0), back));
+
+	r1 += rb * 0.05;
+	g1 += gb * 0.05;
+	b1 += bb * 0.05;
+
+	if(r1+g1+b1 > 2.5) {
+		r1 = r1*0.9;
+		g1 = g1*0.9;
+		b1 = b1*0.9;
 	}
 
-	if(current_back == 0.0 && current_state == 0.0 && mode == 0) {
-		float r = getR(vec2(0, 0), front);
-		float g = getG(vec2(0, 0), front);
-		float b = getB(vec2(0, 0), front);
+	if(r1 == g1 && g1 == b1 && r1 < 0.2) {
+		r1 = (r1-0.01)*0.95;
+		g1 = (g1-0.01)*0.95;
+		b1 = (b1-0.01)*0.95;
+	}
 
-		//if((r != g && r != b) || b > r) {
-			if(r > 0.5) {
-				gl_FragColor = vec4((r-(0.04*duration)), (g+(0.06*duration)), (b), 1.0);
-			} else if(r > 0.0) {
-				gl_FragColor = vec4((r-(0.04*duration)), (g+(0.08*duration)), (b+(0.08*duration)), 1.0);
-			} else if (g > 0.5) {
-				gl_FragColor = vec4(r, (g-(0.24*duration)), (b+(0.12*duration)), 1.0);
-			} else if (g > 0.0) {
-				gl_FragColor = vec4(r, (g-(0.12*duration)), (b-(0.08*duration)), 1.0);
-			} else {
-				gl_FragColor = vec4(r, g, (b-(0.32*duration)), 1.0);
-			}
-		//}
-		
+	if(r1+g1+b1 < 0.04) {
+		r1 = 0.0;
+		g1 = 0.0;
+		b1 = 0.0;
+	}
 
-		//gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-	} else if(current_state != 0.0){
-		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-	}	
+
+	gl_FragColor = vec4(r+(r1*0.993)-0.0008, g+(g1*0.993)-0.0008, b+(b1*0.993)-0.0008, 1.0);
+
 
 	
+	
 }
+
+/*float r = (getR(vec2(0, 0), state)*0.125+getR(vec2(0, 0), back)*0.125)/2.0;
+	float g = (getG(vec2(0, 0), state)*0.125+getG(vec2(0, 0), back)*0.125)/2.0;
+	float b = (getB(vec2(0, 0), state)*0.125+getB(vec2(0, 0), back)*0.125)/2.0;
+
+
+	//gl_FragColor = vec4((r*0.95)-0.05, (g*0.95)-0.05, (b*0.95)-0.05, 1.0);
+
+	//reinforce (take from moore)
+
+	float r1 = ((getR(vec2(1, 0), front) + getR(vec2(1, 1), front) + getR(vec2(0, 1), front) + getR(vec2(-1, 0), front) + getR(vec2(-1, -1), front) + getR(vec2(0, -1), front) + getR(vec2(1, -1), front) + getR(vec2(-1, 1), front)) / 8.0)+((getR(vec2(1, 0), back) + getR(vec2(1, 1), back) + getR(vec2(0, 1), back) + getR(vec2(-1, 0), back) + getR(vec2(-1, -1), back) + getR(vec2(0, -1), back) + getR(vec2(1, -1), back) + getR(vec2(-1, 1), back)) / 8.0)/2.0;
+	float g1 = ((getG(vec2(1, 0), front) + getG(vec2(1, 1), front) + getG(vec2(0, 1), front) + getG(vec2(-1, 0), front) + getG(vec2(-1, -1), front) + getG(vec2(0, -1), front) + getG(vec2(1, -1), front) + getG(vec2(-1, 1), front)) / 8.0)+((getG(vec2(1, 0), back) + getG(vec2(1, 1), back) + getG(vec2(0, 1), back) + getG(vec2(-1, 0), back) + getG(vec2(-1, -1), back) + getG(vec2(0, -1), back) + getG(vec2(1, -1), back) + getG(vec2(-1, 1), back)) / 8.0)/2.0;
+	float b1 = ((getB(vec2(1, 0), front) + getB(vec2(1, 1), front) + getB(vec2(0, 1), front) + getB(vec2(-1, 0), front) + getB(vec2(-1, -1), front) + getB(vec2(0, -1), front) + getB(vec2(1, -1), front) + getB(vec2(-1, 1), front)) / 8.0)+((getB(vec2(1, 0), back) + getB(vec2(1, 1), back) + getB(vec2(0, 1), back) + getB(vec2(-1, 0), back) + getB(vec2(-1, -1), back) + getB(vec2(0, -1), back) + getB(vec2(1, -1), back) + getB(vec2(-1, 1), back)) / 8.0)/2.0;
+
+*/

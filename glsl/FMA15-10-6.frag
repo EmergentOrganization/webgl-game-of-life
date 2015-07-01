@@ -73,7 +73,7 @@ float s0 =
 	if(sum_0 >= 18) 				{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 	if(sum_0 >= 0 && sum_0 <= 4) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 	if(sum_0 >= 7 && sum_0 <= 8) 	{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_0 == 9) 					{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }	
+	if(sum_0 >= 10 && sum_0 <= 13) 	{ gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); }	
 
 	
 
@@ -308,10 +308,11 @@ float s4 = 		getR(vec2(7.0, -1.0)) +
 
 
 
-	if(sum_1 >= 94 && sum_1 <= 135) 		{ gl_FragColor = vec4(1.0, 0.9, 0.7, 1.0); }
 	if(sum_1 >= 15 && sum_1 <= 15) 			{ gl_FragColor = vec4(1.0, 0.4, 0.4, 1.0); }
-	if(sum_1 >= 115 && sum_1 <= 244) 		{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_1 >= 43 && sum_1 <= 50) 			{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	//if(sum_1 >= 80 && sum_1 <= 80) 			{ gl_FragColor = vec4(1.0, 0.4, 0.4, 1.0); }
+
+	if(sum_1 >= 63 && sum_1 <= 80) 			{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+	if(sum_1 >= 16 && sum_1 <= 17) 			{ gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 
 	
 

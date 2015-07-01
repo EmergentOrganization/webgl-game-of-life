@@ -192,8 +192,19 @@ float s2 = 		getR(vec2(5.0, 8.0)) +
 
 	if(sum_0 <= 19) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 	if(sum_0 >= 101) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
-	if(sum_0 >= 20 && sum_0 <= 24)  { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }
-	if(sum_0 >= 51 && sum_0 <= 100)  { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }
+
+	if(sum_0 >= 20 && sum_0 <= 24)  { 
+		float col_grad_g = (float(sum_0) - 20.0)/4.0;
+		float col_grad_b = 1.0-(float(sum_0) - 20.0)/4.0;
+		gl_FragColor = vec4(1.0, col_grad_g, col_grad_b, 1.0); 
+	}
+
+	if(sum_0 >= 51 && sum_0 <= 100)  { 
+		float col_grad_g = 1.0-(float(sum_0) - 51.0)/49.0;
+		float col_grad_b = (float(sum_0) - 51.0)/49.0;
+		gl_FragColor = vec4(1.0, col_grad_g, col_grad_b, 1.0); 
+	}
+
 	if(sum_0 >= 24 && sum_0 <= 58) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
 
 	//EDGE_2
