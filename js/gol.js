@@ -2123,6 +2123,8 @@ GOL.prototype.run_hittests = function() {
 					gol.waypoints[i][3] -= 35;
 					gol.p_health += gol.p_health_max/400;
 					gol.play_sound(15);
+					gol.game_score += 200;
+	
 				}				
 
 				if(gol.waypoints[i][5] == 2) {
@@ -2135,6 +2137,7 @@ GOL.prototype.run_hittests = function() {
 							gol.p_power += 40;
 						}
 					}
+					gol.game_score += 50;
 					gol.p_fuel += 10;
 					gol.play_sound(15);
 				}	
@@ -2976,6 +2979,9 @@ GOL.prototype.run_enemies = function() {
 					gol.enemy_cooldown = delay_spawn;
 				} else {gol.enemy_cooldown += delay_spawn;}
 
+				if(Math.floor(Math.random()*5) == 1) {
+					gol.enemy_cooldown += delay_spawn*(Math.random()*12);
+				}
 
 				//gol.p_health += gol.p_health_max/20;
 				gol.play_sound(6);
@@ -3098,7 +3104,7 @@ GOL.prototype.run_waypoints = function() {
 
 	if(passive_spawn) {
 		if(gol.waypoint_cooldown == 0) {
-			gol.create_waypoint(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], 65, 5000, 0);
+			gol.create_waypoint(Math.random()*gol.statesize[0], Math.random()*gol.statesize[1], 96, 5000, 0);
 			if(gol.waypoint_cooldown == 0) {gol.waypoint_cooldown = -1;}
 		
 		}
