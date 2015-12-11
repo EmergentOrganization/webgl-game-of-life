@@ -1,0 +1,17 @@
+//cut first 5 seconds, cut anything after 20 seconds of startpoint
+avconv -i 1.mp4 -ss 00:00:05 -t 00:00:20 -c copy vid_fin.mp4
+
+//Strip video into *.png images
+avconv -i vid_fin.mp4 -vsync 1 -r 24 -vf scale=512:256 -an -y 'vidf/image%06d.png'
+
+//convert video into audio
+avconv -i vid_fin.mp4 sound_fin.mp3
+
+//Stitch output *.png images into processed video (24 fps, 2048x1024 resolution)
+avconv -qscale 1 -r 24 -b 9600 -i image%06d.png -vf scale=2048:1024 automata0000.mp4
+
+//merge processed video and extracted sound
+avconv -i automata0000.mp4 -i sound_fin.mp3 -c copy -map 0:0 -map 1:0 automata0000_sound.mp4
+
+//Unused: cut audio
+//avconv -i in.mp3 -ss 00:00:05.8 -t 00:01:59 sound_fin.mp3 

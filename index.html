@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>WebGL Game of Life</title>
+    <title>WebGL Visual Filter</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="gol.css"/>     
    
@@ -13,40 +13,21 @@
 
   </head>
   <body>
-    <h1>WebGL Cellular Automata</h1>
+    <h1>WebGL Visual Filter</h1>
     <!-- Canvas dimensions must be powers of two. -->
-    <canvas id="life" width="1024" height="512" tabindex="1"></canvas>
+    <canvas id="life" width="512" height="256" tabindex="1"></canvas>
     <div class="description">
-      <h2>Controls</h2>
       <ul>
         <li>
-          <span class="input">W A S D:  </span>
-          <span class="result">Player movement</span>
-        </li>
+          <span class="input">[SPACEBAR]:  </span>
+          <span class="result">Download batch of 100 recorded frames</span>
+		</li>
+      </ul>
+      <ul>
         <li>
-          <span class="input">Left-click:  </span>
-          <span class="result">Shoot</span>
-        </li>
-        <li>
-          <span class="input">Right-click:  </span>
-          <span class="result">Melee</span>
-        </li>
-        <li>
-          <span class="input">(While using Melee) Left-click:  </span>
-          <span class="result">Place solid block</span>
-        </li>
-        <li>
-          <span class="input">SPACE:  </span>
-          <span class="result">Shield Burst</span>
-        </li>
-        <li>
-          <span class="input">R:  </span>
-          <span class="result">Reset</span>
-        </li>
-        <li>
-          <span class="input">P:  </span>
-          <span class="result">Show stored highscore data</span>
-        </li>
+          <span class="input">Note:  </span>
+          <span class="result">Enable "Do this automatically for files like this from now on" when saving *.png images</span>
+		</li>
       </ul>
     </div>
     <div class="fps">
