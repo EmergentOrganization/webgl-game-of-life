@@ -13,7 +13,7 @@ A JS/WebGL app for applying colour channel modifications to an image via WebGL s
 
 Intended to be run locally - open index.html in a browser.
 
-4GB+ RAM reccommended. Best used with a powerful GPU for WebGL shaders and a good CPU for exporting/dowloading large amounts of image data.
+4GB+ RAM recommended. Best used with a powerful GPU for WebGL shaders and a good CPU for exporting/downloading large amounts of image data.
 
 This application loads source images (*.png) from the '/Seeds' folder in sequence: 'image000000.png', 'image000001.png' ...
 
@@ -39,9 +39,9 @@ Copy the *.png images into the 'webgl-game-of-life/Seeds' folder.
 
 Open 'webgl-game-of-life/js/gol.js' and on line 69 set "this.imgcount = 400;" to the number of frames in the 'Seeds' folder. Start with a small number of frames to load - I usually crash out if I try to load more than 1GB of images.
 
-Canvas resolution can be set on line 18 of 'webgl-game-of-life/Index.html', and both must be powers of two. I reccommend width="512" height="256" or width="1024" height="512" depending on how powerful your CPU & GPU are.
+Canvas resolution can be set on line 18 of 'webgl-game-of-life/Index.html', and both must be powers of two. I recommend width="512" height="256" or width="1024" height="512" depending on how powerful your CPU & GPU are.
 
-To run the program, Open 'webgl-game-of-life/Index.html' in your browser (Firefox reccommended).
+To run the program, Open 'webgl-game-of-life/Index.html' in your browser (Firefox recommended).
 
 If the program successfully loads the seed images, and the WebGL is all working, the first frame should be shown on WebGL canvas. Uncheck **'Pause'** to play the animation.
 
