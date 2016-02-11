@@ -4,6 +4,7 @@ uniform sampler2D render;
 uniform sampler2D state;
 uniform sampler2D front;
 uniform sampler2D back;
+uniform sampler2D level;
 uniform vec2 scale;
 
 
@@ -26,6 +27,7 @@ void main() {
 	float current_back = float(get(vec2(0.0, 0.0), back));
 	float current_state = float(get(vec2(0.0, 0.0), state));
 	float current_front = float(get(vec2(0.0, 0.0), front));
+	float current_level = float(get(vec2(0.0, 0.0), level));
 
 	
 	//if(current_back == float(0) && current_state == float(0)) {
@@ -36,8 +38,10 @@ void main() {
 	if(current_back != float(0)) {gl_FragColor = texture2D(back, gl_FragCoord.xy / scale);}
 	if(current_state != float(0)) {gl_FragColor = texture2D(state, gl_FragCoord.xy / scale);}
 	//if(current_front != float(0)) {gl_FragColor = texture2D(front, gl_FragCoord.xy / scale);}
+
+	if(current_level != float(0)) {gl_FragColor = vec4(0.4, 0.4, 0.4, 1.0);/*texture2D(level, gl_FragCoord.xy / scale);*/}
 	
-	
+	//gl_FragColor = texture2D(front, gl_FragCoord.xy / scale);
 
 
 }

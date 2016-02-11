@@ -14,8 +14,10 @@ void main() {
 	float current_back = getSum(vec2(0, 0), back);
 	float current_state = getSum(vec2(0, 0), state);
 
-	if(current_back != float(0) && current_state != float(0)) {
+	if(current_back != 0.0 && current_state != 0.0) {
 		gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-	} else {gl_FragColor = texture2D(state, gl_FragCoord.xy / scale);}
+	} else {
+		gl_FragColor = texture2D(state, gl_FragCoord.xy / scale);
+	}
 
 }

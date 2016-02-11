@@ -1,7 +1,7 @@
 body {
     margin: 16px auto;
     width: 1024px;
-    background: black;
+    background: #303030;
     font-family: sans-serif;
     user-select: none;
     -moz-user-select: none;
@@ -41,7 +41,7 @@ div.description {
     position: absolute;
     top: 0;
     right: 512ddd;
-    color: #444;
+    color: White;
     font-size: 18px;
 }
 
